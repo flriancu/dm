@@ -1,0 +1,61 @@
+import { marked } from 'marked'
+import { parseFrontMatter, splitSections, type Section } from './frontmatter'
+import type { ContentLocale } from '../i18n'
+
+/**
+ * Course content tree: /content/<lang>/<kind>/<file>.md
+ * Every file is lazy-loaded on demand (per-locale, per-module bundles).
+ * A new content language is a new folder with the same file names (FR-03).
+ */
+const files = import.meta.glob('/content/*/**/*.md', { query: '?raw', import: 'default' }) as Record<string, () => Promise<string>>
+
+export interface ModuleMeta {
+  id: string            // "00", "01", ...
+  title: string
+  subtitle?: string
+  letter?: string       // COPIL letter(s)
+  order: number
+  takeaway: string
+  sources?: string[]
+  source_version: number
+  reconstructed?: boolean
+}
+
+export interface ModuleDoc { meta: ModuleMeta; sections: Section[]; raw: string }
+
+marked.setOptions({ gfm: true, breaks: false })
+
+export function md(s: string): string {
+  return marked.parse(s, { async: false }) as string
+}
+
+function pathsFor(locale: ContentLocale, kind: string): string[] {
+  const prefix = `/content/${locale}/${kind}/`
+  return Object.keys(files).filter((p) => p.startsWith(prefix)).sort()
+}
+
+export async function listModules(locale: ContentLocale): Promise<ModuleMeta[]> {
+  const metas: ModuleMeta[] = []
+  for (const p of pathsFor(locale, 'modules')) {
+    const src = await files[p]()
+    metas.push(parseFrontMatter<ModuleMeta>(src).meta)
+  }
+  return metas.sort((a, b) => a.order - b.order)
+}
+
+export async function loadModule(locale: ContentLocale, id: string): Promise<ModuleDoc | null> {
+  const p = pathsFor(locale, 'modules').find((x) => x.split('/').pop()!.startsWith(`${id}-`))
+  if (!p) return null
+  const src = await files[p]()
+  const { meta, body } = parseFrontMatter<ModuleMeta>(src)
+  return { meta, sections: splitSections(body), raw: body }
+}
+
+/** Any other markdown document, e.g. friend/01.md, sheets/cover.md, pages/sources.md */
+export async function loadDoc(locale: ContentLocale, kind: string, name: string): Promise<{ meta: Record<string, unknown>; html: string } | null> {
+  const p = `/content/${locale}/${kind}/${name}.md`
+  const loader = files[p]
+  if (!loader) return null
+  const { meta, body } = parseFrontMatter(await loader())
+  return { meta, html: md(body) }
+}
