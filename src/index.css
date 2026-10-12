@@ -80,7 +80,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .nav a {
   min-height: var(--tap); min-width: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-decoration: none; color: var(--muted); font-size: .8rem; gap: 2px; border-radius: 8px; padding: 0 6px;
+  text-decoration: none; color: var(--muted); font-size: .72rem; gap: 2px; border-radius: 8px; padding: 0 4px; text-align: center; line-height: 1.1;
 }
 .nav a.active { color: var(--accent); }
 .nav a .ico { font-size: 1.25rem; line-height: 1; }

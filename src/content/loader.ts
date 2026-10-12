@@ -25,8 +25,10 @@ export interface ModuleDoc { meta: ModuleMeta; sections: Section[]; raw: string 
 
 marked.setOptions({ gfm: true, breaks: false })
 
+/** Markdown to HTML. External links open in a new tab and carry no referrer (NFR-01). */
 export function md(s: string): string {
-  return marked.parse(s, { async: false }) as string
+  const html = marked.parse(s, { async: false }) as string
+  return html.replace(/<a href="(https?:\/\/[^"]+)"/g, '<a href="$1" target="_blank" rel="noopener noreferrer"')
 }
 
 function pathsFor(locale: ContentLocale, kind: string): string[] {
@@ -34,11 +36,16 @@ function pathsFor(locale: ContentLocale, kind: string): string[] {
   return Object.keys(files).filter((p) => p.startsWith(prefix)).sort()
 }
 
+/** Module ids are two-digit strings ("01"); the front matter parser would read 01 as 1. */
+function normalizeMeta(meta: ModuleMeta): ModuleMeta {
+  return { ...meta, id: String(meta.id).padStart(2, '0') }
+}
+
 export async function listModules(locale: ContentLocale): Promise<ModuleMeta[]> {
   const metas: ModuleMeta[] = []
   for (const p of pathsFor(locale, 'modules')) {
     const src = await files[p]()
-    metas.push(parseFrontMatter<ModuleMeta>(src).meta)
+    metas.push(normalizeMeta(parseFrontMatter<ModuleMeta>(src).meta))
   }
   return metas.sort((a, b) => a.order - b.order)
 }
@@ -48,7 +55,7 @@ export async function loadModule(locale: ContentLocale, id: string): Promise<Mod
   if (!p) return null
   const src = await files[p]()
   const { meta, body } = parseFrontMatter<ModuleMeta>(src)
-  return { meta, sections: splitSections(body), raw: body }
+  return { meta: normalizeMeta(meta), sections: splitSections(body), raw: body }
 }
 
 /** Any other markdown document, e.g. friend/01.md, sheets/cover.md, pages/sources.md */

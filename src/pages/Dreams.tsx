@@ -45,23 +45,21 @@ export default function Dreams() {
           <p>{t('dreams.paper')}</p>
           <div className="field">
             <label htmlFor="pc">{t('dreams.paper.count')}</label>
-            <input id="pc" type="number" min={0} max={100} value={settings.paperCount} onChange={(e) => update({ paperCount: Math.max(0, Math.min(100, Number(e.target.value) || 0)) })} />
+            <input id="pc" type="number" min={0} max={100} placeholder={t('dreams.paper.count.placeholder')} value={settings.paperCount} onChange={(e) => update({ paperCount: Math.max(0, Math.min(100, Number(e.target.value) || 0)) })} />
           </div>
         </div>
       ) : (
         <div className="card">
           <div className="row">
-            <input type="text" aria-label={t('dreams.add.placeholder')} placeholder={t('dreams.add.placeholder')} value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && add()} style={{ flex: 1, minWidth: 200 }} />
-            <button className="btn primary" onClick={add} disabled={!text.trim()}>{t('common.add')}</button>
+            <input type="text" aria-label={t('dreams.add.label')} placeholder={t('dreams.add.placeholder')} value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && add()} style={{ flex: 1, minWidth: 200 }} />
+            <button className="btn primary" onClick={add} disabled={!text.trim()}>{t('dreams.add.button')}</button>
           </div>
         </div>
       )}
 
-      <Criteria />
-
       {extrinsicWarning(dreams) && <p className="notice small">{t('dreams.warn.extrinsic')}</p>}
 
-      {!settings.paperMode && dreams.length === 0 && <p className="muted">{t('dreams.empty')}</p>}
+      {!settings.paperMode && dreams.length === 0 && <p className="muted" style={{ marginTop: 0 }}>{t('dreams.empty')}</p>}
       {dreams.length > 0 && (
         <div className="row no-print" style={{ margin: '8px 0' }}>
           <button className={`chip ${sort === 'date' ? 'on' : ''}`} onClick={() => setSort('date')}>{t('dreams.sort.date')}</button>
@@ -108,8 +106,8 @@ export default function Dreams() {
                   <div className="row">
                     {!d.chosen && !d.dateAchieved && !d.dateReleased && <button className="btn sm" onClick={() => choose(d)}>{t('dreams.choose')}</button>}
                     {!d.dateAchieved
-                      ? <button className="btn sm" onClick={() => patch(d, { dateAchieved: today(), chosen: 0 })}>{t('dreams.achieved')} ✓</button>
-                      : <button className="btn sm ghost" onClick={() => patch(d, { dateAchieved: undefined })}>{t('dreams.achieved')} ✗</button>}
+                      ? <button className="btn sm" onClick={() => patch(d, { dateAchieved: today(), chosen: 0 })}>{t('dreams.achieved.mark')}</button>
+                      : <button className="btn sm ghost" onClick={() => patch(d, { dateAchieved: undefined })}>{t('dreams.achieved.unmark')}</button>}
                     {!d.dateReleased && !d.dateAchieved && <button className="btn sm ghost" onClick={() => patch(d, { dateReleased: today(), chosen: 0 })}>{t('dreams.release')}</button>}
                   </div>
                 </div>
@@ -119,6 +117,8 @@ export default function Dreams() {
           </li>
         ))}
       </ul>
+
+      <Criteria />
     </>
   )
 }
@@ -129,18 +129,21 @@ function Criteria() {
   const [v, setV] = useState('')
   const add = () => { if (!v.trim()) return; update({ criteria: [...settings.criteria, v.trim()] }); setV('') }
   return (
-    <details>
+    <details className="card" style={{ marginTop: 24 }}>
       <summary>{t('dreams.criteria')}</summary>
       <p className="small muted">{t('dreams.criteria.help')}</p>
       <ul className="list small">
-        <li>1. {t('dreams.criteria.fixed')}</li>
+        <li className="muted">★ {t('dreams.criteria.fixed')} <span className="small">({t('dreams.criteria.fixedNote')})</span></li>
         {settings.criteria.map((c, i) => (
-          <li key={i} className="row">{i + 2}. {c} <button className="btn sm ghost" onClick={() => update({ criteria: settings.criteria.filter((_, j) => j !== i) })}>✕</button></li>
+          <li key={i} className="row" style={{ justifyContent: 'space-between' }}>
+            <span>{i + 1}. {c}</span>
+            <button className="btn sm ghost" aria-label={t('common.delete')} onClick={() => update({ criteria: settings.criteria.filter((_, j) => j !== i) })}>✕</button>
+          </li>
         ))}
       </ul>
       <div className="row">
-        <input type="text" value={v} onChange={(e) => setV(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && add()} style={{ flex: 1, minWidth: 160 }} />
-        <button className="btn" onClick={add}>{t('common.add')}</button>
+        <input type="text" aria-label={t('dreams.criteria.add')} placeholder={t('dreams.criteria.placeholder')} value={v} onChange={(e) => setV(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && add()} style={{ flex: 1, minWidth: 160 }} />
+        <button className="btn sm" onClick={add} disabled={!v.trim()}>{t('dreams.criteria.add')}</button>
       </div>
     </details>
   )

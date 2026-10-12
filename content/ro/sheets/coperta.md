@@ -1,17 +1,21 @@
 ---
 sheet: 1
 title: Cartea Visurilor
-source_version: 1
+source_version: 2
 ---
 
-## Regulile de bază
+Numele meu: ______________________ &nbsp;&nbsp; Data: ______________
+
+Pune foaia aceasta la începutul caietului.
+
+## Promisiunea mea
 
 - Vin cu deschidere și curiozitate.
-- Sunt prezent în timpul întâlnirilor.
-- Onestitate, respect și confidențialitate: ce se spune între noi rămâne între noi.
-- Împărtășirea e de bine, dar nu e obligatorie niciodată.
+- Sunt prezent(ă) în timpul întâlnirilor: în acele ore mă pun pe mine pe primul loc.
+- Onestitate, respect și confidențialitate: ce se spune la întâlniri rămâne la întâlniri.
+- E bine să spun și altora din visurile mele, dar nu sunt niciodată obligat(ă).
 - Nu am nevoie de un vis mare. Învăț cum să lucrez cu un vis.
 
 ## Metoda COPIL
 
-**C** Clarificare · **O** Obstacole · **P** Pași mici · **I** Inima bună · **L** Liniște și limite
+**C** Clarific visul · **O** Numesc obstacolele · **P** Fac pași mici · **I** Adun oamenii cu inima bună · **L** Liniște și limite în fața vocilor care mă trag înapoi

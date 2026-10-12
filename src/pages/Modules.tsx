@@ -15,7 +15,7 @@ export default function Modules() {
         {modules.map((m) => (
           <li key={m.id}>
             <Link to={`/module/${m.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-              <strong>{m.order}. {m.title}</strong>{m.letter ? <span className="chip" style={{ marginLeft: 8 }}>{m.letter}</span> : null}
+              <strong>{m.order}. {m.title}</strong>{m.letter ? <span className="chip small" style={{ marginLeft: 8 }} title={t('letter.label')}>{m.letter.split('').map((l) => `${l} · ${t(`letter.${l}`)}`).join(', ')}</span> : null}
               <div className="small muted">{m.subtitle}</div>
             </Link>
           </li>

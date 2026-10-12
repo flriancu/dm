@@ -4,12 +4,16 @@ import { useT, UI_LOCALES, LOCALE_META } from '../i18n'
 import { useSettings } from '../state/settings'
 import { db, type Role, type Config } from '../db/db'
 import { exportAll, importAll, downloadJson } from '../db/exportImport'
+import { comboIssue, reconcile } from '../state/combos'
 
 export default function Settings() {
   const { t } = useT()
   const { settings, update } = useSettings()
   const file = useRef<HTMLInputElement>(null)
   const [msg, setMsg] = useState('')
+  const issue = comboIssue(settings.role, settings.config)
+  const pickRole = (r: Role) => { const x = reconcile(r, settings.config, 'role'); update({ role: x.role, config: x.config, friendToday: false }) }
+  const pickConfig = (c: Config) => { const x = reconcile(settings.role, c, 'config'); update({ role: x.role, config: x.config }) }
 
   const doExport = async () => downloadJson(`cartea-visurilor-${new Date().toISOString().slice(0, 10)}.json`, await exportAll())
   const doImport = async (f: File) => {
@@ -36,10 +40,15 @@ export default function Settings() {
       </div>
       <div className="card">
         <div className="field"><label>{t('settings.role')}</label>
-          <div className="row">{(['dreamer', 'friend', 'both'] as Role[]).map((r) => <button key={r} className={`chip ${settings.role === r ? 'on' : ''}`} onClick={() => update({ role: r, friendToday: false })}>{t(`onboarding.role.${r}`)}</button>)}</div>
+          <p className="small muted" style={{ margin: 0 }}>{t('settings.role.help')}</p>
+          <div className="row">{(['dreamer', 'friend', 'both'] as Role[]).map((r) => <button key={r} className={`chip ${settings.role === r ? 'on' : ''}`} onClick={() => pickRole(r)}>{t(`onboarding.role.${r}`)}</button>)}</div>
+          <p className="small" style={{ margin: '4px 0 0' }}>{t(`role.help.${settings.role}`)}</p>
         </div>
         <div className="field"><label>{t('settings.config')}</label>
-          <div className="row">{(['solo', 'pair', 'group'] as Config[]).map((c) => <button key={c} className={`chip ${settings.config === c ? 'on' : ''}`} onClick={() => update({ config: c })}>{t(`onboarding.config.${c}`)}</button>)}</div>
+          <p className="small muted" style={{ margin: 0 }}>{t('settings.config.help')}</p>
+          <div className="row">{(['solo', 'pair', 'group'] as Config[]).map((c) => <button key={c} className={`chip ${settings.config === c ? 'on' : ''}`} onClick={() => pickConfig(c)}>{t(`onboarding.config.${c}`)}</button>)}</div>
+          <p className="small" style={{ margin: '4px 0 0' }}>{t(`config.help.${settings.config}`)}</p>
+          {issue && <p className="notice small">{t(`combo.${issue}`)}</p>}
         </div>
         <div className="field"><label htmlFor="sd">{t('onboarding.start')}</label><input id="sd" type="date" value={settings.startDate ?? ''} onChange={(e) => update({ startDate: e.target.value })} /></div>
         <div className="field"><label htmlFor="cd">{t('onboarding.cadence')}</label><input id="cd" type="number" min={7} max={42} value={settings.cadenceDays} onChange={(e) => update({ cadenceDays: Number(e.target.value) || 14 })} /></div>

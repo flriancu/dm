@@ -25,7 +25,7 @@ export default function ModulePage() {
   const [saved, setSaved] = useState(false)
 
   if (doc === undefined) return <p className="muted">…</p>
-  if (doc === null) return <p>{t('modules.title')}: {id}?</p>
+  if (doc === null) return <p className="notice">{t('module.notFound')} <Link to="/modules">{t('nav.modules')}</Link></p>
 
   const sec = (sid: string): Section | undefined => doc.sections.find((s) => s.id === sid)
   const friend = sec('friend')
@@ -42,7 +42,7 @@ export default function ModulePage() {
 
   return (
     <article className="content">
-      <p className="small muted"><Link to="/modules">{t('nav.modules')}</Link> · {t('home.module')} {doc.meta.order}{doc.meta.letter ? ` · ${doc.meta.letter}` : ''}</p>
+      <p className="small muted"><Link to="/modules">{t('nav.modules')}</Link> · {t('home.module')} {doc.meta.order}{doc.meta.letter ? ` · ${doc.meta.letter.split('').map((l) => `${l} · ${t(`letter.${l}`)}`).join(', ')}` : ''}</p>
       <h1>{doc.meta.title}</h1>
       {doc.meta.subtitle && <p className="muted">{doc.meta.subtitle}</p>}
       {(contentLocale as string) !== (locale as string) && <p className="notice small">{t('module.contentFallback')}</p>}
@@ -79,13 +79,13 @@ export default function ModulePage() {
           <div dangerouslySetInnerHTML={{ __html: md(sec('next')!.body) }} />
           <div className="card">
             <p className="small muted">{t('module.next.plan')}</p>
-            <div className="field"><label htmlFor="plan-if">{t('module.next.if')}</label><input id="plan-if" type="text" value={cond} onChange={(e) => setCond(e.target.value)} /></div>
-            <div className="field"><label htmlFor="plan-then">{t('module.next.then')}</label><input id="plan-then" type="text" value={act} onChange={(e) => setAct(e.target.value)} /></div>
+            <div className="field"><label htmlFor="plan-if">{t('module.next.if')}</label><input id="plan-if" type="text" placeholder={t('module.next.if.placeholder')} value={cond} onChange={(e) => setCond(e.target.value)} /></div>
+            <div className="field"><label htmlFor="plan-then">{t('module.next.then')}</label><input id="plan-then" type="text" placeholder={t('module.next.then.placeholder')} value={act} onChange={(e) => setAct(e.target.value)} /></div>
             <button className="btn primary" onClick={savePlan} disabled={!cond.trim() || !act.trim()}>{t('common.save')}</button>
             {saved && <p className="small" style={{ color: 'var(--ok)' }}>{t('module.next.saved')}</p>}
             {plans.length > 0 && (
               <ul className="list small">
-                {plans.map((p) => <li key={p.id} className={p.done ? 'muted' : ''}>{p.done ? '✓ ' : ''}{t('module.next.if')} {p.condition} {t('module.next.then')} {p.action}</li>)}
+                {plans.map((p) => <li key={p.id} className={p.done ? 'muted' : ''}>{p.done ? '✓ ' : ''}{t('plan.if')} {p.condition}, {t('plan.then')} {p.action}</li>)}
               </ul>
             )}
           </div>
@@ -98,16 +98,15 @@ export default function ModulePage() {
       <div className="card">
         <div className="field">
           <label htmlFor="mine">{t('module.takeaways.mine')}</label>
-          <textarea id="mine" defaultValue={note?.takeaways ?? ''} onBlur={(e) => saveNote({ takeaways: e.target.value })} />
+          <textarea id="mine" placeholder={t('module.takeaways.placeholder')} defaultValue={note?.takeaways ?? ''} onBlur={(e) => saveNote({ takeaways: e.target.value })} />
         </div>
         <div className="field">
           <label htmlFor="oneword">{t('module.feedback')}</label>
-          <input id="oneword" type="text" maxLength={40} defaultValue={note?.oneWord ?? ''} onBlur={(e) => saveNote({ oneWord: e.target.value })} />
+          <input id="oneword" type="text" maxLength={40} placeholder={t('module.feedback.placeholder')} defaultValue={note?.oneWord ?? ''} onBlur={(e) => saveNote({ oneWord: e.target.value })} />
         </div>
         <button className="btn primary" onClick={complete}>{note?.completedOn ? '✓ ' : ''}{t('common.done')}</button>
       </div>
 
-      {doc.meta.sources && <p className="small muted">{t('module.sources')}: {doc.meta.sources.join('; ')}</p>}
     </article>
   )
 }

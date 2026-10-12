@@ -36,7 +36,7 @@ export default function Home() {
             <div>{nextDate ? fmtDate(nextDate) : t('home.next.none')}</div>
             <Link className="btn sm" style={{ marginTop: 8, display: 'inline-flex', alignItems: 'center' }} to={`/module/${next.id}`}>{t('common.continue')}</Link>
           </>
-        ) : <div className="muted">…</div>}
+        ) : modules.length === 0 ? <div className="muted">…</div> : <div>{t('home.next.allDone')}</div>}
       </div>
 
       {settings.role === 'both' && (
@@ -59,8 +59,8 @@ export default function Home() {
               <ul className="list">
                 {plans.map((p) => (
                   <li key={p.id} className="row">
-                    <input type="checkbox" aria-label={t('common.done')} onChange={() => db.plans.update(p.id!, { done: 1 })} />
-                    <span><em>{t('module.next.if')}</em> {p.condition} <em>{t('module.next.then')}</em> {p.action}
+                    <input type="checkbox" aria-label={t('home.plans.done')} title={t('home.plans.done')} onChange={() => db.plans.update(p.id!, { done: 1 })} />
+                    <span><em>{t('plan.if')}</em> {p.condition}, <em>{t('plan.then')}</em> {p.action}
                       <span className="small muted"> · {t('home.module')} {Number(p.moduleId)}</span></span>
                   </li>
                 ))}

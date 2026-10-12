@@ -30,8 +30,8 @@ export default function Friend() {
       {doc ? <div className="content" dangerouslySetInnerHTML={{ __html: doc.html }} /> : <p className="muted">…</p>}
       <h2>{t('friend.notes')}</h2>
       <div className="card">
-        <textarea value={text} onChange={(e) => setText(e.target.value)} />
-        <button className="btn" onClick={add} disabled={!text.trim()}>{t('common.add')}</button>
+        <textarea aria-label={t('friend.notes')} placeholder={t('friend.notes.placeholder')} value={text} onChange={(e) => setText(e.target.value)} />
+        <button className="btn" onClick={add} disabled={!text.trim()}>{t('friend.notes.add')}</button>
         <ul className="list small">
           {notes.map((n) => <li key={n.id}><span className="muted">{fmtDate(n.created)}</span> — {n.text}</li>)}
         </ul>

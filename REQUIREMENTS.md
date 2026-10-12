@@ -75,7 +75,11 @@ Identifiers are stable; reference them from issues and commits.
   Friend seat and the schedule to the pair's alternation.
 - FR-07 Configuration setting: Solo + Friend, Peer pair, or Friend + group. It selects
   which variant of each "With your Dream Friend" block and 1:1 script is shown first;
-  the other variants stay one tap away.
+  the other variants stay one tap away. Validity (enforced in onboarding and settings):
+  Dreamer + solo, Dreamer + group, Dream Friend + solo, Dream Friend + group, Both + pair,
+  Both + group are valid. Choosing pair sets the role to Both and says why; a Dream Friend
+  cannot choose pair (a pair has no non-participating Friend); Both + solo shows a notice
+  asking for pair or group, since "Both" needs someone whose Dream Friend this person is.
 - FR-03 Interface language toggle RO/EN on every screen; the choice persists. All
   interface strings live in locale dictionaries, never in components. Course content
   is served from a per-locale content tree; v1 ships `ro` only. When the interface is
@@ -230,6 +234,27 @@ Identifiers are stable; reference them from issues and commits.
 - CR-02 Each module has one key takeaway sentence, as the pilot decks did.
 - CR-06 No Matthews goal-writing percentages, no Positive Intelligence statistics or
   PQ score, no fixed habit-duration number anywhere in the course text.
+- CR-07 Watertight wording (added 2026-10-12 after live testing). Every sentence of
+  course content and every interface string passes six checks, enforced by the build
+  lint where mechanical and by a stranger-read review before content reaches Florin:
+  1. An instruction names its object in the same sentence; no dangling "scrie-l",
+     "fă-o", "transformă-l".
+  2. Nothing refers to anything outside the course: no pilot, session, slide, deck,
+     unknown person, "earlier" or "as before".
+  3. A code, letter, abbreviation or coined term is expanded the first time it appears
+     on each screen (COPIL letters carry their names; "Prietenul Visului" is defined
+     where it first appears).
+  4. Every input has a label saying what to type and a placeholder with an example;
+     every button says what happens; two inputs on one screen never share a label.
+  5. Every empty state says what to do next; labels describe the reader's action, not
+     the author's purpose.
+  6. Every exercise step says what to do, with what, where, for how long when it
+     matters, and is concrete enough to start now; each "Fă" section has at least one
+     worked example.
+  Process: `npm run check:content` fails on rule 1–3 violations it can detect and on
+  interface keys missing from a locale; CONTENT-GUIDE.md holds the templates; a
+  reviewer pass in the persona of a cold reader runs on every new or changed content
+  file before it is shown to Florin, and its findings are fixed first.
 - CR-03 Reconstructed content (1:1 scripts, fear module) is marked "reconstructed" in
   the source file front matter until Florin reviews it, and the marker is not shown to
   the learner.

@@ -37,14 +37,16 @@ function translate(locale: UiLocale, key: string, vars?: Record<string, string |
 }
 
 interface Ctx { locale: UiLocale; t: T; fmtDate: (d: string | Date) => string }
-const LocaleCtx = createContext<Ctx>({ locale: 'ro', t: (k) => k, fmtDate: (d) => String(d) })
+function formatDate(locale: UiLocale, d: string | Date): string {
+  const date = typeof d === 'string' ? new Date(d.length === 10 ? d + 'T00:00:00' : d) : d
+  return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).format(date)
+}
+// Default value is only reached without a provider (e.g. after a hot reload recreates the context); keep it correct anyway.
+const LocaleCtx = createContext<Ctx>({ locale: 'ro', t: (k, v) => translate('ro', k, v), fmtDate: (d) => formatDate('ro', d) })
 
 export function LocaleProvider({ locale, children }: { locale: UiLocale; children: ReactNode }) {
   const t = useCallback<T>((k, v) => translate(locale, k, v), [locale])
-  const fmtDate = useCallback((d: string | Date) => {
-    const date = typeof d === 'string' ? new Date(d) : d
-    return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).format(date)
-  }, [locale])
+  const fmtDate = useCallback((d: string | Date) => formatDate(locale, d), [locale])
   const value = useMemo(() => ({ locale, t, fmtDate }), [locale, t, fmtDate])
   return <LocaleCtx.Provider value={value}>{children}</LocaleCtx.Provider>
 }

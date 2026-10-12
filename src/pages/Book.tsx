@@ -73,7 +73,7 @@ function DreamsSheet() {
         <section className="sheet" key={p}>
           <h1>{t('book.sheet.dreams')} {p === 0 ? '1–50' : '51–100'}</h1>
           <table>
-            <thead><tr><th style={{ width: '2.5em' }}>#</th><th>{t('nav.dreams')}</th><th style={{ width: '7em' }}>{t('dreams.added.on', { date: '' }).replace(/\s+$/, '')}</th><th style={{ width: '7em' }}>{t('dreams.achieved')}</th><th style={{ width: '6em' }}>{t('dreams.area')}</th></tr></thead>
+            <thead><tr><th style={{ width: '2.5em' }}>{t('book.col.n')}</th><th>{t('book.col.dream')}</th><th style={{ width: '7em' }}>{t('book.col.added')}</th><th style={{ width: '7em' }}>{t('book.col.achieved')}</th><th style={{ width: '6em' }}>{t('book.col.area')}</th></tr></thead>
             <tbody>
               {part.map((d, i) => (
                 <tr key={i}><td>{p * 50 + i + 1}</td><td>{d?.text ?? ''}</td><td>{d?.dateAdded ?? ''}</td><td>{d?.dateAchieved ?? ''}</td><td>{d?.area ? t(`area.${d.area}`) : ''}</td></tr>
@@ -97,7 +97,7 @@ function RatingSheet() {
       <p>{t('dreams.criteria')}:</p>
       <ol>{criteria.map((c, i) => <li key={i}>{c || ' '}<div className="lines" /></li>)}</ol>
       <table>
-        <thead><tr><th>#</th>{criteria.map((_, i) => <th key={i}>{i + 1}</th>)}<th>{t('dreams.score')}</th><th>{t('dreams.tag')}</th></tr></thead>
+        <thead><tr><th>{t('book.col.n')}</th>{criteria.map((_, i) => <th key={i}>{i + 1}</th>)}<th>{t('book.col.score')}</th><th>{t('book.col.why')}</th></tr></thead>
         <tbody>
           {Array.from({ length: 25 }, (_, i) => (
             <tr key={i}><td>&nbsp;</td>{criteria.map((_, j) => <td key={j} />)}<td /><td /></tr>
