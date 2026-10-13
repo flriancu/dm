@@ -153,8 +153,8 @@
   "settings.theme.system": "după setarea telefonului",
   "settings.theme.light": "luminos",
   "settings.theme.dark": "întunecat",
-  "settings.export": "Salvează o copie a tuturor datelor (fișier .json pe care îl păstrezi sau îl trimiți)",
-  "settings.import": "Încarcă o copie salvată (fișier .json)",
+  "settings.export": "Salvează o copie",
+  "settings.import": "Încarcă o copie",
   "settings.import.ok": "Copia a fost încărcată: {dreams} visuri, {plans} planuri.",
   "settings.import.err": "Fișierul nu a putut fi citit. Alege un fișier .json salvat din această aplicație.",
   "settings.danger": "Șterge toate datele de pe acest dispozitiv",
@@ -181,5 +181,8 @@
   "picker.pickConfig.both": "Alege: o pereche în care vă sunteți pe rând Prietenul Visului, sau un grup pe care îl conduci tu și în care îți ții și lista ta.",
   "settings.change": "Schimbă rolul sau felul în care parcurgem cursul",
   "settings.saveChoice": "Salvează alegerea",
-  "config.help.group.both": "Tu conduci întâlnirile și, pe lângă asta, îți ții și lista ta de visuri și spui din ele în grup. Atenție: în acest grup nimeni nu este Prietenul tău al Visului, deci nimeni nu îți pune ție întrebările. Dacă vrei pe cineva care să te însoțească la visul tău, fă în paralel o pereche de egali cu un alt Prieten al Visului."
+  "config.help.group.both": "Tu conduci întâlnirile și, pe lângă asta, îți ții și lista ta de visuri și spui din ele în grup. Atenție: în acest grup nimeni nu este Prietenul tău al Visului, deci nimeni nu îți pune ție întrebările. Dacă vrei pe cineva care să te însoțească la visul tău, fă în paralel o pereche de egali cu un alt Prieten al Visului.",
+  "settings.export.help": "Creează un fișier cu toate datele tale (visuri, planuri, notițe, setări). Îl păstrezi ca rezervă sau îl trimiți Prietenului Visului. Nimic nu se trimite automat.",
+  "settings.import.help": "Alege un fișier salvat mai devreme din această aplicație. Înlocuiește tot ce e acum pe acest dispozitiv.",
+  "settings.backup": "Copie de rezervă"
 }

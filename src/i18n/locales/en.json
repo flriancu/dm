@@ -153,8 +153,8 @@
   "settings.theme.system": "follow device setting",
   "settings.theme.light": "light",
   "settings.theme.dark": "dark",
-  "settings.export": "Save a copy of all data (.json file you keep or send)",
-  "settings.import": "Load a saved copy (.json file)",
+  "settings.export": "Save a copy",
+  "settings.import": "Load a copy",
   "settings.import.ok": "Copy loaded: {dreams} dreams, {plans} plans.",
   "settings.import.err": "The file could not be read. Choose a .json file saved from this app.",
   "settings.danger": "Delete all data on this device",
@@ -181,5 +181,8 @@
   "picker.pickConfig.both": "Choose: a pair in which you take turns as Dream Friend, or a group that you lead while also keeping your own list.",
   "settings.change": "Change the role or how we go through the course",
   "settings.saveChoice": "Save the choice",
-  "config.help.group.both": "You lead the meetings and, alongside, keep your own dream list and share from it in the group. Note: nobody in this group is your Dream Friend, so nobody asks you the questions. If you want someone to accompany you on your own dream, run a separate peer pair with another Dream Friend."
+  "config.help.group.both": "You lead the meetings and, alongside, keep your own dream list and share from it in the group. Note: nobody in this group is your Dream Friend, so nobody asks you the questions. If you want someone to accompany you on your own dream, run a separate peer pair with another Dream Friend.",
+  "settings.export.help": "Creates a file with all your data (dreams, plans, notes, settings). Keep it as a backup or send it to your Dream Friend. Nothing is sent automatically.",
+  "settings.import.help": "Choose a file saved earlier from this app. It replaces everything currently on this device.",
+  "settings.backup": "Backup copy"
 }

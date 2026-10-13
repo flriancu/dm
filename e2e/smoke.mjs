@@ -86,7 +86,7 @@ for (const [name, viewport] of [['phone', { width: 360, height: 740 }], ['laptop
   await page.getByRole('button', { name: 'Română' }).click()
 
   // Export produces a file
-  const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Salvează o copie/ }).click()])
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Salvează o copie' }).click()])
   check(/cartea-visurilor-.*\.json/.test(dl.suggestedFilename()), `${name}: export downloads JSON`)
 
   // Print sheets render (acceptance 2, in part)
