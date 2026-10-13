@@ -62,6 +62,14 @@ the calendar); the course logic stays in this repo.
 Interface languages: ro, en. Content: ro only in v1; add `content/<lang>/` with the same
 file names to add a language. The build check lists what is missing or stale.
 
+## Serve from this workstation (intranet)
+
+`npm run build`, then `pwsh scripts/serve-intranet.ps1` serves `dist/` at
+`http://<COMPUTERNAME>.<domain>/dream_management/` through Windows HTTP.sys, for as long
+as the script runs. It needs a one-time URL reservation for port 80 and an inbound firewall
+rule, both by an administrator; the commands (and how to undo them) are at the top of the
+script. Without them, `-Prefix http://localhost:8099/dream_management/` serves locally only.
+
 ## Deploy
 
 `.github/workflows/deploy.yml` builds on push to `main` and syncs `dist/` to the S3 +
