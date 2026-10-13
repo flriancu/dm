@@ -1,6 +1,6 @@
 ---
 title: Surse și mulțumiri
-source_version: 7
+source_version: 8
 ---
 
 Cursul este o adaptare, pentru uz privat între prieteni și familie, a unui program de „management al visurilor” (Dream Management) la care autorul a participat în 2026. Nu este vândut și nu înlocuiește un program certificat.
@@ -30,7 +30,7 @@ Metodele din curs se sprijină pe studii publicate în reviste de specialitate. 
 - Alegerea visurilor „din interior” (dorite pentru creștere, relații, sănătate, nu pentru bani sau imagine; modulul 2): Sheldon & Elliot (1999), *Journal of Personality and Social Psychology* — [articol](https://doi.org/10.1037/0022-3514.76.3.482), DOI 10.1037/0022-3514.76.3.482; Bradshaw și colab. (2023), *Journal of Personality and Social Psychology* — [articol](https://doi.org/10.1037/pspp0000431), DOI 10.1037/pspp0000431
 - Contrastul mental, visul față în față cu obstacolul (modulul 3): Cross & Sheffield (2019), *Health Psychology Review* — [articol](https://doi.org/10.1080/17437199.2019.1594332), DOI 10.1080/17437199.2019.1594332; Wang, Wang & Gai (2021), *Frontiers in Psychology* — [articol](https://doi.org/10.3389/fpsyg.2021.565202), DOI 10.3389/fpsyg.2021.565202
 - Imaginarea drumului, nu doar a rezultatului (modulul 1): Pham & Taylor (1999), *Personality and Social Psychology Bulletin* — [articol](https://doi.org/10.1177/0146167299025002010), DOI 10.1177/0146167299025002010
-- Scrisul obiectivelor și urmărirea progresului (modulul 1 și lista visurilor): Epton, Currie & Armitage (2017), *Journal of Consulting and Clinical Psychology* — [articol](https://doi.org/10.1037/ccp0000260), DOI 10.1037/ccp0000260; Harkin și colab. (2016), *Psychological Bulletin* — [articol](https://doi.org/10.1037/bul0000025), DOI 10.1037/bul0000025
+- Scrisul obiectivelor și urmărirea progresului (modulul 1, lista visurilor și verificarea viziunii din modulul 7): Epton, Currie & Armitage (2017), *Journal of Consulting and Clinical Psychology* — [articol](https://doi.org/10.1037/ccp0000260), DOI 10.1037/ccp0000260; Harkin și colab. (2016), *Psychological Bulletin* — [articol](https://doi.org/10.1037/bul0000025), DOI 10.1037/bul0000025
 - A spune altora despre un vis (modulul 4): Peetz, Buehler & Wells (2025), *Personality and Social Psychology Bulletin* — [articol](https://doi.org/10.1177/01461672251382271), DOI 10.1177/01461672251382271; Klein și colab. (2020), *Journal of Applied Psychology* — [articol](https://doi.org/10.1037/apl0000441), DOI 10.1037/apl0000441; Gollwitzer și colab. (2009), *Psychological Science* — [articol](https://doi.org/10.1111/j.1467-9280.2009.02336.x), DOI 10.1111/j.1467-9280.2009.02336.x
 - Obiceiurile mici și cât durează să se formeze (modulul 4): Singh și colab. (2024), *Healthcare* — [articol](https://doi.org/10.3390/healthcare12232488), DOI 10.3390/healthcare12232488
 - Scrisoarea de la / către sinele viitor (modulul 6; studiile folosesc scrisori în ambele direcții): Carrillo și colab. (2019), *PLOS ONE* — [articol](https://doi.org/10.1371/journal.pone.0222386), DOI 10.1371/journal.pone.0222386; Rutchick și colab. (2018), *Journal of Experimental Psychology: Applied* — [articol](https://doi.org/10.1037/xap0000153), DOI 10.1037/xap0000153; Chishima & Wilson (2020), *Self and Identity* — [articol](https://doi.org/10.1080/15298868.2020.1754283), DOI 10.1080/15298868.2020.1754283

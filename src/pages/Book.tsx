@@ -3,12 +3,12 @@ import { Link, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useT, contentLocaleFor } from '../i18n'
 import { useSettings } from '../state/settings'
-import { db, CLARIFY_STEPS, WOOP_STEPS, QUADRANTS, HABIT_PARTS, WHEEL_AREAS, SWLS_ITEMS, VISION_SECTIONS } from '../db/db'
+import { db, CLARIFY_STEPS, WOOP_STEPS, QUADRANTS, HABIT_PARTS, WHEEL_AREAS, SWLS_ITEMS, VISION_SECTIONS, REGRET_AREAS } from '../db/db'
 import { WheelSvg } from './Calm'
 import { loadDoc } from '../content/loader'
 
 /** Dream Book sheets available so far (FR-04). Each sheet is a `.sheet` block that prints on its own page. */
-const SHEETS = ['cover', 'dreams', 'rating', 'clarify', 'week', 'woop', 'habit', 'friends', 'fear', 'profile', 'journal', 'wheel', 'values', 'letter', 'sheet'] as const
+const SHEETS = ['cover', 'dreams', 'rating', 'clarify', 'week', 'woop', 'habit', 'friends', 'fear', 'profile', 'journal', 'wheel', 'values', 'letter', 'sheet', 'regret', 'letgo', 'checkin', 'retro'] as const
 type SheetId = (typeof SHEETS)[number]
 
 export default function Book({ print = false }: { print?: boolean }) {
@@ -57,6 +57,10 @@ export default function Book({ print = false }: { print?: boolean }) {
         {ids.includes('values') && <ValuesSheet />}
         {ids.includes('letter') && <LetterSheet />}
         {ids.includes('sheet') && <VisionSheet />}
+        {ids.includes('regret') && <RegretSheet />}
+        {ids.includes('letgo') && <LetgoSheet />}
+        {ids.includes('checkin') && <CheckinSheet />}
+        {ids.includes('retro') && <RetroSheet />}
       </div>
     </>
   )
@@ -361,5 +365,65 @@ function VisionSheet() {
         </section>
       ))}
     </>
+  )
+}
+
+function RegretSheet() {
+  const { t } = useT()
+  const v = useLiveQuery(() => db.vision.get('me'), [])
+  return (
+    <section className="sheet">
+      <h1>{t('book.sheet.regret')}</h1>
+      <p>{t('regret.help')}</p>
+      {REGRET_AREAS.map((a) => <div key={a}><h3>{t(`regret.${a}`)}</h3><div className="box" style={{ minHeight: '22mm' }}>{v?.regret?.[a] ?? ''}</div></div>)}
+      <h3>{t('yesno.title')}</h3>
+      {(['yes', 'no', 'changes', 'hardest'] as const).map((k) => <div key={k}><p style={{ margin: '4px 0 0' }}><strong>{t(`yesno.${k}`)}</strong></p><div className="box" style={{ minHeight: '18mm' }}>{v?.yesno?.[k] ?? ''}</div></div>)}
+    </section>
+  )
+}
+
+function LetgoSheet() {
+  const { t } = useT()
+  const { dream, work } = useWork()
+  return (
+    <section className="sheet">
+      <h1>{t('book.sheet.letgo')}</h1>
+      <p>{t('letgo.help')}</p>
+      <p>{t('home.chosen')}: <strong>{dream?.text ?? ''}</strong></p>
+      <h3>{t('letgo.signs')}</h3>
+      <ul>{['oscillate', 'sleep', 'stalled', 'outside'].map((k) => <li key={k}>☐ {t(`letgo.sign.${k}`)}</li>)}</ul>
+      {(['costs', 'benefits', 'replacement'] as const).map((k) => <div key={k}><h3>{t(`letgo.${k}`)}</h3><div className="box" style={{ minHeight: '22mm' }}>{work?.letgo?.[k] ?? ''}</div></div>)}
+      <p>☐ {t('letgo.continue')} &nbsp;&nbsp; ☐ {t('letgo.release')} &nbsp;&nbsp; {t('book.col.added').replace(/.*/, '')}Data: ____________</p>
+    </section>
+  )
+}
+
+function CheckinSheet() {
+  const { t, fmtDate } = useT()
+  const v = useLiveQuery(() => db.vision.get('me'), [])
+  const log = v?.checkin?.log ?? []
+  return (
+    <section className="sheet">
+      <h1>{t('book.sheet.checkin')}</h1>
+      <p>{t('checkin.help')}</p>
+      <h3>{t('checkin.steps')}</h3>
+      <ol>{['vision', 'wheel', 'dreams', 'directions', 'yesno', 'letgo'].map((k) => <li key={k}>{t(`checkin.step.${k}`)}</li>)}</ol>
+      <table><thead><tr><th style={{ width: '10em' }}>{t('book.col.added').split(' ')[0]}</th><th>{t('checkin.note')}</th></tr></thead>
+        <tbody>{[...log, ...Array.from({ length: Math.max(0, 8 - log.length) }, () => null)].map((l, i) => <tr key={i}><td>{l ? fmtDate(l.date) : ''}</td><td>{l?.note ?? ''}<div style={{ minHeight: '10mm' }} /></td></tr>)}</tbody></table>
+    </section>
+  )
+}
+
+function RetroSheet() {
+  const { t } = useT()
+  const v = useLiveQuery(() => db.vision.get('me'), [])
+  const notes = useLiveQuery(() => db.moduleNotes.orderBy('moduleId').toArray(), []) ?? []
+  return (
+    <section className="sheet">
+      <h1>{t('book.sheet.retro')}</h1>
+      <h3>{t('retro.words')}</h3>
+      <table><tbody>{[0, 1, 2, 3, 4, 5, 6, 7].map((m) => { const n = notes.find((x) => Number(x.moduleId) === m); return <tr key={m}><th style={{ width: '8em' }}>{t('home.module')} {m}</th><td>{n?.oneWord ?? ''}</td></tr> })}</tbody></table>
+      {(['tool', 'habit', 'aha', 'word'] as const).map((k) => <div key={k}><h3>{t(`retro.${k}`)}</h3><div className="box" style={{ minHeight: k === 'word' ? '10mm' : '20mm' }}>{v?.retro?.[k] ?? ''}</div></div>)}
+    </section>
   )
 }

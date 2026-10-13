@@ -74,6 +74,7 @@ export interface DreamWork {
   habitLog?: HabitWeek[]                           // weekly tracker (FR-22, FR-45)
   friends?: DreamFriend[]                          // module 4 (I), FR-23
   fear?: { fear?: string; goodEnough?: string }    // module 4, FR-35
+  letgo?: { signs?: string[]; costs?: string; benefits?: string; replacement?: string; decision?: 'continue' | 'release'; decided?: string } // FR-46
   updated: string
 }
 
@@ -93,7 +94,17 @@ export interface ValueAct { date: string; value: string; text: string }
 export interface Letter { text?: string; reply?: string; deliverDate?: string; sealed?: boolean; sealedOn?: string; opened?: boolean }
 export const VISION_SECTIONS = ['matters', 'best', 'energy', 'tenYears', 'impact', 'idealDay', 'identity', 'statement', 'focus'] as const
 export type VisionSection = (typeof VISION_SECTIONS)[number]
-export interface VisionDoc { id: 'me'; values: ValueItem[]; valueActs: ValueAct[]; letter?: Letter; worksheet: Partial<Record<VisionSection, string>>; updated: string }
+export const REGRET_AREAS = ['impact', 'relationships', 'growth', 'courage'] as const
+export type RegretArea = (typeof REGRET_AREAS)[number]
+export interface Checkin { everyMonths?: 3 | 6; next?: string; lastDone?: string; log?: { date: string; note: string }[] }
+export interface VisionDoc {
+  id: 'me'; values: ValueItem[]; valueActs: ValueAct[]; letter?: Letter; worksheet: Partial<Record<VisionSection, string>>
+  regret?: Partial<Record<RegretArea, string>>                       // module 7, FR-44
+  yesno?: { yes?: string; no?: string; changes?: string; hardest?: string } // module 7, FR-44
+  checkin?: Checkin                                                   // FR-45
+  retro?: { tool?: string; habit?: string; aha?: string; word?: string } // module 7 retrospective
+  updated: string
+}
 
 /** Monday of the week containing an ISO date. */
 export function weekStart(iso: string): string {

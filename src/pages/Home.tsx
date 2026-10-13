@@ -22,6 +22,8 @@ export default function Home() {
   const notes = useLiveQuery(() => db.moduleNotes.toArray(), []) ?? []
   const plans = useLiveQuery(() => db.plans.filter((p) => !p.done).toArray(), []) ?? []
   const chosen = useLiveQuery(() => db.dreams.where('chosen').equals(1).first(), [])
+  const vision = useLiveQuery(() => db.vision.get('me'), [])
+  const checkinDue = !!vision?.checkin?.next && vision.checkin.next <= new Date().toISOString().slice(0, 10)
   const done = new Set(notes.filter((n) => n.completedOn).map((n) => n.moduleId))
   const next = modules.find((m) => m.order > 0 && !done.has(m.id))
   const nextDate = next ? moduleDate(settings.startDate, settings.cadenceDays, next.order) : null
@@ -38,6 +40,13 @@ export default function Home() {
           </>
         ) : modules.length === 0 ? <div className="muted">…</div> : <div>{t('home.next.allDone')}</div>}
       </div>
+
+      {checkinDue && (
+        <div className="card soft">
+          <strong>{t('home.checkin.due')}</strong>
+          <div><Link className="btn sm" to="/vision#checkin">{t('home.checkin.open')}</Link></div>
+        </div>
+      )}
 
       {showsFriendSwitch(settings) && (
         <label className="card row" style={{ cursor: 'pointer' }}>

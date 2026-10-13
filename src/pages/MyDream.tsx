@@ -6,10 +6,12 @@ import {
   type ClarifyStep, type WoopStep, type HabitPart, type DreamWork, type DreamFriend, type HabitWeek,
 } from '../db/db'
 
-/** The chosen dream's worksheets: module 2 (clarify, routes), 3 (WOOP), 4 (habit, friends, fear). */
+/** The chosen dream's worksheets: module 2 (clarify, routes), 3 (WOOP), 4 (habit, friends, fear), and letting go (FR-46). */
+const LETGO_SIGNS = ['oscillate', 'sleep', 'stalled', 'outside'] as const
 export default function MyDream() {
   const { t, fmtDate } = useT()
-  const dream = useLiveQuery(() => db.dreams.where('chosen').equals(1).first(), [])
+  // the chosen dream, or the most recently released one (so the letting-go note stays visible)
+  const dream = useLiveQuery(async () => (await db.dreams.where('chosen').equals(1).first()) ?? (await db.dreams.orderBy('dateReleased').reverse().first()), [])
   const work = useLiveQuery(() => (dream?.id ? db.dreamWork.get(dream.id) : undefined), [dream?.id])
 
   if (dream === undefined) return <p className="muted">…</p>
@@ -31,6 +33,7 @@ export default function MyDream() {
       woop: { ...(cur.woop ?? {}), ...(patch.woop ?? {}) },
       habit: { ...(cur.habit ?? {}), ...(patch.habit ?? {}) },
       fear: { ...(cur.fear ?? {}), ...(patch.fear ?? {}) },
+      letgo: { ...(cur.letgo ?? {}), ...(patch.letgo ?? {}) },
       updated: today(),
     })
   })
@@ -74,6 +77,7 @@ export default function MyDream() {
           <a href="#habit">{t('mydream.section.habit')}</a>
           <a href="#friends">{t('mydream.section.friends')}</a>
           <a href="#fear">{t('mydream.section.fear')}</a>
+          <a href="#letgo">{t('mydream.section.letgo')}</a>
         </div>
       </div>
 
@@ -184,6 +188,38 @@ export default function MyDream() {
         </div>
       </div>
       <p className="small muted">{t('mydream.saved')} <Link to="/book/print/fear">{t('fear.print')}</Link></p>
+
+      <Section id="letgo" label={t('mydream.section.letgo')} title={t('letgo.title')} />
+      <p className="muted small">{t('letgo.help')}</p>
+      <div className="card">
+        <div className="field">
+          <label>{t('letgo.signs')}</label>
+          {LETGO_SIGNS.map((s) => (
+            <label key={s} className="row" style={{ minHeight: 32 }}>
+              <input type="checkbox" key={`${s}-${(work?.letgo?.signs ?? []).includes(s) ? 1 : 0}`} defaultChecked={(work?.letgo?.signs ?? []).includes(s)} onChange={(e) => { const cur = work?.letgo?.signs ?? []; save({ letgo: { signs: e.target.checked ? [...cur, s] : cur.filter((x) => x !== s) } }) }} />
+              <span>{t(`letgo.sign.${s}`)}</span>
+            </label>
+          ))}
+        </div>
+        {(['costs', 'benefits', 'replacement'] as const).map((k) => (
+          <div className="field" key={k}>
+            <label htmlFor={`letgo-${k}`}>{t(`letgo.${k}`)}</label>
+            <textarea id={`letgo-${k}`} placeholder={t(`letgo.${k}.placeholder`)} defaultValue={work?.letgo?.[k] ?? ''} onBlur={(e) => save({ letgo: { [k]: e.target.value } })} style={{ minHeight: 64 }} />
+          </div>
+        ))}
+        {dream.dateReleased ? (
+          <p className="notice small">{t('letgo.released', { date: fmtDate(dream.dateReleased) })} <Link to="/dreams">{t('dreams.title')} →</Link></p>
+        ) : (
+          <>
+            {work?.letgo?.decision === 'continue' && work.letgo.decided && <p className="small muted">{t('letgo.continued', { date: fmtDate(work.letgo.decided) })}</p>}
+            <div className="row">
+              <button className="btn" onClick={() => save({ letgo: { decision: 'continue', decided: today() } })}>{t('letgo.continue')}</button>
+              <button className="btn ghost" onClick={async () => { await save({ letgo: { decision: 'release', decided: today() } }); await db.dreams.update(dream.id!, { dateReleased: today(), chosen: 0 }) }}>{t('letgo.release')}</button>
+            </div>
+          </>
+        )}
+      </div>
+      <p className="small muted">{t('mydream.saved')} <Link to="/book/print/letgo">{t('letgo.print')}</Link></p>
     </>
   )
 }
