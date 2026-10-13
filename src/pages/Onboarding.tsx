@@ -3,24 +3,23 @@ import { useNavigate } from 'react-router-dom'
 import { useT, UI_LOCALES, LOCALE_META, type UiLocale } from '../i18n'
 import { useSettings } from '../state/settings'
 import { today, type Role, type Config } from '../db/db'
-import { comboIssue, reconcile } from '../state/combos'
+import RoleConfigPicker from '../components/RoleConfigPicker'
 
 export default function Onboarding() {
   const { t } = useT()
   const { settings, update } = useSettings()
   const nav = useNavigate()
-  const [role, setRole] = useState<Role>(settings.role)
-  const [config, setConfig] = useState<Config>(settings.config)
   const [uiLocale, setLocale] = useState<UiLocale>(settings.uiLocale)
+  const [role, setRole] = useState<Role | undefined>(undefined)
+  const [config, setConfig] = useState<Config | undefined>(undefined)
   const [startDate, setStart] = useState(settings.startDate ?? today())
   const [cadenceDays, setCadence] = useState(settings.cadenceDays)
   const [paperMode, setPaper] = useState(settings.paperMode)
-  const issue = comboIssue(role, config)
-  const pickRole = (r: Role) => { const x = reconcile(r, config, 'role'); setRole(x.role); setConfig(x.config) }
-  const pickConfig = (c: Config) => { const x = reconcile(role, c, 'config'); setRole(x.role); setConfig(x.config) }
+  const ready = !!role && !!config
 
   const go = async () => {
-    await update({ role, config, uiLocale, startDate, cadenceDays, paperMode, onboarded: true })
+    if (!ready) return
+    await update({ role: role!, config: config!, uiLocale, startDate, cadenceDays, paperMode, onboarded: true })
     nav('/', { replace: true })
   }
 
@@ -40,49 +39,33 @@ export default function Onboarding() {
         </div>
       </div>
 
-      <div className="card">
-        <div className="field">
-          <label>{t('onboarding.role')}</label>
-          <div className="row">
-            {(['dreamer', 'friend', 'both'] as Role[]).map((r) => (
-              <button key={r} className={`chip ${role === r ? 'on' : ''}`} onClick={() => pickRole(r)}>{t(`onboarding.role.${r}`)}</button>
-            ))}
-          </div>
-          <p className="small" style={{ margin: '4px 0 0' }}>{t(`role.help.${role}`)}</p>
-        </div>
-        <div className="field">
-          <label>{t('onboarding.config')}</label>
-          <div className="row">
-            {(['solo', 'pair', 'group'] as Config[]).map((c) => (
-              <button key={c} className={`chip ${config === c ? 'on' : ''}`} onClick={() => pickConfig(c)}>{t(`onboarding.config.${c}`)}</button>
-            ))}
-          </div>
-          <p className="small" style={{ margin: '4px 0 0' }}>{t(`config.help.${config}`)}</p>
-          {issue && <p className="notice small">{t(`combo.${issue}`)}</p>}
-        </div>
-      </div>
+      <RoleConfigPicker role={role} config={config} onChange={(n) => { setRole(n.role); setConfig(n.config) }} />
 
-      <div className="card">
-        <div className="field">
-          <label htmlFor="start">{t('onboarding.start')}</label>
-          <input id="start" type="date" value={startDate} onChange={(e) => setStart(e.target.value)} />
-        </div>
-        <div className="field">
-          <label htmlFor="cad">{t('onboarding.cadence')}</label>
-          <input id="cad" type="number" min={7} max={42} value={cadenceDays} onChange={(e) => setCadence(Number(e.target.value) || 14)} />
-        </div>
-      </div>
+      {ready && (
+        <>
+          <div className="card">
+            <div className="field">
+              <label htmlFor="start">{t('onboarding.start')}</label>
+              <input id="start" type="date" value={startDate} onChange={(e) => setStart(e.target.value)} />
+            </div>
+            <div className="field">
+              <label htmlFor="cad">{t('onboarding.cadence')}</label>
+              <input id="cad" type="number" min={7} max={42} value={cadenceDays} onChange={(e) => setCadence(Number(e.target.value) || 14)} />
+            </div>
+          </div>
 
-      {role !== 'friend' && (
-        <div className="card">
-          <label className="row" style={{ minHeight: 44 }}>
-            <input type="checkbox" checked={paperMode} onChange={(e) => setPaper(e.target.checked)} /> {t('onboarding.paper')}
-          </label>
-          <p className="small muted">{t('onboarding.paper.help')}</p>
-        </div>
+          {role !== 'friend' && (
+            <div className="card">
+              <label className="row" style={{ minHeight: 44 }}>
+                <input type="checkbox" checked={paperMode} onChange={(e) => setPaper(e.target.checked)} /> {t('onboarding.paper')}
+              </label>
+              <p className="small muted">{t('onboarding.paper.help')}</p>
+            </div>
+          )}
+
+          <button className="btn primary" onClick={go}>{t('onboarding.go')}</button>
+        </>
       )}
-
-      <button className="btn primary" onClick={go}>{t('onboarding.go')}</button>
     </>
   )
 }

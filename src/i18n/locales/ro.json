@@ -172,5 +172,13 @@
   "plan.then": "atunci",
   "combo.pairNeedsBoth": "Într-o pereche de egali amândoi lucrați la visul vostru și, pe rând, sunteți Prietenul Visului. De aceea rolul pe acest dispozitiv devine „Ambele”.",
   "combo.friendNoPair": "Cu rolul Prietenul Visului nu poți alege „Pereche de egali”: într-o pereche nu există un Prieten care nu face cursul.",
-  "combo.bothNeedsPartner": "Cu rolul „Ambele” ai nevoie de cineva al cărui Prieten al Visului să fii: alege „Pereche de egali” sau „Prieten al Visului și grup”."
+  "combo.bothNeedsPartner": "Cu rolul „Ambele” ai nevoie de cineva al cărui Prieten al Visului să fii: alege „Pereche de egali” sau „Prieten al Visului și grup”.",
+  "picker.step1": "Pasul 1 din 2: rolul meu pe acest dispozitiv",
+  "picker.step2": "Pasul 2 din 2: cum parcurgem cursul",
+  "picker.pickRole": "Alege un rol ca să vezi pasul următor.",
+  "picker.pickConfig.dreamer": "Alege: lucrezi cu un Prieten al Visului care nu face cursul, sau într-un grup condus de un Prieten al Visului.",
+  "picker.pickConfig.friend": "Alege: însoțești un singur Visător, sau conduci un grup.",
+  "picker.pickConfig.both": "Alege: o pereche în care vă sunteți pe rând Prietenul Visului, sau un grup în care și tu lucrezi la visul tău.",
+  "settings.change": "Schimbă rolul sau felul în care parcurgem cursul",
+  "settings.saveChoice": "Salvează alegerea"
 }

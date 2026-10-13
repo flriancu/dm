@@ -20,3 +20,10 @@ export function reconcile(role: Role, config: Config, changed: 'role' | 'config'
   if (changed === 'role' && role === 'dreamer' && config === 'pair') return { role, config: 'solo', note: null }
   return { role, config, note: comboIssue(role, config) }
 }
+
+/** Configurations offered for each role; the picker never shows an invalid pair. */
+export const CONFIGS_FOR_ROLE: Record<Role, Config[]> = {
+  dreamer: ['solo', 'group'],
+  friend: ['solo', 'group'],
+  both: ['pair', 'group'],
+}

@@ -172,5 +172,13 @@
   "plan.then": "then",
   "combo.pairNeedsBoth": "In a peer pair you both work on your own dream and take turns being the Dream Friend. That is why the role on this device becomes \"Both\".",
   "combo.friendNoPair": "With the Dream Friend role you cannot choose \"Peer pair\": a pair has no Friend who is not doing the course.",
-  "combo.bothNeedsPartner": "With the role \"Both\" you need someone whose Dream Friend you are: choose \"Peer pair\" or \"Dream Friend and a group\"."
+  "combo.bothNeedsPartner": "With the role \"Both\" you need someone whose Dream Friend you are: choose \"Peer pair\" or \"Dream Friend and a group\".",
+  "picker.step1": "Step 1 of 2: my role on this device",
+  "picker.step2": "Step 2 of 2: how we go through the course",
+  "picker.pickRole": "Choose a role to see the next step.",
+  "picker.pickConfig.dreamer": "Choose: you work with a Dream Friend who is not doing the course, or in a group run by a Dream Friend.",
+  "picker.pickConfig.friend": "Choose: you accompany one Dreamer, or you run a group.",
+  "picker.pickConfig.both": "Choose: a pair in which you take turns as Dream Friend, or a group in which you also work on your own dream.",
+  "settings.change": "Change the role or how we go through the course",
+  "settings.saveChoice": "Save the choice"
 }
