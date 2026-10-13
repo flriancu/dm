@@ -212,3 +212,4 @@ input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-i
 .datepop .rdp-weekday { color: var(--muted); font-size: .75rem; text-transform: lowercase; }
 .datepop .rdp-chevron { fill: var(--text); }
 .datepop-foot { margin-top: 6px; }
+

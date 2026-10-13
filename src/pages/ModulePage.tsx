@@ -41,7 +41,7 @@ export default function ModulePage() {
   }
 
   return (
-    <article className="content">
+    <article className="content" lang={contentLocale}>
       <p className="small muted"><Link to="/modules">{t('nav.modules')}</Link> · {t('home.module')} {doc.meta.order}{doc.meta.letter ? ` · ${doc.meta.letter.split('').map((l) => `${l} · ${t(`letter.${l}`)}`).join(', ')}` : ''}</p>
       <h1>{doc.meta.title}</h1>
       {doc.meta.subtitle && <p className="muted">{doc.meta.subtitle}</p>}

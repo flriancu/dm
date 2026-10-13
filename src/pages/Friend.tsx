@@ -56,7 +56,7 @@ export default function Friend() {
       </div>
       <h2>{t('friend.plan')}</h2>
       {doc === undefined ? <p className="muted">…</p> : doc === null ? <p className="notice">{t('module.notFound')}</p> : (
-        <div className="content">
+        <div className="content" lang={contentLocaleFor(locale)}>
           <div dangerouslySetInnerHTML={{ __html: md(doc.preamble) }} />
           {chosen && <div className="card"><h3 style={{ marginTop: 0 }}>{chosen.title}</h3><div dangerouslySetInnerHTML={{ __html: md(chosen.body) }} /></div>}
           {others.length > 0 && <p className="small muted">{t('friend.plan.help')}</p>}
