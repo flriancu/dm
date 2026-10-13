@@ -1,6 +1,6 @@
 ---
 title: Surse și mulțumiri
-source_version: 3
+source_version: 4
 ---
 
 Cursul este o adaptare, pentru uz privat între prieteni și familie, a unui program de „management al visurilor” (Dream Management) la care autorul a participat în 2026. Nu este vândut și nu înlocuiește un program certificat.
@@ -35,7 +35,7 @@ Metodele din curs se sprijină pe studii publicate în reviste de specialitate. 
 - Punctele forte (modulul 5): Schutte & Malouff (2019), *Journal of Happiness Studies* — [articol](https://doi.org/10.1007/s10902-018-9990-2), DOI 10.1007/s10902-018-9990-2
 - Valorile personale (modulul 6): Zhang și colab. (2025), *American Psychologist* — [articol](https://doi.org/10.1037/amp0001591), DOI 10.1037/amp0001591; Russo-Netzer & Atad (2024), *Frontiers in Psychology* — [articol](https://doi.org/10.3389/fpsyg.2024.1375237), DOI 10.3389/fpsyg.2024.1375237
 - Blândețea cu tine și criticul interior (modulul 5): Wakelin, Perman & Simonds (2022), *Clinical Psychology & Psychotherapy* — [articol](https://doi.org/10.1002/cpp.2586), DOI 10.1002/cpp.2586; Kroener, Mahler & Sosic-Vasic (2024), *Frontiers in Psychiatry* — [articol](https://doi.org/10.3389/fpsyt.2024.1397925), DOI 10.3389/fpsyt.2024.1397925
-- Numirea emoțiilor (modulele 4 și 5): Torre & Lieberman (2018), *Emotion Review* — [articol](https://doi.org/10.1177/1754073917742706), DOI 10.1177/1754073917742706; Kashdan, Barrett & McKnight (2015), *Current Directions in Psychological Science* — [articol](https://doi.org/10.1177/0963721414550708), DOI 10.1177/0963721414550708
+- Numirea emoțiilor (modulul 5): Torre & Lieberman (2018), *Emotion Review* — [articol](https://doi.org/10.1177/1754073917742706), DOI 10.1177/1754073917742706; Kashdan, Barrett & McKnight (2015), *Current Directions in Psychological Science* — [articol](https://doi.org/10.1177/0963721414550708), DOI 10.1177/0963721414550708
 - A renunța cu onoare la un vis (modulul 7): Wrosch și colab. (2003), *Personality and Social Psychology Bulletin* — [articol](https://doi.org/10.1177/0146167203256921), DOI 10.1177/0146167203256921; Brandstätter & Bernecker (2022), *Annual Review of Psychology* — [articol](https://doi.org/10.1146/annurev-psych-020821-110710), DOI 10.1146/annurev-psych-020821-110710
 - Regretul anticipat, ca unealtă de decizie (modulul 7): Brewer, DeFrank & Gilkey (2016), *Health Psychology* — [articol](https://doi.org/10.1037/hea0000294), DOI 10.1037/hea0000294
 - Curajul (modulul 4): Rate și colab. (2007), *The Journal of Positive Psychology* — [articol](https://doi.org/10.1080/17439760701228813), DOI 10.1080/17439760701228813

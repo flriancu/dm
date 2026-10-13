@@ -57,12 +57,32 @@ export type ClarifyStep = (typeof CLARIFY_STEPS)[number]
 export const WOOP_STEPS = ['wish', 'outcome', 'obstacle', 'plan'] as const
 export type WoopStep = (typeof WOOP_STEPS)[number]
 
+export const HABIT_PARTS = ['anchor', 'behaviour', 'celebration'] as const
+export type HabitPart = (typeof HABIT_PARTS)[number]
+export interface HabitWeek { week: string; done?: boolean; note?: string }   // week = Monday ISO date
+
+export const FRIEND_ROLES = ['friend', 'progress', 'ask'] as const
+export type FriendRole = (typeof FRIEND_ROLES)[number]
+export interface DreamFriend { name?: string; role?: FriendRole; ask?: string; day?: string }
+
 export interface DreamWork {
   dreamId: number
   clarify?: Partial<Record<ClarifyStep, string>>   // module 2 (C)
   routes?: string[]                                 // three routes (module 2)
   woop?: Partial<Record<WoopStep, string>>         // module 3 (O), FR-21
+  habit?: Partial<Record<HabitPart, string>>       // module 4 (P), FR-22
+  habitLog?: HabitWeek[]                           // weekly tracker (FR-22, FR-45)
+  friends?: DreamFriend[]                          // module 4 (I), FR-23
+  fear?: { fear?: string; goodEnough?: string }    // module 4, FR-35
   updated: string
+}
+
+/** Monday of the week containing an ISO date. */
+export function weekStart(iso: string): string {
+  const d = new Date(iso + 'T00:00:00')
+  const day = (d.getDay() + 6) % 7
+  d.setDate(d.getDate() - day)
+  return d.toISOString().slice(0, 10)
 }
 
 /** Eisenhower matrix items from a real week (FR-13), module 3. */

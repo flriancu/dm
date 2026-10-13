@@ -3,11 +3,11 @@ import { Link, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useT, contentLocaleFor } from '../i18n'
 import { useSettings } from '../state/settings'
-import { db, CLARIFY_STEPS, WOOP_STEPS, QUADRANTS } from '../db/db'
+import { db, CLARIFY_STEPS, WOOP_STEPS, QUADRANTS, HABIT_PARTS } from '../db/db'
 import { loadDoc } from '../content/loader'
 
 /** Dream Book sheets available so far (FR-04). Each sheet is a `.sheet` block that prints on its own page. */
-const SHEETS = ['cover', 'dreams', 'rating', 'clarify', 'week', 'woop'] as const
+const SHEETS = ['cover', 'dreams', 'rating', 'clarify', 'week', 'woop', 'habit', 'friends', 'fear'] as const
 type SheetId = (typeof SHEETS)[number]
 
 export default function Book({ print = false }: { print?: boolean }) {
@@ -47,6 +47,9 @@ export default function Book({ print = false }: { print?: boolean }) {
         {ids.includes('clarify') && <ClarifySheet />}
         {ids.includes('week') && <WeekSheet />}
         {ids.includes('woop') && <WoopSheet />}
+        {ids.includes('habit') && <HabitSheet />}
+        {ids.includes('friends') && <FriendsSheet />}
+        {ids.includes('fear') && <FearSheet />}
       </div>
     </>
   )
@@ -173,6 +176,67 @@ function WoopSheet() {
           ))}
         </tbody>
       </table>
+    </section>
+  )
+}
+
+function useWork() {
+  const dream = useLiveQuery(() => db.dreams.where('chosen').equals(1).first(), [])
+  const work = useLiveQuery(() => (dream?.id ? db.dreamWork.get(dream.id) : undefined), [dream?.id])
+  return { dream, work }
+}
+
+function HabitSheet() {
+  const { t, fmtDate } = useT()
+  const { dream, work } = useWork()
+  const log = [...(work?.habitLog ?? [])].sort((a, b) => a.week.localeCompare(b.week))
+  const rows = [...log, ...Array.from({ length: Math.max(0, 16 - log.length) }, () => null)]
+  return (
+    <section className="sheet">
+      <h1>{t('book.sheet.habit')}</h1>
+      <p>{t('home.chosen')}: <strong>{dream?.text ?? ''}</strong></p>
+      <table>
+        <thead><tr>{HABIT_PARTS.map((h) => <th key={h}>{t(`habit.${h}`)}</th>)}</tr></thead>
+        <tbody><tr>{HABIT_PARTS.map((h) => <td key={h}>{work?.habit?.[h] ?? ''}<div style={{ minHeight: '18mm' }} /></td>)}</tr></tbody>
+      </table>
+      <h3>{t('habit.log')}</h3>
+      <table>
+        <thead><tr><th style={{ width: '9em' }}>{t('book.col.week')}</th><th style={{ width: '6em' }}>{t('book.col.done')}</th><th>{t('book.col.sent')}</th></tr></thead>
+        <tbody>{rows.map((r, i) => <tr key={i}><td>{r ? fmtDate(r.week) : ''}</td><td>{r?.done ? '✓' : ''}</td><td>{r?.note ?? ''}</td></tr>)}</tbody>
+      </table>
+    </section>
+  )
+}
+
+function FriendsSheet() {
+  const { t } = useT()
+  const { dream, work } = useWork()
+  const friends = [...(work?.friends ?? []), {}, {}, {}].slice(0, 3)
+  return (
+    <section className="sheet">
+      <h1>{t('book.sheet.friends')}</h1>
+      <p>{t('home.chosen')}: <strong>{dream?.text ?? ''}</strong></p>
+      <table>
+        <thead><tr><th style={{ width: '30%' }}>{t('book.col.person')}</th><th>{t('book.col.role')}</th></tr></thead>
+        <tbody>{friends.map((f, i) => <tr key={i}><td>{f.name ?? ''}<div style={{ minHeight: '10mm' }} /></td><td>{f.role ? t(`friends.role.${f.role}`) : ''}{f.day ? ` · ${f.day}` : ''}</td></tr>)}</tbody>
+      </table>
+      <h3>{t('friends.ask')}</h3>
+      <div className="box">{friends.find((f) => f.role === 'ask')?.ask ?? ''}</div>
+    </section>
+  )
+}
+
+function FearSheet() {
+  const { t } = useT()
+  const { dream, work } = useWork()
+  return (
+    <section className="sheet">
+      <h1>{t('book.sheet.fear')}</h1>
+      <p>{t('home.chosen')}: <strong>{dream?.text ?? ''}</strong></p>
+      <h3>{t('fear.fear')}</h3><p>{t('fear.fear.q')}</p>
+      <div className="box">{work?.fear?.fear ?? ''}</div>
+      <h3>{t('fear.goodEnough')}</h3><p>{t('fear.goodEnough.q')}</p>
+      <div className="box">{work?.fear?.goodEnough ?? ''}</div>
     </section>
   )
 }
