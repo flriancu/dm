@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useT } from '../i18n'
+import AutoText from '../components/AutoText'
 import { db, today, QUADRANTS, type Quadrant, type WeekTask } from '../db/db'
 
 /** Eisenhower matrix on a real week (FR-13), module 3. Tap to assign a box; drag works too. */
@@ -94,7 +95,7 @@ function Week() {
             {task.moved ? (
               <div className="field">
                 <label htmlFor="when">{t('week.moved')} · {t('week.when')}</label>
-                <input id="when" type="text" placeholder={t('week.when.placeholder')} defaultValue={task.when ?? ''} onBlur={(e) => db.weekTasks.update(task.id!, { when: e.target.value })} />
+                <AutoText id="when" placeholder={t('week.when.placeholder')} value={task.when ?? ''} onSave={(v) => db.weekTasks.update(task.id!, { when: v })} />
               </div>
             ) : null}
           </div>

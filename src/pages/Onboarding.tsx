@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useT, UI_LOCALES, LOCALE_META, type UiLocale } from '../i18n'
-import { useSettings } from '../state/settings'
-import { today, type Role, type Config } from '../db/db'
+import { useSettings, startDateKey } from '../state/settings'
+import { type Role, type Config } from '../db/db'
 import RoleConfigPicker from '../components/RoleConfigPicker'
 import Stepper from '../components/Stepper'
 
@@ -13,14 +13,14 @@ export default function Onboarding() {
   const [uiLocale, setLocale] = useState<UiLocale>(settings.uiLocale)
   const [role, setRole] = useState<Role | undefined>(undefined)
   const [config, setConfig] = useState<Config | undefined>(undefined)
-  const [startDate, setStart] = useState(settings.startDate ?? today())
+  const [startDate, setStart] = useState(settings.startDate ?? '')
   const [cadenceDays, setCadence] = useState(settings.cadenceDays)
   const [paperMode, setPaper] = useState(settings.paperMode)
   const ready = !!role && !!config
 
   const go = async () => {
     if (!ready) return
-    await update({ role: role!, config: config!, uiLocale, startDate, cadenceDays, paperMode, onboarded: true })
+    await update({ role: role!, config: config!, uiLocale, startDate: startDate || undefined, cadenceDays, paperMode, onboarded: true })
     nav('/', { replace: true })
   }
 
@@ -46,12 +46,14 @@ export default function Onboarding() {
         <>
           <div className="card">
             <div className="field">
-              <label htmlFor="start">{t('onboarding.start')}</label>
+              <label htmlFor="start">{t(startDateKey({ role: role!, config: config! }))}</label>
               <input id="start" type="date" value={startDate} onChange={(e) => setStart(e.target.value)} />
+              <p className="small muted">{t('onboarding.start.help')}</p>
             </div>
             <div className="field">
               <label htmlFor="cad">{t('onboarding.cadence')}</label>
               <Stepper id="cad" min={7} max={42} value={cadenceDays} onChange={setCadence} />
+              {cadenceDays < 14 && <p className="small notice">{t('onboarding.cadence.help')}</p>}
             </div>
           </div>
 

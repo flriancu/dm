@@ -2,6 +2,7 @@ import DreamerOnly from '../components/DreamerOnly'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Stepper from '../components/Stepper'
+import AutoText from '../components/AutoText'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useT } from '../i18n'
 import { useSettings } from '../state/settings'
@@ -35,6 +36,13 @@ function Dreams() {
     await db.dreams.add({ text: v, dateAdded: today(), chosen: 0 })
   }
   const patch = (d: Dream, p: Partial<Dream>) => db.dreams.update(d.id!, p)
+  // paper mode: the one chosen dream is typed here and stored as the single chosen row
+  const chosenRow = dreams.find((d) => d.chosen)
+  const setPaperChosen = (text: string) => db.transaction('rw', db.dreams, async () => {
+    const cur = await db.dreams.where('chosen').equals(1).first()
+    if (cur) await db.dreams.update(cur.id!, { text: text.trim() })
+    else if (text.trim()) await db.dreams.add({ text: text.trim(), dateAdded: today(), chosen: 1 })
+  })
   const choose = async (d: Dream) => {
     await db.transaction('rw', db.dreams, async () => {
       await db.dreams.where('chosen').equals(1).modify({ chosen: 0 })
@@ -54,6 +62,11 @@ function Dreams() {
             <label htmlFor="pc">{t('dreams.paper.count')}</label>
             <Stepper id="pc" min={0} max={100} value={settings.paperCount} onChange={(v) => update({ paperCount: v })} />
           </div>
+          <div className="field">
+            <label htmlFor="paper-chosen">{t('dreams.paper.chosen')}</label>
+            <AutoText id="paper-chosen" placeholder={t('dreams.paper.chosen.placeholder')} value={chosenRow?.text ?? ''} onSave={setPaperChosen} />
+            {chosenRow && <p className="small" style={{ margin: '6px 0 0' }}><Link to="/dream">{t('home.chosen.open')} →</Link></p>}
+          </div>
         </div>
       ) : (
         <div className="card">
@@ -67,14 +80,14 @@ function Dreams() {
       {extrinsicWarning(dreams) && <p className="notice small">{t('dreams.warn.extrinsic')}</p>}
 
       {!settings.paperMode && dreams.length === 0 && <p className="muted" style={{ marginTop: 0 }}>{t('dreams.empty')}</p>}
-      {dreams.length > 0 && (
+      {!settings.paperMode && dreams.length > 0 && (
         <div className="row no-print" style={{ margin: '8px 0' }}>
           <button className={`chip ${sort === 'date' ? 'on' : ''}`} onClick={() => setSort('date')}>{t('dreams.sort.date')}</button>
           <button className={`chip ${sort === 'score' ? 'on' : ''}`} onClick={() => setSort('score')}>{t('dreams.sort.score')}</button>
         </div>
       )}
 
-      <ul className="list">
+      {!settings.paperMode && <ul className="list">
         {sorted.map((d, i) => (
           <li key={d.id} className={`dream ${d.chosen ? 'chosen' : ''} ${d.dateAchieved ? 'achieved' : ''}`}>
             <span className="num">{i + 1}.</span>
@@ -123,7 +136,7 @@ function Dreams() {
             <span />
           </li>
         ))}
-      </ul>
+      </ul>}
 
       <Criteria />
     </>

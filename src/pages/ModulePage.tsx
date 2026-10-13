@@ -2,9 +2,12 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useT, contentLocaleFor } from '../i18n'
-import { useSettings, isFriendNow, showsDreamerParts } from '../state/settings'
+import { useSettings, showsDreamerParts, showsFriendSwitch, leadsMeetings } from '../state/settings'
 import { db, today } from '../db/db'
 import { loadModule, md, type ModuleDoc } from '../content/loader'
+import { toolsFor } from '../content/tools'
+import { leaderAfterMeeting } from '../lib/course'
+import AutoText from '../components/AutoText'
 import type { Section } from '../content/frontmatter'
 
 const VARIANTS = ['solo', 'pair', 'group'] as const
@@ -12,17 +15,12 @@ const VARIANTS = ['solo', 'pair', 'group'] as const
 export default function ModulePage() {
   const { id = '' } = useParams()
   const { t, locale } = useT()
-  const { settings } = useSettings()
+  const { settings, update } = useSettings()
   const [doc, setDoc] = useState<ModuleDoc | null | undefined>(undefined)
   const contentLocale = contentLocaleFor(locale)
   useEffect(() => { loadModule(contentLocale, id).then(setDoc) }, [contentLocale, id])
 
   const note = useLiveQuery(() => db.moduleNotes.get(id), [id])
-  const plans = useLiveQuery(() => db.plans.where('moduleId').equals(id).toArray(), [id]) ?? []
-
-  const [cond, setCond] = useState('')
-  const [act, setAct] = useState('')
-  const [saved, setSaved] = useState(false)
 
   if (doc === undefined) return <p className="muted">…</p>
   if (doc === null) return <p className="notice">{t('module.notFound')} <Link to="/modules">{t('nav.modules')}</Link></p>
@@ -30,16 +28,17 @@ export default function ModulePage() {
   const sec = (sid: string): Section | undefined => doc.sections.find((s) => s.id === sid)
   const friend = sec('friend')
   const ordered = [settings.config, ...VARIANTS.filter((v) => v !== settings.config)]
-  const friendNow = isFriendNow(settings)
   const dreamer = showsDreamerParts(settings)
+  const isZero = doc.meta.order === 0
+  const lead = leadsMeetings(settings)   // 'me' | 'other' | null: who leads the next meeting on this device
 
-  const savePlan = async () => {
-    if (!cond.trim() || !act.trim()) return
-    await db.plans.add({ moduleId: id, condition: cond.trim(), action: act.trim(), created: today(), done: 0 })
-    setCond(''); setAct(''); setSaved(true)
-  }
   const saveNote = (patch: Record<string, string>) => db.moduleNotes.put({ moduleId: id, ...(note ?? {}), ...patch })
-  const complete = () => saveNote({ completedOn: today() })
+  const complete = async () => {
+    const first = !note?.completedOn
+    await saveNote({ completedOn: today() })
+    // in a peer pair the lead passes to the other person after every meeting
+    if (first && !isZero && showsFriendSwitch(settings)) await update({ friendToday: leaderAfterMeeting(settings.friendToday) })
+  }
 
   return (
     <article className="content">
@@ -55,18 +54,15 @@ export default function ModulePage() {
           <h2>{t('module.do')}</h2>
           <div dangerouslySetInnerHTML={{ __html: md(sec('do')!.body) }} />
           {sec('do')!.sub.map((s) => <div key={s.id}><h3>{s.title}</h3><div dangerouslySetInnerHTML={{ __html: md(s.body) }} /></div>)}
-          {doc.meta.order === 1 && <p><Link className="btn" to="/dreams">{t('dreams.title')} →</Link></p>}
-          {doc.meta.order === 2 && <p className="row"><Link className="btn" to="/dreams">{t('dreams.title')} →</Link><Link className="btn" to="/dream">{t('mydream.title')} →</Link></p>}
-          {doc.meta.order === 3 && <p className="row"><Link className="btn" to="/week">{t('week.title')} →</Link><Link className="btn" to="/dream#woop">{t('woop.title')} →</Link></p>}
-          {(doc.meta.order === 6 || doc.meta.order === 7) && <p className="row"><Link className="btn" to="/vision">{t('vision.title')} →</Link></p>}
-          {doc.meta.order === 5 && <p className="row"><Link className="btn" to="/calm">{t('calm.title')} →</Link></p>}
-          {doc.meta.order === 4 && <p className="row"><Link className="btn" to="/dream#habit">{t('habit.title')} →</Link><Link className="btn" to="/dream#friends">{t('friends.title')} →</Link><Link className="btn" to="/dream#fear">{t('fear.title')} →</Link></p>}
+          {dreamer && toolsFor(doc.meta).length > 0 && (
+            <p className="row">{toolsFor(doc.meta).map((tool) => <Link key={tool.id} className="btn" to={tool.to}>{t(tool.labelKey)} →</Link>)}</p>
+          )}
         </>
       )}
 
       {friend && (
         <>
-          <h2>{t('module.friend')}{friendNow && <span className="chip on small" style={{ marginLeft: 8 }}>{t('home.friendMode')}</span>}</h2>
+          <h2>{t('module.friend')}{lead && !isZero && <span className="chip on small" style={{ marginLeft: 8 }}>{t(lead === 'me' ? 'module.lead.me' : 'module.lead.other')}</span>}</h2>
           {friend.body && <div dangerouslySetInnerHTML={{ __html: md(friend.body) }} />}
           {ordered.map((v, i) => {
             const s = friend.sub.find((x) => x.id === v)
@@ -83,38 +79,59 @@ export default function ModulePage() {
         <>
           <h2>{t('module.next')}</h2>
           <div dangerouslySetInnerHTML={{ __html: md(sec('next')!.body) }} />
-          {dreamer && <div className="card">
-            <p className="small muted">{t('module.next.plan')}</p>
-            <div className="field"><label htmlFor="plan-if">{t('module.next.if')}</label><input id="plan-if" type="text" placeholder={t('module.next.if.placeholder')} value={cond} onChange={(e) => setCond(e.target.value)} /></div>
-            <div className="field"><label htmlFor="plan-then">{t('module.next.then')}</label><input id="plan-then" type="text" placeholder={t('module.next.then.placeholder')} value={act} onChange={(e) => setAct(e.target.value)} /></div>
-            <button className="btn primary" onClick={savePlan} disabled={!cond.trim() || !act.trim()}>{t('common.save')}</button>
-            {saved && <p className="small" style={{ color: 'var(--ok)' }}>{t('module.next.saved')}</p>}
-            {plans.length > 0 && (
-              <ul className="list small">
-                {plans.map((p) => <li key={p.id} className={p.done ? 'muted' : ''}>{p.done ? '✓ ' : ''}{t('plan.if')} {p.condition}, {t('plan.then')} {p.action}</li>)}
-              </ul>
-            )}
-          </div>}
+          {dreamer && <PlanForm moduleId={id} />}
         </>
       )}
 
       <h2>{t('module.takeaway')}</h2>
       <p className="takeaway">{doc.meta.takeaway}</p>
 
-      {!dreamer && <p className="notice">{t('module.friendNote')} <Link to="/friend">{t('nav.friend')} →</Link></p>}
+      {!dreamer && <p className="notice">{t('module.friendNote')} <Link to={`/friend/${id}`}>{t('nav.friend')} →</Link></p>}
 
-      {dreamer && <div className="card">
-        <div className="field">
-          <label htmlFor="mine">{t('module.takeaways.mine')}</label>
-          <textarea id="mine" placeholder={t('module.takeaways.placeholder')} defaultValue={note?.takeaways ?? ''} onBlur={(e) => saveNote({ takeaways: e.target.value })} />
-        </div>
-        <div className="field">
-          <label htmlFor="oneword">{t('module.feedback')}</label>
-          <input id="oneword" type="text" maxLength={40} placeholder={t('module.feedback.placeholder')} defaultValue={note?.oneWord ?? ''} onBlur={(e) => saveNote({ oneWord: e.target.value })} />
-        </div>
-        <button className="btn primary" onClick={complete}>{note?.completedOn ? '✓ ' : ''}{t('common.done')}</button>
-      </div>}
-
+      <div className="card">
+        {dreamer && (
+          <div className="field">
+            <label htmlFor="mine">{t('module.takeaways.mine')}</label>
+            <AutoText id="mine" multiline placeholder={t('module.takeaways.placeholder')} value={note?.takeaways ?? ''} onSave={(v) => saveNote({ takeaways: v })} />
+          </div>
+        )}
+        {dreamer && !isZero && (
+          <div className="field">
+            <label htmlFor="oneword">{t('module.feedback')}</label>
+            <AutoText id="oneword" maxLength={40} placeholder={t('module.feedback.placeholder')} value={note?.oneWord ?? ''} onSave={(v) => saveNote({ oneWord: v })} />
+          </div>
+        )}
+        <button className="btn primary" onClick={complete}>{note?.completedOn ? '✓ ' : ''}{t(isZero ? 'common.done.0' : 'common.done')}</button>
+        <p className="small muted" style={{ margin: '8px 0 0' }}>{t(isZero ? 'module.done.help.0' : 'module.done.help')}</p>
+      </div>
     </article>
+  )
+}
+
+/** The if-then plan for "Până data viitoare" (FR-14): saved to the plans table, listed on Home. */
+function PlanForm({ moduleId }: { moduleId: string }) {
+  const { t } = useT()
+  const plans = useLiveQuery(() => db.plans.where('moduleId').equals(moduleId).toArray(), [moduleId]) ?? []
+  const [cond, setCond] = useState('')
+  const [act, setAct] = useState('')
+  const [saved, setSaved] = useState(false)
+  const savePlan = async () => {
+    if (!cond.trim() || !act.trim()) return
+    await db.plans.add({ moduleId, condition: cond.trim(), action: act.trim(), created: today(), done: 0 })
+    setCond(''); setAct(''); setSaved(true)
+  }
+  return (
+    <div className="card">
+      <p className="small muted">{t('module.next.plan')}</p>
+      <div className="field"><label htmlFor="plan-if">{t('module.next.if')}</label><input id="plan-if" type="text" placeholder={t('module.next.if.placeholder')} value={cond} onChange={(e) => setCond(e.target.value)} /></div>
+      <div className="field"><label htmlFor="plan-then">{t('module.next.then')}</label><input id="plan-then" type="text" placeholder={t('module.next.then.placeholder')} value={act} onChange={(e) => setAct(e.target.value)} /></div>
+      <button className="btn primary" onClick={savePlan} disabled={!cond.trim() || !act.trim()}>{t('common.save')}</button>
+      {saved && <p className="small" style={{ color: 'var(--ok)' }}>{t('module.next.saved')}</p>}
+      {plans.length > 0 && (
+        <ul className="list small">
+          {plans.map((p) => <li key={p.id} className={p.done ? 'muted' : ''}>{p.done ? '✓ ' : ''}{t('plan.if')} {p.condition}, {t('plan.then')} {p.action}</li>)}
+        </ul>
+      )}
+    </div>
   )
 }

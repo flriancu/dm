@@ -19,9 +19,13 @@ export interface ModuleMeta {
   sources?: string[]
   source_version: number
   reconstructed?: boolean
+  tools?: string[]      // app pages the "Fă" section links to; see content/tools.ts
 }
 
 export interface ModuleDoc { meta: ModuleMeta; sections: Section[]; raw: string }
+
+/** A meeting plan: the text before the first heading, then its `##` sections (three configuration tables, questions, lessons). */
+export interface PlanDoc { meta: Record<string, unknown>; preamble: string; sections: Section[] }
 
 marked.setOptions({ gfm: true, breaks: false })
 
@@ -65,4 +69,14 @@ export async function loadDoc(locale: ContentLocale, kind: string, name: string)
   if (!loader) return null
   const { meta, body } = parseFrontMatter(await loader())
   return { meta, html: md(body) }
+}
+
+/** Meeting plan friend/<id>.md, split into preamble and sections so the page can order the configurations. */
+export async function loadPlan(locale: ContentLocale, id: string): Promise<PlanDoc | null> {
+  const loader = files[`/content/${locale}/friend/${id}.md`]
+  if (!loader) return null
+  const { meta, body } = parseFrontMatter(await loader())
+  const first = body.search(/^##\s/m)
+  const preamble = first < 0 ? body : body.slice(0, first)
+  return { meta, preamble: preamble.trim(), sections: splitSections(first < 0 ? '' : body.slice(first)) }
 }

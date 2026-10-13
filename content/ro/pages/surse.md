@@ -1,6 +1,6 @@
 ---
 title: Surse și mulțumiri
-source_version: 8
+source_version: 9
 ---
 
 Cursul este o adaptare, pentru uz privat între prieteni și familie, a unui program de „management al visurilor” (Dream Management) la care autorul a participat în 2026. Nu este vândut și nu înlocuiește un program certificat.
@@ -26,7 +26,7 @@ Numele sabotorilor sunt un vocabular de coaching, nu un diagnostic. Cursul nu re
 
 Metodele din curs se sprijină pe studii publicate în reviste de specialitate. Cuvântul „articol” din fiecare rând duce la studiu; codul de după el (DOI) este adresa permanentă a articolului.
 
-- Planurile „dacă… atunci…” (a scrie dinainte în ce situație faci ce acțiune; de la modulul 1): Gollwitzer & Sheeran (2006), *Advances in Experimental Social Psychology* — [articol](https://doi.org/10.1016/S0065-2601(06)38002-1), DOI 10.1016/S0065-2601(06)38002-1; Wang, Wang & Gai (2021), *Frontiers in Psychology* — [articol](https://doi.org/10.3389/fpsyg.2021.565202), DOI 10.3389/fpsyg.2021.565202
+- Planurile „dacă… atunci…” (a scrie dinainte în ce situație faci ce acțiune; de la modulul 0, la sfârșitul fiecărui modul; explicate în modulul 3): Gollwitzer & Sheeran (2006), *Advances in Experimental Social Psychology* — [articol](https://doi.org/10.1016/S0065-2601(06)38002-1), DOI 10.1016/S0065-2601(06)38002-1; Wang, Wang & Gai (2021), *Frontiers in Psychology* — [articol](https://doi.org/10.3389/fpsyg.2021.565202), DOI 10.3389/fpsyg.2021.565202
 - Alegerea visurilor „din interior” (dorite pentru creștere, relații, sănătate, nu pentru bani sau imagine; modulul 2): Sheldon & Elliot (1999), *Journal of Personality and Social Psychology* — [articol](https://doi.org/10.1037/0022-3514.76.3.482), DOI 10.1037/0022-3514.76.3.482; Bradshaw și colab. (2023), *Journal of Personality and Social Psychology* — [articol](https://doi.org/10.1037/pspp0000431), DOI 10.1037/pspp0000431
 - Contrastul mental, visul față în față cu obstacolul (modulul 3): Cross & Sheffield (2019), *Health Psychology Review* — [articol](https://doi.org/10.1080/17437199.2019.1594332), DOI 10.1080/17437199.2019.1594332; Wang, Wang & Gai (2021), *Frontiers in Psychology* — [articol](https://doi.org/10.3389/fpsyg.2021.565202), DOI 10.3389/fpsyg.2021.565202
 - Imaginarea drumului, nu doar a rezultatului (modulul 1): Pham & Taylor (1999), *Personality and Social Psychology Bulletin* — [articol](https://doi.org/10.1177/0146167299025002010), DOI 10.1177/0146167299025002010

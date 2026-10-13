@@ -2,7 +2,10 @@
 
 How to write a module, a sheet or an interface string so that a cold reader can act on
 it without asking anyone. Rule CR-07 in [REQUIREMENTS.md](REQUIREMENTS.md) is the
-contract; this file is the how.
+contract; this file is the how. What the course promises across modules (roles at a
+meeting, who speaks first, the load ledger, the names of app buttons, the meeting plan
+template) is in [COURSE-RULES.md](COURSE-RULES.md); a sentence that contradicts it is wrong
+even if it passes the six checks below.
 
 ## The reader
 
@@ -76,9 +79,16 @@ Bad: "Lucrează la listă." (no object detail, no place, no time, no example)
 - Both locale files have exactly the same keys; the build fails otherwise.
 - Romanian with diacritics (ă â î ș ț), informal "tu", no corporate words.
 
+## Meeting plan template
+
+See [COURSE-RULES.md](COURSE-RULES.md) section 5. The app finds the three configuration
+tables by their `##` heading text, which must start with "Un Visător și Prietenul lui",
+"Pereche de egali" or "Prieten al Visului și grup".
+
 ## Before handing content over
 
 1. `npm run check:content` passes.
 2. A stranger-read review (persona above, six checks) has run on every new or changed
    file and its findings are fixed.
 3. The screen was looked at on a phone width.
+4. Module and plan agree on minutes and questions (the plan is the source of truth).

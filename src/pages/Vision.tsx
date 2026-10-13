@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useT } from '../i18n'
+import AutoText from '../components/AutoText'
 import { db, today, VISION_SECTIONS, REGRET_AREAS, type VisionDoc, type ValueItem, type RegretArea } from '../db/db'
 
 /** Modules 6–7: values, the letter from the future self, the vision worksheet, regret and Yes/No, the check-in, the retrospective. */
@@ -14,22 +15,11 @@ export function emptyVision(): VisionDoc {
 }
 
 import { addMonths } from '../lib/dates'
-export { addMonths }
 
-/** iCalendar file for a date (FR-41, FR-45). */
-export function dateIcs(date: string, uid: string, title: string, body: string): string {
-  const stamp = new Date().toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z'
-  const d = date.replace(/-/g, '')
-  const esc = (s: string) => s.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n')
-  return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Cartea Visurilor//RO', 'BEGIN:VEVENT', `UID:${uid}-${d}@cartea-visurilor`, `DTSTAMP:${stamp}`,
-    `DTSTART;VALUE=DATE:${d}`, `SUMMARY:${esc(title)}`, `DESCRIPTION:${esc(body)}`, 'END:VEVENT', 'END:VCALENDAR'].join('\r\n')
-}
-export const letterIcs = (date: string, title: string, body: string) => dateIcs(date, 'letter', title, body)
+import { dateIcs, letterIcs, downloadText as download } from '../lib/ics'
+import { saveDoc } from '../db/docs'
 
-function download(name: string, text: string) {
-  const blob = new Blob([text], { type: 'text/calendar' })
-  const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000)
-}
+const VISION_DOC = { table: db.vision, key: 'me' as const, empty: emptyVision, nested: ['worksheet', 'letter', 'regret', 'yesno', 'checkin', 'retro'] as const }
 
 function SectionHead({ id, label, title, right }: { id: string; label: string; title: string; right?: string }) {
   return (
@@ -49,19 +39,7 @@ function Vision() {
   const doc = useLiveQuery(() => db.vision.get('me'), [])
   const notes = useLiveQuery(() => db.moduleNotes.orderBy('moduleId').toArray(), []) ?? []
   const v = doc ?? emptyVision()
-  const save = (patch: Partial<VisionDoc>) => db.transaction('rw', db.vision, async () => {
-    const cur = (await db.vision.get('me')) ?? emptyVision()
-    await db.vision.put({
-      ...cur, ...patch,
-      worksheet: { ...(cur.worksheet ?? {}), ...(patch.worksheet ?? {}) },
-      letter: patch.letter ? { ...(cur.letter ?? {}), ...patch.letter } : cur.letter,
-      regret: patch.regret ? { ...(cur.regret ?? {}), ...patch.regret } : cur.regret,
-      yesno: patch.yesno ? { ...(cur.yesno ?? {}), ...patch.yesno } : cur.yesno,
-      checkin: patch.checkin ? { ...(cur.checkin ?? {}), ...patch.checkin } : cur.checkin,
-      retro: patch.retro ? { ...(cur.retro ?? {}), ...patch.retro } : cur.retro,
-      updated: today(),
-    })
-  })
+  const save = (patch: Partial<VisionDoc>) => saveDoc(VISION_DOC, patch)
 
   // values
   const setValue = (i: number, p: Partial<ValueItem>) => { const n = v.values.map((x) => ({ ...x })); n[i] = { ...n[i], ...p }; save({ values: n }) }
@@ -109,7 +87,7 @@ function Vision() {
       <div className="card">
         {v.values.map((x, i) => (
           <div className="row" key={i} style={{ flexWrap: 'nowrap' }}>
-            <input type="text" aria-label={t('values.n', { n: i + 1 })} placeholder={t(`values.placeholder.${(i % 5) + 1}`)} defaultValue={x.text} onBlur={(e) => setValue(i, { text: e.target.value })} style={{ flex: 1 }} />
+            <AutoText aria-label={t('values.n', { n: i + 1 })} placeholder={t(`values.placeholder.${(i % 5) + 1}`)} style={{ flex: 1 }} value={x.text} onSave={(v) => setValue(i, { text: v })} />
             <button className={`chip ${x.chosen ? 'on' : ''}`} onClick={() => setValue(i, { chosen: !x.chosen, nonNegotiable: x.chosen ? false : x.nonNegotiable })} disabled={!x.chosen && chosenCount >= 5} aria-pressed={!!x.chosen} aria-label={t('values.choose')} title={t('values.choose')}>{x.chosen ? '★' : '☆'}</button>
             {x.chosen && <button className={`chip ${x.nonNegotiable ? 'on' : ''}`} onClick={() => setValue(i, { nonNegotiable: !x.nonNegotiable })} aria-pressed={!!x.nonNegotiable} aria-label={t('values.nonneg')} title={t('values.nonneg')}>{t('values.nonneg.short')}</button>}
           </div>
@@ -155,11 +133,11 @@ function Vision() {
             <ol className="small" style={{ margin: '0 0 8px', paddingLeft: '1.3rem' }}>{LETTER_QS.map((q) => <li key={q}>{t(`letter.q.${q}`)}</li>)}</ol>
             <div className="field">
               <label htmlFor="letter-text">{t('letter.text')}</label>
-              <textarea id="letter-text" style={{ minHeight: 220 }} placeholder={t('letter.text.placeholder')} defaultValue={L.text ?? ''} onBlur={(e) => save({ letter: { text: e.target.value } })} />
+              <AutoText id="letter-text" style={{ minHeight: 220 }} placeholder={t('letter.text.placeholder')} value={L.text ?? ''} onSave={(v) => save({ letter: { text: v } })} multiline />
             </div>
             <div className="field">
               <label htmlFor="letter-reply">{t('letter.reply')}</label>
-              <textarea id="letter-reply" style={{ minHeight: 120 }} placeholder={t('letter.reply.placeholder')} defaultValue={L.reply ?? ''} onBlur={(e) => save({ letter: { reply: e.target.value } })} />
+              <AutoText id="letter-reply" style={{ minHeight: 120 }} placeholder={t('letter.reply.placeholder')} value={L.reply ?? ''} onSave={(v) => save({ letter: { reply: v } })} multiline />
             </div>
             {!L.sealed && (
               <>
@@ -183,7 +161,7 @@ function Vision() {
         <div className="card" key={s}>
           <div className="field">
             <label htmlFor={`vs-${s}`}><span className="chip small" style={{ marginRight: 6 }}>{t('home.module')} {i < 4 ? 6 : 7}</span> <strong>{i + 1}. {t(`sheet.${s}`)}</strong> — {t(`sheet.${s}.q`)}</label>
-            <textarea id={`vs-${s}`} placeholder={t(`sheet.${s}.placeholder`)} defaultValue={v.worksheet[s] ?? ''} onBlur={(e) => save({ worksheet: { [s]: e.target.value } })} />
+            <AutoText id={`vs-${s}`} placeholder={t(`sheet.${s}.placeholder`)} value={v.worksheet[s] ?? ''} onSave={(v) => save({ worksheet: { [s]: v } })} multiline />
           </div>
         </div>
       ))}
@@ -202,7 +180,7 @@ function Vision() {
         <div className="card" key={a}>
           <div className="field">
             <label htmlFor={`regret-${a}`}><strong>{t(`regret.${a}`)}</strong> — {t('regret.q')}</label>
-            <textarea id={`regret-${a}`} placeholder={t(`regret.${a}.placeholder`)} defaultValue={v.regret?.[a] ?? ''} onBlur={(e) => save({ regret: { [a]: e.target.value } })} style={{ minHeight: 72 }} />
+            <AutoText id={`regret-${a}`} placeholder={t(`regret.${a}.placeholder`)} style={{ minHeight: 72 }} value={v.regret?.[a] ?? ''} onSave={(v) => save({ regret: { [a]: v } })} multiline />
           </div>
         </div>
       ))}
@@ -212,7 +190,7 @@ function Vision() {
         {(['yes', 'no', 'changes', 'hardest'] as const).map((k) => (
           <div className="field" key={k}>
             <label htmlFor={`yn-${k}`}><strong>{t(`yesno.${k}`)}</strong></label>
-            <textarea id={`yn-${k}`} placeholder={t(`yesno.${k}.placeholder`)} defaultValue={v.yesno?.[k] ?? ''} onBlur={(e) => save({ yesno: { [k]: e.target.value } })} style={{ minHeight: 72 }} />
+            <AutoText id={`yn-${k}`} placeholder={t(`yesno.${k}.placeholder`)} style={{ minHeight: 72 }} value={v.yesno?.[k] ?? ''} onSave={(v) => save({ yesno: { [k]: v } })} multiline />
           </div>
         ))}
       </div>
@@ -262,8 +240,8 @@ function Vision() {
           <div className="field" key={k}>
             <label htmlFor={`retro-${k}`}><strong>{t(`retro.${k}`)}</strong></label>
             {k === 'word'
-              ? <input id={`retro-${k}`} type="text" maxLength={40} placeholder={t(`retro.${k}.placeholder`)} defaultValue={v.retro?.[k] ?? ''} onBlur={(e) => save({ retro: { [k]: e.target.value } })} />
-              : <textarea id={`retro-${k}`} placeholder={t(`retro.${k}.placeholder`)} defaultValue={v.retro?.[k] ?? ''} onBlur={(e) => save({ retro: { [k]: e.target.value } })} style={{ minHeight: 72 }} />}
+              ? <AutoText id={`retro-${k}`} maxLength={40} placeholder={t(`retro.${k}.placeholder`)} value={v.retro?.[k] ?? ''} onSave={(v) => save({ retro: { [k]: v } })} />
+              : <AutoText id={`retro-${k}`} placeholder={t(`retro.${k}.placeholder`)} style={{ minHeight: 72 }} value={v.retro?.[k] ?? ''} onSave={(v) => save({ retro: { [k]: v } })} multiline />}
           </div>
         ))}
       </div>

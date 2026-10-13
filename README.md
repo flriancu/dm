@@ -9,9 +9,10 @@ Design documents: [REQUIREMENTS.md](REQUIREMENTS.md), [COURSE-OUTLINE.md](COURSE
 
 ## Status
 
-Prototype: welcome module and module 1 (the 100 dreams list), the first three Dream
-Book sheets, roles and configurations, if-then plans, export/import, Dream Friend
-section with the module 1 session plan.
+All eight modules (0–7), the 19 printable sheets, the seven meeting plans in three
+configurations, roles and configurations, if-then plans, export/import. Content and
+app were walked through cold for every role and configuration (2026-10-13); the
+cross-cutting decisions from that pass are in [COURSE-RULES.md](COURSE-RULES.md).
 
 ## Run
 
@@ -26,14 +27,26 @@ npm run build      # content check + type check + vite build → dist/
 
 ```
 content/<lang>/modules/NN-slug.md   course modules (front matter + sections {#learn} {#do} {#friend} {#next} {#takeaway})
-content/<lang>/friend/NN.md         Dream Friend session plans
+content/<lang>/friend/NN.md         meeting plans (preamble + one ## table per configuration + questions + lessons)
 content/<lang>/sheets/*.md          printable sheet text
 content/<lang>/pages/*.md           other pages (sources)
 src/i18n/locales/<lang>.json        interface strings only
-src/db/                             Dexie schema, export/import
-src/pages/                          one file per route
+src/lib/                            pure logic: dates (local, never UTC), course calendar/progress, ics files
+src/db/db.ts                        Dexie schema and constants; docs.ts transactional document saves; hooks.ts live queries
+src/state/settings.tsx              settings context and the role/configuration predicates (who sees what, who leads)
+src/content/loader.ts               content tree access; tools.ts = which app pages a module links to
+src/sheets/                         printable sheets, one file per area, listed once in registry.ts
+src/components/                     Shell (nav), AutoText (autosaving box), Stepper, RoleConfigPicker, DreamerOnly, WheelSvg
+src/pages/                          one file per route; pages compose the pieces above
 scripts/check-content.mjs           diffs every content locale against ro, validates ro
+e2e/smoke.mjs, e2e/adversarial.mjs  Playwright: happy path per viewport; malformed, rapid and role-switch input
 ```
+
+Design rules: a page never holds business logic that a test would want (that lives in
+`src/lib` or `src/db`); adding a sheet, a module tool or a role rule is one entry in a
+registry (`src/sheets/registry.ts`, `src/content/tools.ts`, `src/state/settings.tsx`);
+every multi-field document is saved through `saveDoc` so quick edits never overwrite
+each other; every free-text box is an `AutoText`.
 
 Interface languages: ro, en. Content: ro only in v1; add `content/<lang>/` with the same
 file names to add a language. The build check lists what is missing or stale.

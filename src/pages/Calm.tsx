@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useT } from '../i18n'
+import AutoText from '../components/AutoText'
+import { WheelSvg } from '../components/WheelSvg'
 import { useSettings } from '../state/settings'
 import { db, today, mutateSettings, SABOTEURS, WHEEL_AREAS, SWLS_ITEMS, type Saboteur, type JournalEntry, type WheelSnapshot } from '../db/db'
 
@@ -83,7 +85,7 @@ function Profile() {
         {strengths.map((s, i) => (
           <div className="field" key={i}>
             <label htmlFor={`str-${i}`}>{t('profile.strength', { n: i + 1 })}</label>
-            <input id={`str-${i}`} type="text" placeholder={t(`profile.strength.placeholder.${i + 1}`)} defaultValue={s} onBlur={(e) => setStrength(i, e.target.value)} />
+            <AutoText id={`str-${i}`} placeholder={t(`profile.strength.placeholder.${i + 1}`)} value={s} onSave={(v) => setStrength(i, v)} />
           </div>
         ))}
       </div>
@@ -208,19 +210,6 @@ function Rep() {
 }
 
 /* ---------- 4. wheel of life + life satisfaction ---------- */
-export function WheelSvg({ values, size = 260 }: { values: number[]; size?: number }) {
-  const n = WHEEL_AREAS.length, cx = size / 2, cy = size / 2, r = size / 2 - 8
-  const pt = (i: number, v: number) => { const a = (Math.PI * 2 * i) / n - Math.PI / 2; const d = (r * v) / 10; return [cx + d * Math.cos(a), cy + d * Math.sin(a)] }
-  const poly = values.map((v, i) => pt(i, v).join(',')).join(' ')
-  return (
-    <svg viewBox={`0 0 ${size} ${size}`} width="100%" style={{ maxWidth: size, display: 'block', margin: '0 auto' }} role="img" aria-label="wheel">
-      {[2, 4, 6, 8, 10].map((k) => <circle key={k} cx={cx} cy={cy} r={(r * k) / 10} fill="none" stroke="var(--line)" />)}
-      {WHEEL_AREAS.map((_, i) => { const [x, y] = pt(i, 10); return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="var(--line)" /> })}
-      <polygon points={poly} fill="var(--accent)" fillOpacity="0.25" stroke="var(--accent)" strokeWidth="2" />
-      {values.map((v, i) => { const [x, y] = pt(i, v); return <circle key={i} cx={x} cy={y} r="3" fill="var(--accent)" /> })}
-    </svg>
-  )
-}
 
 function Wheel() {
   const { t, fmtDate } = useT()

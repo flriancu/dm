@@ -41,6 +41,7 @@ function Gate() {
             <Route path="/book" element={<Book />} />
             <Route path="/book/print/:which" element={<Book print />} />
             <Route path="/friend" element={<Friend />} />
+            <Route path="/friend/:id" element={<Friend />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/sources" element={<Sources />} />
             <Route path="*" element={<Navigate to="/" replace />} />

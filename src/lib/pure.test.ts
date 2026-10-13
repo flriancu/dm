@@ -1,10 +1,11 @@
 import { describe, it, expect } from 'vitest'
 import { weekStart } from '../db/db'
-import { dateIcs } from '../pages/Vision'
+import { dateIcs } from './ics'
 import { addMonths, localIso, parseLocal, today } from './dates'
 import { extrinsicWarning } from '../pages/Dreams'
 import { comboIssue, reconcile, CONFIGS_FOR_ROLE } from '../state/combos'
-import { moduleDate } from '../pages/Home'
+import { moduleDate, nextModule, leaderAfterMeeting, letterDue } from './course'
+import { mergeDoc } from '../db/docs'
 
 describe('weekStart', () => {
   it('returns the Monday of the week', () => {
@@ -76,7 +77,42 @@ describe('moduleDate', () => {
   it('starts at the start date for module 1 and adds the cadence per module', () => {
     expect(localIso(moduleDate('2026-10-13', 14, 1)!)).toBe('2026-10-13')
     expect(localIso(moduleDate('2026-10-13', 14, 3)!)).toBe('2026-11-10')
-    expect(localIso(moduleDate('2026-10-13', 14, 0)!)).toBe('2026-10-13')
+    expect(moduleDate('2026-10-13', 14, 0)).toBeNull()   // module 0 has no meeting
     expect(moduleDate(undefined, 14, 2)).toBeNull()
+  })
+})
+
+describe('nextModule', () => {
+  const mods = [{ id: '00', order: 0 }, { id: '01', order: 1 }, { id: '02', order: 2 }]
+  it('starts with module 0 and moves on only when a module is marked', () => {
+    expect(nextModule(mods, new Set())?.id).toBe('00')
+    expect(nextModule(mods, new Set(['00']))?.id).toBe('01')
+    expect(nextModule(mods, new Set(['00', '01', '02']))).toBeUndefined()
+  })
+  it('does not skip a gap: an unmarked module stays next', () => {
+    expect(nextModule(mods, new Set(['00', '02']))?.id).toBe('01')
+  })
+})
+
+describe('pair leadership and the sealed letter', () => {
+  it('passes the lead to the other person after each meeting', () => {
+    expect(leaderAfterMeeting(true)).toBe(false); expect(leaderAfterMeeting(false)).toBe(true)
+  })
+  it('surfaces the letter only when sealed, due and unopened', () => {
+    expect(letterDue({ sealed: true, deliverDate: '2026-10-01' }, '2026-10-13')).toBe(true)
+    expect(letterDue({ sealed: true, deliverDate: '2026-12-01' }, '2026-10-13')).toBe(false)
+    expect(letterDue({ sealed: true, deliverDate: '2026-10-01', opened: true }, '2026-10-13')).toBe(false)
+    expect(letterDue({ sealed: false, deliverDate: '2026-10-01' }, '2026-10-13')).toBe(false)
+    expect(letterDue(undefined, '2026-10-13')).toBe(false)
+  })
+})
+
+describe('mergeDoc', () => {
+  it('merges nested objects one level deep and replaces arrays', () => {
+    type D = { a: { x?: string; y?: string }; list: number[]; n?: number }
+    const cur: D = { a: { x: '1', y: '2' }, list: [1, 2] }
+    expect(mergeDoc(cur, { a: { y: '3' } }, ['a'])).toEqual({ a: { x: '1', y: '3' }, list: [1, 2] })
+    expect(mergeDoc(cur, { list: [9] }, ['a'])).toEqual({ a: { x: '1', y: '2' }, list: [9] })
+    expect(mergeDoc(cur, { n: 5 }, ['a']).n).toBe(5)
   })
 })

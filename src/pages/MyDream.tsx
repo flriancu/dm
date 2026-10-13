@@ -2,6 +2,8 @@ import DreamerOnly from '../components/DreamerOnly'
 import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useT } from '../i18n'
+import AutoText from '../components/AutoText'
+import { saveDoc } from '../db/docs'
 import {
   db, today, CLARIFY_STEPS, WOOP_STEPS, HABIT_PARTS, FRIEND_ROLES, weekStart,
   type ClarifyStep, type WoopStep, type HabitPart, type DreamWork, type DreamFriend, type HabitWeek,
@@ -29,19 +31,8 @@ function MyDream() {
     )
   }
 
-  // Read-modify-write inside one transaction, so two quick edits never overwrite each other.
-  const save = (patch: Partial<DreamWork>) => db.transaction('rw', db.dreamWork, async () => {
-    const cur = (await db.dreamWork.get(dream.id!)) ?? { dreamId: dream.id!, updated: today() }
-    await db.dreamWork.put({
-      ...cur, ...patch,
-      clarify: { ...(cur.clarify ?? {}), ...(patch.clarify ?? {}) },
-      woop: { ...(cur.woop ?? {}), ...(patch.woop ?? {}) },
-      habit: { ...(cur.habit ?? {}), ...(patch.habit ?? {}) },
-      fear: { ...(cur.fear ?? {}), ...(patch.fear ?? {}) },
-      letgo: { ...(cur.letgo ?? {}), ...(patch.letgo ?? {}) },
-      updated: today(),
-    })
-  })
+  // read-modify-write inside one transaction, so two quick edits never overwrite each other
+  const save = (patch: Partial<DreamWork>) => saveDoc({ table: db.dreamWork, key: dream.id!, empty: () => ({ dreamId: dream.id!, updated: today() }), nested: ['clarify', 'woop', 'habit', 'fear', 'letgo'] }, patch)
   const setStep = (step: ClarifyStep, v: string) => save({ clarify: { [step]: v } })
   const routes = [...(work?.routes ?? []), '', '', ''].slice(0, 3)
   const setRoute = (i: number, v: string) => { const r = [...routes]; r[i] = v; save({ routes: r }) }
@@ -92,7 +83,7 @@ function MyDream() {
         <div className="card" key={s}>
           <div className="field">
             <label htmlFor={`step-${s}`}><strong>{t(`clarify.${s}`)}</strong> — {t(`clarify.${s}.q`)}</label>
-            <textarea id={`step-${s}`} placeholder={t(`clarify.${s}.placeholder`)} defaultValue={work?.clarify?.[s] ?? ''} onBlur={(e) => setStep(s, e.target.value)} />
+            <AutoText id={`step-${s}`} placeholder={t(`clarify.${s}.placeholder`)} value={work?.clarify?.[s] ?? ''} onSave={(v) => setStep(s, v)} multiline />
           </div>
         </div>
       ))}
@@ -102,7 +93,7 @@ function MyDream() {
         {routes.map((r, i) => (
           <div className="field" key={i}>
             <label htmlFor={`route-${i}`}>{t('mydream.route', { n: i + 1 })}</label>
-            <input id={`route-${i}`} type="text" placeholder={t(`mydream.route.placeholder.${i + 1}`)} defaultValue={r} onBlur={(e) => setRoute(i, e.target.value)} />
+            <AutoText id={`route-${i}`} placeholder={t(`mydream.route.placeholder.${i + 1}`)} value={r} onSave={(v) => setRoute(i, v)} />
           </div>
         ))}
       </div>
@@ -114,7 +105,7 @@ function MyDream() {
         <div className="card" key={s}>
           <div className="field">
             <label htmlFor={`woop-${s}`}><strong>{t(`woop.${s}`)}</strong> — {t(`woop.${s}.q`)}</label>
-            <textarea id={`woop-${s}`} placeholder={t(`woop.${s}.placeholder`)} defaultValue={work?.woop?.[s] ?? ''} onBlur={(e) => setWoop(s, e.target.value)} />
+            <AutoText id={`woop-${s}`} placeholder={t(`woop.${s}.placeholder`)} value={work?.woop?.[s] ?? ''} onSave={(v) => setWoop(s, v)} multiline />
           </div>
         </div>
       ))}
@@ -126,7 +117,7 @@ function MyDream() {
         {HABIT_PARTS.map((p) => (
           <div className="field" key={p}>
             <label htmlFor={`habit-${p}`}><strong>{t(`habit.${p}`)}</strong> — {t(`habit.${p}.q`)}</label>
-            <input id={`habit-${p}`} type="text" placeholder={t(`habit.${p}.placeholder`)} defaultValue={work?.habit?.[p] ?? ''} onBlur={(e) => setHabit(p, e.target.value)} />
+            <AutoText id={`habit-${p}`} placeholder={t(`habit.${p}.placeholder`)} value={work?.habit?.[p] ?? ''} onSave={(v) => setHabit(p, v)} />
           </div>
         ))}
         <p className="small"><em>{[work?.habit?.anchor, work?.habit?.behaviour, work?.habit?.celebration].filter(Boolean).join(' ') || t('habit.sentence.empty')}</em></p>
@@ -142,7 +133,7 @@ function MyDream() {
                 <input type="checkbox" key={`${w}-${row?.done ? 1 : 0}`} defaultChecked={!!row?.done} onChange={(e) => setWeek(w, { done: e.target.checked })} />
                 <span>{t('habit.week.of', { date: fmtDate(w) })}{w === thisWeek ? ` (${t('habit.week.this')})` : ''}: {t('habit.week.done')}</span>
               </label>
-              <input type="text" aria-label={t('habit.note.label', { date: fmtDate(w) })} placeholder={t('habit.note.placeholder')} defaultValue={row?.note ?? ''} onBlur={(e) => setWeek(w, { note: e.target.value })} />
+              <AutoText aria-label={t('habit.note.label', { date: fmtDate(w) })} placeholder={t('habit.note.placeholder')} value={row?.note ?? ''} onSave={(v) => setWeek(w, { note: v })} />
             </div>
           )
         })}
@@ -155,7 +146,7 @@ function MyDream() {
         <div className="card" key={i}>
           <div className="field">
             <label htmlFor={`friend-name-${i}`}>{t('friends.name', { n: i + 1 })}</label>
-            <input id={`friend-name-${i}`} type="text" placeholder={t('friends.name.placeholder')} defaultValue={f.name ?? ''} onBlur={(e) => setFriend(i, { name: e.target.value })} />
+            <AutoText id={`friend-name-${i}`} placeholder={t('friends.name.placeholder')} value={f.name ?? ''} onSave={(v) => setFriend(i, { name: v })} />
           </div>
           <div className="field">
             <label>{t('friends.role')}</label>
@@ -167,13 +158,13 @@ function MyDream() {
           {f.role === 'ask' && (
             <div className="field">
               <label htmlFor={`friend-ask-${i}`}>{t('friends.ask')}</label>
-              <textarea id={`friend-ask-${i}`} placeholder={t('friends.ask.placeholder')} defaultValue={f.ask ?? ''} onBlur={(e) => setFriend(i, { ask: e.target.value })} />
+              <AutoText id={`friend-ask-${i}`} placeholder={t('friends.ask.placeholder')} value={f.ask ?? ''} onSave={(v) => setFriend(i, { ask: v })} multiline />
             </div>
           )}
           {f.role === 'progress' && (
             <div className="field">
               <label htmlFor={`friend-day-${i}`}>{t('friends.day')}</label>
-              <input id={`friend-day-${i}`} type="text" placeholder={t('friends.day.placeholder')} defaultValue={f.day ?? ''} onBlur={(e) => setFriend(i, { day: e.target.value })} />
+              <AutoText id={`friend-day-${i}`} placeholder={t('friends.day.placeholder')} value={f.day ?? ''} onSave={(v) => setFriend(i, { day: v })} />
             </div>
           )}
         </div>
@@ -185,11 +176,11 @@ function MyDream() {
       <div className="card">
         <div className="field">
           <label htmlFor="fear-fear"><strong>{t('fear.fear')}</strong> — {t('fear.fear.q')}</label>
-          <textarea id="fear-fear" placeholder={t('fear.fear.placeholder')} defaultValue={work?.fear?.fear ?? ''} onBlur={(e) => setFear('fear', e.target.value)} />
+          <AutoText id="fear-fear" placeholder={t('fear.fear.placeholder')} value={work?.fear?.fear ?? ''} onSave={(v) => setFear('fear', v)} multiline />
         </div>
         <div className="field">
           <label htmlFor="fear-good"><strong>{t('fear.goodEnough')}</strong> — {t('fear.goodEnough.q')}</label>
-          <textarea id="fear-good" placeholder={t('fear.goodEnough.placeholder')} defaultValue={work?.fear?.goodEnough ?? ''} onBlur={(e) => setFear('goodEnough', e.target.value)} />
+          <AutoText id="fear-good" placeholder={t('fear.goodEnough.placeholder')} value={work?.fear?.goodEnough ?? ''} onSave={(v) => setFear('goodEnough', v)} multiline />
         </div>
       </div>
       <p className="small muted">{t('mydream.saved')} <Link to="/book/print/fear">{t('fear.print')}</Link></p>
@@ -209,7 +200,7 @@ function MyDream() {
         {(['costs', 'benefits', 'replacement'] as const).map((k) => (
           <div className="field" key={k}>
             <label htmlFor={`letgo-${k}`}>{t(`letgo.${k}`)}</label>
-            <textarea id={`letgo-${k}`} placeholder={t(`letgo.${k}.placeholder`)} defaultValue={work?.letgo?.[k] ?? ''} onBlur={(e) => save({ letgo: { [k]: e.target.value } })} style={{ minHeight: 64 }} />
+            <AutoText id={`letgo-${k}`} placeholder={t(`letgo.${k}.placeholder`)} style={{ minHeight: 64 }} value={work?.letgo?.[k] ?? ''} onSave={(v) => save({ letgo: { [k]: v } })} multiline />
           </div>
         ))}
         {dream.dateReleased ? (
