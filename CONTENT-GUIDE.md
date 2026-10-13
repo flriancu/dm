@@ -78,6 +78,13 @@ Bad: "Lucrează la listă." (no object detail, no place, no time, no example)
 - A string with a pronoun must have its noun on the same screen.
 - Both locale files have exactly the same keys; the build fails otherwise.
 - Romanian with diacritics (ă â î ș ț), informal "tu", no corporate words.
+- The reader is one person. A plural "you" verb (ați, aveți, hotărâți, schimbați…) is
+  allowed only in a sentence that names who the plural is (amândoi, voi, împreună,
+  fiecare, Visătorul și tu…). Never "dacă nu ați ales… las-o".
+- Every pronoun or clitic ("o", "le", "-l") has its noun in the same sentence: "lasă
+  data goală", not "las-o goală".
+- `npm run check:content` applies rules 1–3 and the plural rule to every interface
+  string, not only to content files; a string that fails blocks the build.
 
 ## Meeting plan template
 

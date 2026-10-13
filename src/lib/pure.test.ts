@@ -3,7 +3,7 @@ import { weekStart } from '../db/db'
 import { dateIcs } from './ics'
 import { addMonths, localIso, parseLocal, today } from './dates'
 import { extrinsicWarning } from '../pages/Dreams'
-import { comboIssue, reconcile, CONFIGS_FOR_ROLE } from '../state/combos'
+import { comboIssue, reconcile, configHelpKey, CONFIGS_FOR_ROLE } from '../state/combos'
 import { moduleDate, nextModule, leaderAfterMeeting, letterDue } from './course'
 import { mergeDoc } from '../db/docs'
 
@@ -114,5 +114,16 @@ describe('mergeDoc', () => {
     expect(mergeDoc(cur, { a: { y: '3' } }, ['a'])).toEqual({ a: { x: '1', y: '3' }, list: [1, 2] })
     expect(mergeDoc(cur, { list: [9] }, ['a'])).toEqual({ a: { x: '1', y: '2' }, list: [9] })
     expect(mergeDoc(cur, { n: 5 }, ['a']).n).toBe(5)
+  })
+})
+
+describe('configHelpKey', () => {
+  it('picks the help written from the reader\'s own role', () => {
+    expect(configHelpKey('dreamer', 'solo')).toBe('config.help.solo.dreamer')
+    expect(configHelpKey('friend', 'solo')).toBe('config.help.solo.friend')
+    expect(configHelpKey('both', 'pair')).toBe('config.help.pair')
+    expect(configHelpKey('dreamer', 'group')).toBe('config.help.group.dreamer')
+    expect(configHelpKey('friend', 'group')).toBe('config.help.group.friend')
+    expect(configHelpKey('both', 'group')).toBe('config.help.group.both')
   })
 })

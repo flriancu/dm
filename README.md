@@ -36,7 +36,7 @@ src/db/db.ts                        Dexie schema and constants; docs.ts transact
 src/state/settings.tsx              settings context and the role/configuration predicates (who sees what, who leads)
 src/content/loader.ts               content tree access; tools.ts = which app pages a module links to
 src/sheets/                         printable sheets, one file per area, listed once in registry.ts
-src/components/                     Shell (nav), AutoText (autosaving box), Stepper, RoleConfigPicker, DreamerOnly, WheelSvg
+src/components/                     Shell (nav), AutoText (autosaving box), DateField (DayPicker in site colours), Stepper, RoleConfigPicker, DreamerOnly, WheelSvg
 src/pages/                          one file per route; pages compose the pieces above
 scripts/check-content.mjs           diffs every content locale against ro, validates ro
 e2e/smoke.mjs, e2e/adversarial.mjs  Playwright: happy path per viewport; malformed, rapid and role-switch input
@@ -46,7 +46,9 @@ Design rules: a page never holds business logic that a test would want (that liv
 `src/lib` or `src/db`); adding a sheet, a module tool or a role rule is one entry in a
 registry (`src/sheets/registry.ts`, `src/content/tools.ts`, `src/state/settings.tsx`);
 every multi-field document is saved through `saveDoc` so quick edits never overwrite
-each other; every free-text box is an `AutoText`.
+each other; every free-text box is an `AutoText`; every date is picked with `DateField`.
+Libraries are used for what is not specific to the course (routing, storage, markdown,
+the calendar); the course logic stays in this repo.
 
 Interface languages: ro, en. Content: ro only in v1; add `content/<lang>/` with the same
 file names to add a language. The build check lists what is missing or stale.

@@ -1,16 +1,16 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useT, UI_LOCALES, LOCALE_META, type UiLocale } from '../i18n'
+import { useT, UI_LOCALES, LOCALE_META } from '../i18n'
 import { useSettings, startDateKey } from '../state/settings'
 import { type Role, type Config } from '../db/db'
 import RoleConfigPicker from '../components/RoleConfigPicker'
 import Stepper from '../components/Stepper'
+import DateField from '../components/DateField'
 
 export default function Onboarding() {
   const { t } = useT()
   const { settings, update } = useSettings()
   const nav = useNavigate()
-  const [uiLocale, setLocale] = useState<UiLocale>(settings.uiLocale)
   const [role, setRole] = useState<Role | undefined>(undefined)
   const [config, setConfig] = useState<Config | undefined>(undefined)
   const [startDate, setStart] = useState(settings.startDate ?? '')
@@ -20,7 +20,7 @@ export default function Onboarding() {
 
   const go = async () => {
     if (!ready) return
-    await update({ role: role!, config: config!, uiLocale, startDate: startDate || undefined, cadenceDays, paperMode, onboarded: true })
+    await update({ role: role!, config: config!, startDate: startDate || undefined, cadenceDays, paperMode, onboarded: true })
     nav('/', { replace: true })
   }
 
@@ -34,9 +34,18 @@ export default function Onboarding() {
           <label>{t('onboarding.lang')}</label>
           <div className="row">
             {UI_LOCALES.map((l) => (
-              <button key={l} className={`chip ${uiLocale === l ? 'on' : ''}`} onClick={() => setLocale(l)}>{LOCALE_META[l].name}</button>
+              <button key={l} className={`chip ${settings.uiLocale === l ? 'on' : ''}`} onClick={() => update({ uiLocale: l })}>{LOCALE_META[l].name}</button>
             ))}
           </div>
+        </div>
+        <div className="field">
+          <label>{t('settings.theme')}</label>
+          <div className="row">
+            {(['system', 'light', 'dark'] as const).map((x) => (
+              <button key={x} className={`chip ${settings.theme === x ? 'on' : ''}`} onClick={() => update({ theme: x })}>{t(`settings.theme.${x}`)}</button>
+            ))}
+          </div>
+          <p className="small muted">{t('onboarding.theme.help')}</p>
         </div>
       </div>
 
@@ -47,7 +56,7 @@ export default function Onboarding() {
           <div className="card">
             <div className="field">
               <label htmlFor="start">{t(startDateKey({ role: role!, config: config! }))}</label>
-              <input id="start" type="date" value={startDate} onChange={(e) => setStart(e.target.value)} />
+              <DateField id="start" value={startDate} onChange={setStart} />
               <p className="small muted">{t('onboarding.start.help')}</p>
             </div>
             <div className="field">

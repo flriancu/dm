@@ -12,6 +12,8 @@
     "check:content": "node scripts/check-content.mjs"
   },
   "dependencies": {
+    "@daypicker/react": "^10.0.2",
+    "date-fns": "^4.4.0",
     "dexie": "^4.4.6",
     "dexie-react-hooks": "^4.4.0",
     "marked": "^18.1.1",

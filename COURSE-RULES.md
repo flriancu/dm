@@ -44,7 +44,7 @@ Content refers to app elements only by these names (the strings in `ro.json` mat
 | Pair switch | „La următoarea întâlnire eu conduc (Prietenul Visului)” | Acasă, only in a pair |
 
 The app has no notifications. Never write "aplicația îți amintește". Write "pune data în
-calendarul telefonului cu butonul „Pune data în calendarul telefonului”; aplicația îți
+calendarul telefonului cu butonul „Pune data în calendar”; aplicația îți
 arată data pe pagina Acasă".
 
 Each device holds one person. The Dream Friend uses the app on their own phone with the

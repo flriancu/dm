@@ -1,6 +1,6 @@
 import { useT } from '../i18n'
 import type { Role, Config } from '../db/db'
-import { CONFIGS_FOR_ROLE } from '../state/combos'
+import { CONFIGS_FOR_ROLE, configHelpKey } from '../state/combos'
 
 /**
  * Stepped chooser for role and configuration (FR-06, FR-07).
@@ -37,7 +37,7 @@ export default function RoleConfigPicker({ role, config, onChange }: {
                 <button key={c} className={`chip ${config === c ? 'on' : ''}`} onClick={() => onChange({ role, config: c })}>{t(`onboarding.config.${c}`)}</button>
               ))}
             </div>
-            {config ? <p className="small" style={{ margin: '4px 0 0' }}>{t(config === 'group' && role === 'both' ? 'config.help.group.both' : `config.help.${config}`)}</p> : <p className="small muted" style={{ margin: '4px 0 0' }}>{t(`picker.pickConfig.${role}`)}</p>}
+            {config ? <p className="small" style={{ margin: '4px 0 0' }}>{t(configHelpKey(role!, config))}</p> : <p className="small muted" style={{ margin: '4px 0 0' }}>{t(`picker.pickConfig.${role}`)}</p>}
           </div>
         </div>
       )}

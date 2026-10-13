@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useT } from '../i18n'
 import AutoText from '../components/AutoText'
+import DateField from '../components/DateField'
 import { db, today, VISION_SECTIONS, REGRET_AREAS, type VisionDoc, type ValueItem, type RegretArea } from '../db/db'
 
 /** Modules 6–7: values, the letter from the future self, the vision worksheet, regret and Yes/No, the check-in, the retrospective. */
@@ -143,7 +144,7 @@ function Vision() {
               <>
                 <div className="field">
                   <label htmlFor="letter-date">{t('letter.date')}</label>
-                  <input id="letter-date" type="date" min={minDate} max={maxDate} value={deliver} onChange={(e) => setDeliver(e.target.value)} />
+                  <DateField id="letter-date" min={minDate} max={maxDate} value={deliver} onChange={setDeliver} />
                   <p className="small muted" style={{ margin: 0 }}>{t('letter.date.help')}</p>
                 </div>
                 <button className="btn primary" onClick={seal} disabled={!(L.text ?? '').trim() || deliver < minDate || deliver > maxDate}>{t('letter.seal')}</button>

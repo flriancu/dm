@@ -4,9 +4,10 @@ import { useT, UI_LOCALES, LOCALE_META } from '../i18n'
 import { useSettings, startDateKey } from '../state/settings'
 import { db, today, type Role, type Config } from '../db/db'
 import { exportAll, importAll, downloadJson } from '../db/exportImport'
-import { comboIssue } from '../state/combos'
+import { comboIssue, configHelpKey } from '../state/combos'
 import RoleConfigPicker from '../components/RoleConfigPicker'
 import Stepper from '../components/Stepper'
+import DateField from '../components/DateField'
 
 export default function Settings() {
   const { t } = useT()
@@ -52,7 +53,7 @@ export default function Settings() {
           <div className="small muted">{t('settings.role')}</div>
           <div><strong>{t(`onboarding.role.${settings.role}`)}</strong> <span className="small">— {t(`role.help.${settings.role}`)}</span></div>
           <div className="small muted" style={{ marginTop: 8 }}>{t('settings.config')}</div>
-          <div><strong>{t(`onboarding.config.${settings.config}`)}</strong> <span className="small">— {t(settings.config === 'group' && settings.role === 'both' ? 'config.help.group.both' : `config.help.${settings.config}`)}</span></div>
+          <div><strong>{t(`onboarding.config.${settings.config}`)}</strong> <span className="small">— {t(configHelpKey(settings.role, settings.config))}</span></div>
           {issue && <p className="notice small">{t(`combo.${issue}`)}</p>}
           <button className="btn sm" onClick={startEdit}>{t('settings.change')}</button>
         </div>
@@ -67,7 +68,7 @@ export default function Settings() {
       )}
 
       <div className="card">
-        <div className="field"><label htmlFor="sd">{t(startDateKey(settings))}</label><input id="sd" type="date" value={settings.startDate ?? ''} onChange={(e) => update({ startDate: e.target.value })} /></div>
+        <div className="field"><label htmlFor="sd">{t(startDateKey(settings))}</label><DateField id="sd" value={settings.startDate ?? ''} onChange={(v) => update({ startDate: v || undefined })} /></div>
         <div className="field"><label htmlFor="cd">{t('onboarding.cadence')}</label><Stepper id="cd" min={7} max={42} value={settings.cadenceDays} onChange={(v) => update({ cadenceDays: v })} />{settings.cadenceDays < 14 && <p className="small notice">{t('onboarding.cadence.help')}</p>}</div>
         {settings.role !== 'friend' && (
           <label className="row" style={{ minHeight: 44 }}><input type="checkbox" key={String(settings.paperMode)} defaultChecked={settings.paperMode} onChange={(e) => update({ paperMode: e.target.checked })} /> {t('onboarding.paper')}</label>

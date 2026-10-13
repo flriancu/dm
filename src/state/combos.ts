@@ -27,3 +27,9 @@ export const CONFIGS_FOR_ROLE: Record<Role, Config[]> = {
   friend: ['solo', 'group'],
   both: ['pair', 'group'],
 }
+
+/** Locale key of the configuration help, written from the reader's own role. */
+export function configHelpKey(role: Role, config: Config): string {
+  if (config === 'pair') return 'config.help.pair'
+  return `config.help.${config}.${role === 'both' && config === 'solo' ? 'dreamer' : role}`
+}

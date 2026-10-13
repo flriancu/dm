@@ -198,3 +198,17 @@ textarea { scrollbar-width: thin; }
 .stepper .btn { min-width: var(--tap); padding: 0; font-size: 1.2rem; }
 input[type="number"]:not(.stepper input) { -moz-appearance: textfield; appearance: textfield; }
 input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* Date field: a button that opens a month calendar (DayPicker) themed with the site's tokens. */
+.datefield { position: relative; display: block; }
+.datefield-btn { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: var(--tap); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.datefield-btn.empty > span:first-child { color: var(--muted); }
+.datefield-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.datefield-ico { opacity: .7; }
+.datepop { position: absolute; z-index: 20; top: calc(100% + 6px); left: 0; padding: 8px 10px 10px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface); box-shadow: 0 8px 24px rgba(0,0,0,.14); }
+.datepop .rdp-root { --rdp-accent-color: var(--accent); --rdp-accent-background-color: var(--accent-soft); --rdp-today-color: var(--accent); --rdp-day-height: 40px; --rdp-day-width: 40px; --rdp-day_button-height: 38px; --rdp-day_button-width: 38px; --rdp-day_button-border-radius: 8px; --rdp-selected-border: 2px solid var(--accent); font-size: .95rem; color: var(--text); }
+.datepop .rdp-selected .rdp-day_button { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.datepop .rdp-caption_label { text-transform: capitalize; font-weight: 650; }
+.datepop .rdp-weekday { color: var(--muted); font-size: .75rem; text-transform: lowercase; }
+.datepop .rdp-chevron { fill: var(--text); }
+.datepop-foot { margin-top: 6px; }

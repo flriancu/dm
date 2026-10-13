@@ -22,6 +22,11 @@ await page.goto(base); await page.waitForURL(/#\/start/)
 check(!(await page.getByRole('button', { name: 'Începe' }).isVisible()), 'onboarding: Begin hidden before role/config')
 await page.getByRole('button', { name: 'Visător', exact: true }).click()
 check(!(await page.getByRole('button', { name: 'Începe' }).isVisible()), 'onboarding: Begin hidden before config')
+// theme chips apply at once and persist past onboarding
+await page.getByRole('button', { name: 'întunecat' }).click(); await page.waitForTimeout(200)
+check((await page.evaluate(() => document.documentElement.dataset.theme)) === 'dark', 'onboarding: dark theme applies on tap')
+await page.getByRole('button', { name: 'ca dispozitivul' }).click(); await page.waitForTimeout(200)
+check((await page.evaluate(() => document.documentElement.dataset.theme)) === undefined, 'onboarding: "follow the device" clears the override')
 await page.getByRole('button', { name: /Un Visător și Prietenul lui/ }).click()
 // cadence stepper clamps
 const cad = page.locator('#cad')
@@ -73,11 +78,16 @@ check((await page.getByRole('button', { name: 'Nu renunț oricât ar costa' }).c
 // ---- letter: seal disabled when empty or date out of range; open anyway works
 check(await page.getByRole('button', { name: 'Sigilez scrisoarea' }).isDisabled(), 'cannot seal an empty letter')
 await page.getByLabel(/^Scrisoarea, de la mine/).fill(WEIRD + LONG); await page.getByLabel(/^Scrisoarea, de la mine/).blur()
-await page.locator('#letter-date').fill('2020-01-01')
-check(await page.getByRole('button', { name: 'Sigilez scrisoarea' }).isDisabled(), 'cannot seal with a past date')
-await page.locator('#letter-date').fill('2099-01-01')
-check(await page.getByRole('button', { name: 'Sigilez scrisoarea' }).isDisabled(), 'cannot seal with a date beyond 12 months')
-const ok = new Date(); ok.setMonth(ok.getMonth() + 4); await page.locator('#letter-date').fill(ok.toISOString().slice(0, 10))
+// the delivery date calendar cannot leave the 3–12 month window: the month navigation stops at the bounds
+await page.locator('#letter-date').click(); await page.getByRole('dialog').waitFor()
+for (let i = 0; i < 12; i++) { const prev = page.getByRole('button', { name: 'Luna dinainte' }); if (await prev.isDisabled()) break; await prev.click() }
+check(await page.getByRole('button', { name: 'Luna dinainte' }).isDisabled(), 'letter date: cannot go before 3 months ahead')
+for (let i = 0; i < 24; i++) { const next = page.getByRole('button', { name: 'Luna următoare' }); if (await next.isDisabled()) break; await next.click() }
+check(await page.getByRole('button', { name: 'Luna următoare' }).isDisabled(), 'letter date: cannot go beyond 12 months ahead')
+check(!(await page.getByRole('dialog').getByRole('button', { name: 'Azi', exact: true }).isVisible()), 'letter date: "today" is not offered when today is out of range')
+// pick the 1st of the last allowed month, through the calendar, like a person would
+await page.locator('.datepop .rdp-day_button:not(:disabled)').first().click(); await page.waitForTimeout(200)
+check(!(await page.getByRole('dialog').isVisible()), 'letter date: calendar closes after a pick')
 await page.getByRole('button', { name: 'Sigilez scrisoarea' }).click(); check(await visible(page.getByText(/Sigilată până pe/)), 'seal with a valid date')
 await page.getByRole('button', { name: 'O deschid oricum' }).click(); check(await visible(page.getByText(/Acum e deschisă/)), 'open anyway shows the letter again')
 await noOverflow('vision page with long letter')

@@ -34,6 +34,20 @@ const DANGLING = /(^|[.!?:]\s+|^\d+\.\s+|^- )(scrie|fă|pune|notează|transform�
 // bold **C** is fine when a word or its name follows ("**C**larifică", "**C** Clarificare"); flag only letters followed by punctuation or line end.
 const BARE_LETTER = /(?:\*\*([COPIL])\*\*(?=[,.;:)]|\s*$|\s+[^\p{L}\s–·-])|(?:^|\s|\()([COPIL])(?=[,.;:)]|\s*$))/gmu
 const LETTER_NAMES = { C: /\bC\s*[–·-]\s*Clarific/i, O: /\bO\s*[–·-]\s*Obstacol/i, P: /\bP\s*[–·-]\s*Pași/i, I: /\bI\s*[–·-]\s*Inim/i, L: /\bL\s*[–·-]\s*Linișt/i }
+// CR-07 rule 1b: the reader is one person ("tu"). A plural "you" verb is allowed only where the same
+// paragraph names who the plural is (amândoi, voi, împreună, fiecare, toți, grupul, perechea…).
+const PLURAL_YOU = /(?<!\p{L})(ați|aveți|sunteți|puteți|faceți|scrieți|hotărâți|corectați|alegeți|citiți|spuneți|stabiliți|deschideți|notați|bifați|parcurgeți|conduceți|lucrați|veniți|vreți|știți|folosiți|puneți|terminați|completați|apăsați|luați|dați|mergeți|încercați|schimbați|vorbiți|ascultați|răspundeți|numărați|pregătiți|aduceți|tipăriți|așezați|țineți|rămâneți|opriți|continuați|repetați|jucați|întrebați|povestiți|arătați|sărbătoriți|mulțumiți|vă)(?!\p{L})/iu
+const PLURAL_SUBJECT = /(?<!\p{L})(amândoi|amândouă|voi|vouă|vostru|voastră|împreună|fiecare|toți|toate|grup(ul)?|perech[ei]|perechea|perechile|doi|două|trei|ceilalți|celălalt|membri|membrii|visător(ul|ului|i|ii)?|prietenul|rolurile|voluntarul|tu și|și tu|unul|una)(?!\p{L})/iu
+/** Wording checks shared by content paragraphs and interface strings. */
+function proseChecks(text, where, { exemptForbidden = false } = {}) {
+  if (!exemptForbidden) for (const [re, why] of FORBIDDEN) { const m = re.exec(text); if (m) err(`${where}: „${m[0]}” – ${why} (CR-07 regula 2)`) }
+  for (const m of text.matchAll(DANGLING)) err(`${where}: instrucțiune cu pronume fără substantiv: „${m[0].trim()}” (CR-07 regula 1)`)
+  if (/[sS]̧|[tT]̧/.test(text)) err(`${where}: diacritice cu sedilă (folosește ș ț cu virgulă)`)
+  for (const para of text.split(/\n\s*\n|\n(?=\|)|\n(?=\d+\. )|\n(?=- )/)) {
+    const m = PLURAL_YOU.exec(para)
+    if (m && !PLURAL_SUBJECT.test(para)) err(`${where}: „${m[0]}” se adresează la plural fără să spună cui (amândoi, voi, fiecare…): „${para.trim().slice(0, 70)}…” (CR-07 regula 1)`)
+  }
+}
 
 function walk(dir) {
   const out = []
@@ -100,14 +114,10 @@ for (const rel of srcFiles) {
     }
   }
 
-  if (!FORBIDDEN_EXEMPT.includes(rel)) {
-    for (const [re, why] of FORBIDDEN) { const m = re.exec(text); if (m) err(`${SOURCE}/${rel}: „${m[0]}” – ${why} (CR-07 regula 2)`) }
-  }
-  for (const m of text.matchAll(DANGLING)) err(`${SOURCE}/${rel}: instrucțiune cu pronume fără substantiv: „${m[0].trim()}” (CR-07 regula 1)`)
+  proseChecks(text, `${SOURCE}/${rel}`, { exemptForbidden: FORBIDDEN_EXEMPT.includes(rel) })
   // bare COPIL letters: allowed only if the same file names the letter somewhere
   const bare = new Set([...text.matchAll(BARE_LETTER)].map((m) => m[1] ?? m[2]))
   for (const l of bare) if (LETTER_NAMES[l] && !LETTER_NAMES[l].test(text)) err(`${SOURCE}/${rel}: litera „${l}” apare singură fără numele ei (CR-07 regula 3)`)
-  if (/[sS]̧|[tT]̧/.test(text)) err(`${SOURCE}/${rel}: diacritice cu sedilă (folosește ș ț cu virgulă)`)
 }
 console.log(`${SOURCE}: ${srcFiles.length} content files${errors ? '' : ' ok'}`)
 
@@ -122,7 +132,7 @@ for (const [lang, d] of Object.entries(dicts)) {
   for (const k of Object.keys(d)) if (!(k in base)) err(`locales/${lang}.json: extra key "${k}" not in ${SOURCE}`)
 }
 for (const [k, v] of Object.entries(base)) {
-  if (/[sS]̧|[tT]̧/.test(v)) err(`locales/${SOURCE}.json "${k}": diacritice cu sedilă`)
+  proseChecks(v, `locales/${SOURCE}.json "${k}"`)
   if (DANGLING.test(v)) err(`locales/${SOURCE}.json "${k}": instrucțiune cu pronume fără substantiv (CR-07 regula 1)`)
   DANGLING.lastIndex = 0
 }
