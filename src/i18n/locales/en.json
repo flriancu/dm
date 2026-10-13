@@ -163,7 +163,7 @@
   "settings.privacy": "Nothing leaves this device. A saved copy is the only way data goes out, and only you start it.",
   "role.help.dreamer": "I work on my own dream. I see the modules, the dream list and the book.",
   "role.help.friend": "I accompany someone else on the road to their dream. I do not work on a dream of my own here; I see the meeting plans and my notes.",
-  "role.help.both": "I work on my dream and, by turns, I am also the Dream Friend for someone else. I see everything; on the Home page I tick when it is my turn to be the Dream Friend.",
+  "role.help.both": "I work on my dream and I am also the Dream Friend for someone else: by turns, in a pair, or all the time, when I lead a group.",
   "config.help.solo": "One person works on their dream and someone close accompanies them at the meetings, without doing the course themselves.",
   "config.help.pair": "Two people both do the course and take turns being the Dream Friend for each other.",
   "config.help.group": "One Dream Friend runs the meetings for 3–8 people who each work on their own dream.",
@@ -178,7 +178,8 @@
   "picker.pickRole": "Choose a role to see the next step.",
   "picker.pickConfig.dreamer": "Choose: you work with a Dream Friend who is not doing the course, or in a group run by a Dream Friend.",
   "picker.pickConfig.friend": "Choose: you accompany one Dreamer, or you run a group.",
-  "picker.pickConfig.both": "Choose: a pair in which you take turns as Dream Friend, or a group in which you also work on your own dream.",
+  "picker.pickConfig.both": "Choose: a pair in which you take turns as Dream Friend, or a group that you lead while also keeping your own list.",
   "settings.change": "Change the role or how we go through the course",
-  "settings.saveChoice": "Save the choice"
+  "settings.saveChoice": "Save the choice",
+  "config.help.group.both": "You lead the meetings and, alongside, keep your own dream list and share from it in the group. Note: nobody in this group is your Dream Friend, so nobody asks you the questions. If you want someone to accompany you on your own dream, run a separate peer pair with another Dream Friend."
 }

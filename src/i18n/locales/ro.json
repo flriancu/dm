@@ -163,7 +163,7 @@
   "settings.privacy": "Nimic nu părăsește acest dispozitiv. Copia salvată este singura cale prin care datele ies, și numai tu o pornești.",
   "role.help.dreamer": "Lucrez la visul meu. Văd modulele, lista de visuri și cartea.",
   "role.help.friend": "Însoțesc pe altcineva pe drumul spre visul lui. Nu lucrez la un vis al meu aici; văd planurile întâlnirilor și notițele mele.",
-  "role.help.both": "Lucrez la visul meu și, pe rând, sunt și Prietenul Visului pentru altcineva. Văd tot; pe pagina Acasă bifez când e rândul meu să fiu Prietenul Visului.",
+  "role.help.both": "Lucrez la visul meu și sunt și Prietenul Visului pentru altcineva: pe rând, într-o pereche, sau tot timpul, când conduc un grup.",
   "config.help.solo": "O persoană lucrează la visul ei, iar cineva apropiat o însoțește la întâlniri, fără să parcurgă și el cursul.",
   "config.help.pair": "Două persoane parcurg amândouă cursul și, pe rând, una e Prietenul Visului pentru cealaltă.",
   "config.help.group": "Un Prieten al Visului conduce întâlnirile pentru 3–8 persoane care lucrează fiecare la visul ei.",
@@ -178,7 +178,8 @@
   "picker.pickRole": "Alege un rol ca să vezi pasul următor.",
   "picker.pickConfig.dreamer": "Alege: lucrezi cu un Prieten al Visului care nu face cursul, sau într-un grup condus de un Prieten al Visului.",
   "picker.pickConfig.friend": "Alege: însoțești un singur Visător, sau conduci un grup.",
-  "picker.pickConfig.both": "Alege: o pereche în care vă sunteți pe rând Prietenul Visului, sau un grup în care și tu lucrezi la visul tău.",
+  "picker.pickConfig.both": "Alege: o pereche în care vă sunteți pe rând Prietenul Visului, sau un grup pe care îl conduci tu și în care îți ții și lista ta.",
   "settings.change": "Schimbă rolul sau felul în care parcurgem cursul",
-  "settings.saveChoice": "Salvează alegerea"
+  "settings.saveChoice": "Salvează alegerea",
+  "config.help.group.both": "Tu conduci întâlnirile și, pe lângă asta, îți ții și lista ta de visuri și spui din ele în grup. Atenție: în acest grup nimeni nu este Prietenul tău al Visului, deci nimeni nu îți pune ție întrebările. Dacă vrei pe cineva care să te însoțească la visul tău, fă în paralel o pereche de egali cu un alt Prieten al Visului."
 }

@@ -29,7 +29,11 @@ export function useSettings() { return useContext(SettingsCtx) }
 
 /** Whether this device currently acts as the Dream Friend (FR-06). */
 export function isFriendNow(s: Settings) {
-  return s.role === 'friend' || (s.role === 'both' && s.friendToday)
+  return s.role === 'friend' || (s.role === 'both' && (s.friendToday || s.config === 'group'))
+}
+/** The per-meeting switch only makes sense in a pair, where the role rotates. */
+export function showsFriendSwitch(s: Settings) {
+  return s.role === 'both' && s.config === 'pair'
 }
 export function showsFriendSection(s: Settings) {
   return s.role === 'friend' || s.role === 'both'

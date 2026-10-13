@@ -21,7 +21,7 @@ export default function Shell({ children }: { children: ReactNode }) {
     <div className="shell">
       <header className="topbar">
         <Link to="/" className="brand">{t('app.title')}</Link>
-        {settings.role === 'both' && settings.friendToday && <span className="chip on small">{t('home.friendMode')}</span>}
+        {settings.role === 'both' && settings.config === 'pair' && settings.friendToday && <span className="chip on small">{t('home.friendMode')}</span>}
       </header>
       {!onboarding && !printing && (
         <nav className="nav" aria-label="main">

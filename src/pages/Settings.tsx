@@ -51,7 +51,7 @@ export default function Settings() {
           <div className="small muted">{t('settings.role')}</div>
           <div><strong>{t(`onboarding.role.${settings.role}`)}</strong> <span className="small">— {t(`role.help.${settings.role}`)}</span></div>
           <div className="small muted" style={{ marginTop: 8 }}>{t('settings.config')}</div>
-          <div><strong>{t(`onboarding.config.${settings.config}`)}</strong> <span className="small">— {t(`config.help.${settings.config}`)}</span></div>
+          <div><strong>{t(`onboarding.config.${settings.config}`)}</strong> <span className="small">— {t(settings.config === 'group' && settings.role === 'both' ? 'config.help.group.both' : `config.help.${settings.config}`)}</span></div>
           {issue && <p className="notice small">{t(`combo.${issue}`)}</p>}
           <button className="btn sm" style={{ marginTop: 10 }} onClick={startEdit}>{t('settings.change')}</button>
         </div>

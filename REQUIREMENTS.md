@@ -80,6 +80,10 @@ Identifiers are stable; reference them from issues and commits.
   Both + group are valid. Choosing pair sets the role to Both and says why; a Dream Friend
   cannot choose pair (a pair has no non-participating Friend); Both + solo shows a notice
   asking for pair or group, since "Both" needs someone whose Dream Friend this person is.
+  Both + group is the group leader who also keeps their own dream list: the text says
+  nobody in the group is their Dream Friend and suggests a separate peer pair for that;
+  the per-meeting "today I am the Friend" switch is shown only in a pair, and in a group
+  the Both device always acts as the Friend.
 - FR-03 Interface language toggle RO/EN on every screen; the choice persists. All
   interface strings live in locale dictionaries, never in components. Course content
   is served from a per-locale content tree; v1 ships `ro` only. When the interface is

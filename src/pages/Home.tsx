@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useT, contentLocaleFor } from '../i18n'
-import { useSettings, showsDreamerParts } from '../state/settings'
+import { useSettings, showsDreamerParts, showsFriendSwitch } from '../state/settings'
 import { db } from '../db/db'
 import { listModules, type ModuleMeta } from '../content/loader'
 
@@ -39,7 +39,7 @@ export default function Home() {
         ) : modules.length === 0 ? <div className="muted">…</div> : <div>{t('home.next.allDone')}</div>}
       </div>
 
-      {settings.role === 'both' && (
+      {showsFriendSwitch(settings) && (
         <label className="card row" style={{ cursor: 'pointer' }}>
           <input type="checkbox" checked={settings.friendToday} onChange={(e) => update({ friendToday: e.target.checked })} />
           <span>{t('home.friendMode')}<br /><span className="small muted">{t('home.friendMode.help')}</span></span>
