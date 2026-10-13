@@ -6,6 +6,7 @@ import { db, type Role, type Config } from '../db/db'
 import { exportAll, importAll, downloadJson } from '../db/exportImport'
 import { comboIssue } from '../state/combos'
 import RoleConfigPicker from '../components/RoleConfigPicker'
+import Stepper from '../components/Stepper'
 
 export default function Settings() {
   const { t } = useT()
@@ -67,7 +68,7 @@ export default function Settings() {
 
       <div className="card">
         <div className="field"><label htmlFor="sd">{t('onboarding.start')}</label><input id="sd" type="date" value={settings.startDate ?? ''} onChange={(e) => update({ startDate: e.target.value })} /></div>
-        <div className="field"><label htmlFor="cd">{t('onboarding.cadence')}</label><input id="cd" type="number" min={7} max={42} value={settings.cadenceDays} onChange={(e) => update({ cadenceDays: Number(e.target.value) || 14 })} /></div>
+        <div className="field"><label htmlFor="cd">{t('onboarding.cadence')}</label><Stepper id="cd" min={7} max={42} value={settings.cadenceDays} onChange={(v) => update({ cadenceDays: v })} /></div>
         {settings.role !== 'friend' && (
           <label className="row" style={{ minHeight: 44 }}><input type="checkbox" checked={settings.paperMode} onChange={(e) => update({ paperMode: e.target.checked })} /> {t('onboarding.paper')}</label>
         )}

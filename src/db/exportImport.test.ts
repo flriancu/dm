@@ -26,6 +26,7 @@ describe('export / import round trip (FR-50, acceptance 3)', () => {
     await a.wheels.add({ date: today(), values: [5, 6, 4, 7, 8, 6, 5, 3], swls: [4, 5, 5, 4, 3] })
     await a.reps.add({ date: today(), seconds: 60 })
     await a.strengthUses.add({ date: today(), strength: 'curiozitate', text: 'am sunat un ghid' })
+    await a.vision.put({ id: 'me', values: [{ text: 'familia', chosen: true, nonNegotiable: true }], valueActs: [], letter: { text: 'e marți dimineață', sealed: true, deliverDate: '2027-04-01' }, worksheet: { matters: 'familia' }, updated: today() })
 
     const file = await exportAll(a)
     expect(isExportFile(file)).toBe(true)
@@ -45,6 +46,7 @@ describe('export / import round trip (FR-50, acceptance 3)', () => {
     expect((await b.wheels.toArray())[0]?.swls).toEqual([4, 5, 5, 4, 3])
     expect(await b.reps.count()).toBe(1)
     expect(await b.strengthUses.count()).toBe(1)
+    expect((await b.vision.get('me'))?.letter?.deliverDate).toBe('2027-04-01')
     expect((await b.dreamWork.toArray())[0]?.friends?.[0]?.name).toBe('Mihai')
     expect((await b.dreamWork.toArray())[0]?.habitLog?.[0]?.done).toBe(true)
   })

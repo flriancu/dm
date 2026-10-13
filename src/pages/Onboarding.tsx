@@ -4,6 +4,7 @@ import { useT, UI_LOCALES, LOCALE_META, type UiLocale } from '../i18n'
 import { useSettings } from '../state/settings'
 import { today, type Role, type Config } from '../db/db'
 import RoleConfigPicker from '../components/RoleConfigPicker'
+import Stepper from '../components/Stepper'
 
 export default function Onboarding() {
   const { t } = useT()
@@ -50,7 +51,7 @@ export default function Onboarding() {
             </div>
             <div className="field">
               <label htmlFor="cad">{t('onboarding.cadence')}</label>
-              <input id="cad" type="number" min={7} max={42} value={cadenceDays} onChange={(e) => setCadence(Number(e.target.value) || 14)} />
+              <Stepper id="cad" min={7} max={42} value={cadenceDays} onChange={setCadence} />
             </div>
           </div>
 

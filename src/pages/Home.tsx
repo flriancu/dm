@@ -77,6 +77,7 @@ export default function Home() {
           <Link className="btn sm" to="/dream">{t('mydream.title')}</Link>
           <Link className="btn sm" to="/week">{t('week.title')}</Link>
           <Link className="btn sm" to="/calm">{t('calm.title')}</Link>
+          <Link className="btn sm" to="/vision">{t('vision.title')}</Link>
         </div>
       </div>
 

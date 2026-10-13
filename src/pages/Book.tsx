@@ -3,12 +3,12 @@ import { Link, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useT, contentLocaleFor } from '../i18n'
 import { useSettings } from '../state/settings'
-import { db, CLARIFY_STEPS, WOOP_STEPS, QUADRANTS, HABIT_PARTS, WHEEL_AREAS, SWLS_ITEMS } from '../db/db'
+import { db, CLARIFY_STEPS, WOOP_STEPS, QUADRANTS, HABIT_PARTS, WHEEL_AREAS, SWLS_ITEMS, VISION_SECTIONS } from '../db/db'
 import { WheelSvg } from './Calm'
 import { loadDoc } from '../content/loader'
 
 /** Dream Book sheets available so far (FR-04). Each sheet is a `.sheet` block that prints on its own page. */
-const SHEETS = ['cover', 'dreams', 'rating', 'clarify', 'week', 'woop', 'habit', 'friends', 'fear', 'profile', 'journal', 'wheel'] as const
+const SHEETS = ['cover', 'dreams', 'rating', 'clarify', 'week', 'woop', 'habit', 'friends', 'fear', 'profile', 'journal', 'wheel', 'values', 'letter', 'sheet'] as const
 type SheetId = (typeof SHEETS)[number]
 
 export default function Book({ print = false }: { print?: boolean }) {
@@ -54,6 +54,9 @@ export default function Book({ print = false }: { print?: boolean }) {
         {ids.includes('profile') && <ProfileSheet />}
         {ids.includes('journal') && <JournalSheet />}
         {ids.includes('wheel') && <WheelSheet />}
+        {ids.includes('values') && <ValuesSheet />}
+        {ids.includes('letter') && <LetterSheet />}
+        {ids.includes('sheet') && <VisionSheet />}
       </div>
     </>
   )
@@ -301,5 +304,62 @@ function WheelSheet() {
         {SWLS_ITEMS.map((k, i) => <tr key={k}><th style={{ width: '70%', fontWeight: 400 }}>{t(`swls.${k}`)}</th><td>{last ? last.swls[i] : ''}</td></tr>)}
       </tbody></table>
     </section>
+  )
+}
+
+function ValuesSheet() {
+  const { t } = useT()
+  const v = useLiveQuery(() => db.vision.get('me'), [])
+  const vals: { text: string; chosen?: boolean; nonNegotiable?: boolean }[] = [...(v?.values ?? []), ...Array.from({ length: 10 }, () => ({ text: '' }))].slice(0, 10)
+  return (
+    <section className="sheet">
+      <h1>{t('book.sheet.values')}</h1>
+      <p>{t('values.help')}</p>
+      <table><thead><tr><th style={{ width: '3em' }}>{t('book.col.n')}</th><th>{t('values.title')}</th><th style={{ width: '5em' }}>★</th><th style={{ width: '8em' }}>{t('values.nonneg.short')}</th></tr></thead>
+        <tbody>{vals.map((x, i) => <tr key={i}><td>{i + 1}</td><td>{x.text}</td><td>{x.chosen ? '★' : ''}</td><td>{x.nonNegotiable ? '✓' : ''}</td></tr>)}</tbody></table>
+      <h3>{t('values.acts')}</h3>
+      {[1, 2, 3].map((i) => <div key={i} className="lines" />)}
+    </section>
+  )
+}
+
+function LetterSheet() {
+  const { t } = useT()
+  const v = useLiveQuery(() => db.vision.get('me'), [])
+  const qs = ['where', 'doing', 'feel', 'built', 'stopped', 'mattered', 'advice']
+  const hidden = !!v?.letter?.sealed && !v?.letter?.opened
+  return (
+    <>
+      <section className="sheet">
+        <h1>{t('book.sheet.letter')}</h1>
+        <p>{t('letter.help')}</p>
+        <ol>{qs.map((q) => <li key={q}>{t(`letter.q.${q}`)}</li>)}</ol>
+        <div className="box" style={{ minHeight: '120mm', whiteSpace: 'pre-wrap' }}>{hidden ? '' : (v?.letter?.text ?? '')}</div>
+      </section>
+      <section className="sheet">
+        <h1>{t('letter.reply')}</h1>
+        <div className="box" style={{ minHeight: '90mm', whiteSpace: 'pre-wrap' }}>{hidden ? '' : (v?.letter?.reply ?? '')}</div>
+        <p>{t('letter.date')}: {v?.letter?.deliverDate ?? '____________'}</p>
+      </section>
+    </>
+  )
+}
+
+function VisionSheet() {
+  const { t } = useT()
+  const v = useLiveQuery(() => db.vision.get('me'), [])
+  const pages = [VISION_SECTIONS.slice(0, 4), VISION_SECTIONS.slice(4, 7), VISION_SECTIONS.slice(7)]
+  return (
+    <>
+      {pages.map((secs, p) => (
+        <section className="sheet" key={p}>
+          <h1>{t('book.sheet.sheet')} {p + 1}/3</h1>
+          {secs.map((sec) => {
+            const i = VISION_SECTIONS.indexOf(sec)
+            return <div key={sec}><h3>{i + 1}. {t(`sheet.${sec}`)}</h3><p>{t(`sheet.${sec}.q`)}</p><div className="box" style={{ minHeight: '34mm', whiteSpace: 'pre-wrap' }}>{v?.worksheet?.[sec] ?? ''}</div></div>
+          })}
+        </section>
+      ))}
+    </>
   )
 }

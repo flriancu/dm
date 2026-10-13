@@ -17,7 +17,7 @@ await p.goto(base + '#/dreams')
 const input = p.getByLabel('Un vis nou')
 for (const d of ['Să văd aurora boreală', 'Să gătesc o ciorbă ca a bunicii', 'O seară pe săptămână doar pentru mine']) { await input.fill(d); await input.press('Enter') }
 await p.getByText('Să văd aurora boreală').click()
-await p.getByLabel(/^Importanță/).fill('9'); await p.getByRole('button', { name: 'din interior' }).click()
+await p.getByRole('button', { name: '9', exact: true }).first().click(); await p.getByRole('button', { name: 'din interior' }).click()
 await p.getByRole('button', { name: /Aleg acest vis/ }).click()
 await p.getByText('Criteriile mele').click()
 await p.getByPlaceholder('de exemplu: mă apropie').fill('mă apropie de familie'); await p.getByRole('button', { name: 'Adaugă criteriul' }).click()

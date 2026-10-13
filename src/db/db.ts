@@ -87,6 +87,14 @@ export const WHEEL_AREAS = ['home', 'work', 'money', 'health', 'friends', 'partn
 export const SWLS_ITEMS = ['ideal', 'conditions', 'satisfied', 'gotten', 'again'] as const
 export interface WheelSnapshot { id?: number; date: string; values: number[]; swls: number[] }
 
+/** Modules 6–7: values, the letter from the future self, the vision worksheet (FR-40..45). One row, id 'me'. */
+export interface ValueItem { text: string; chosen?: boolean; nonNegotiable?: boolean }
+export interface ValueAct { date: string; value: string; text: string }
+export interface Letter { text?: string; reply?: string; deliverDate?: string; sealed?: boolean; sealedOn?: string; opened?: boolean }
+export const VISION_SECTIONS = ['matters', 'best', 'energy', 'tenYears', 'impact', 'idealDay', 'identity', 'statement', 'focus'] as const
+export type VisionSection = (typeof VISION_SECTIONS)[number]
+export interface VisionDoc { id: 'me'; values: ValueItem[]; valueActs: ValueAct[]; letter?: Letter; worksheet: Partial<Record<VisionSection, string>>; updated: string }
+
 /** Monday of the week containing an ISO date. */
 export function weekStart(iso: string): string {
   const d = new Date(iso + 'T00:00:00')
@@ -119,6 +127,7 @@ export class DreamDB extends Dexie {
   strengthUses!: EntityTable<StrengthUse, 'id'>
   reps!: EntityTable<RepDone, 'id'>
   wheels!: EntityTable<WheelSnapshot, 'id'>
+  vision!: EntityTable<VisionDoc, 'id'>
 
   constructor(name = 'dream-course') {
     super(name)
@@ -140,6 +149,9 @@ export class DreamDB extends Dexie {
       strengthUses: '++id, date',
       reps: '++id, date',
       wheels: '++id, date',
+    })
+    this.version(5).stores({
+      vision: 'id',
     })
   }
 }

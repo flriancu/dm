@@ -13,6 +13,7 @@ const Dreams = lazy(() => import('./pages/Dreams'))
 const MyDream = lazy(() => import('./pages/MyDream'))
 const Week = lazy(() => import('./pages/Week'))
 const Calm = lazy(() => import('./pages/Calm'))
+const Vision = lazy(() => import('./pages/Vision'))
 const Book = lazy(() => import('./pages/Book'))
 const Friend = lazy(() => import('./pages/Friend'))
 const Settings = lazy(() => import('./pages/Settings'))
@@ -36,6 +37,7 @@ function Gate() {
             <Route path="/dream" element={<MyDream />} />
             <Route path="/week" element={<Week />} />
             <Route path="/calm" element={<Calm />} />
+            <Route path="/vision" element={<Vision />} />
             <Route path="/book" element={<Book />} />
             <Route path="/book/print/:which" element={<Book print />} />
             <Route path="/friend" element={<Friend />} />

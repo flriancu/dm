@@ -1,5 +1,6 @@
 /* Design tokens. Light by default, dark via system preference or data-theme. */
 :root {
+  color-scheme: light;
   --bg: #faf7f2;
   --surface: #ffffff;
   --text: #22201c;
@@ -18,6 +19,7 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --bg: #17161a;
     --surface: #222126;
     --text: #ece8e1;
@@ -31,6 +33,7 @@
   }
 }
 :root[data-theme="dark"] {
+  color-scheme: dark;
   --bg: #17161a;
   --surface: #222126;
   --text: #ece8e1;
@@ -186,3 +189,11 @@ html { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
 ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 8px; border: 2px solid var(--bg); }
 ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 textarea { scrollbar-width: thin; }
+
+/* Stepper: themed number control; native spinners hidden */
+.stepper { display: inline-flex; align-items: center; gap: 8px; }
+.stepper input[type="number"] { width: 4.5em; text-align: center; -moz-appearance: textfield; appearance: textfield; }
+.stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.stepper .btn { min-width: var(--tap); padding: 0; font-size: 1.2rem; }
+input[type="number"]:not(.stepper input) { -moz-appearance: textfield; appearance: textfield; }
+input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }

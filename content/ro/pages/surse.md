@@ -1,6 +1,6 @@
 ---
 title: Surse și mulțumiri
-source_version: 6
+source_version: 7
 ---
 
 Cursul este o adaptare, pentru uz privat între prieteni și familie, a unui program de „management al visurilor” (Dream Management) la care autorul a participat în 2026. Nu este vândut și nu înlocuiește un program certificat.
@@ -33,7 +33,7 @@ Metodele din curs se sprijină pe studii publicate în reviste de specialitate. 
 - Scrisul obiectivelor și urmărirea progresului (modulul 1 și lista visurilor): Epton, Currie & Armitage (2017), *Journal of Consulting and Clinical Psychology* — [articol](https://doi.org/10.1037/ccp0000260), DOI 10.1037/ccp0000260; Harkin și colab. (2016), *Psychological Bulletin* — [articol](https://doi.org/10.1037/bul0000025), DOI 10.1037/bul0000025
 - A spune altora despre un vis (modulul 4): Peetz, Buehler & Wells (2025), *Personality and Social Psychology Bulletin* — [articol](https://doi.org/10.1177/01461672251382271), DOI 10.1177/01461672251382271; Klein și colab. (2020), *Journal of Applied Psychology* — [articol](https://doi.org/10.1037/apl0000441), DOI 10.1037/apl0000441; Gollwitzer și colab. (2009), *Psychological Science* — [articol](https://doi.org/10.1111/j.1467-9280.2009.02336.x), DOI 10.1111/j.1467-9280.2009.02336.x
 - Obiceiurile mici și cât durează să se formeze (modulul 4): Singh și colab. (2024), *Healthcare* — [articol](https://doi.org/10.3390/healthcare12232488), DOI 10.3390/healthcare12232488
-- Scrisoarea către sinele viitor (modulul 6): Carrillo și colab. (2019), *PLOS ONE* — [articol](https://doi.org/10.1371/journal.pone.0222386), DOI 10.1371/journal.pone.0222386; Rutchick și colab. (2018), *Journal of Experimental Psychology: Applied* — [articol](https://doi.org/10.1037/xap0000153), DOI 10.1037/xap0000153; Chishima & Wilson (2020), *Self and Identity* — [articol](https://doi.org/10.1080/15298868.2020.1754283), DOI 10.1080/15298868.2020.1754283
+- Scrisoarea de la / către sinele viitor (modulul 6; studiile folosesc scrisori în ambele direcții): Carrillo și colab. (2019), *PLOS ONE* — [articol](https://doi.org/10.1371/journal.pone.0222386), DOI 10.1371/journal.pone.0222386; Rutchick și colab. (2018), *Journal of Experimental Psychology: Applied* — [articol](https://doi.org/10.1037/xap0000153), DOI 10.1037/xap0000153; Chishima & Wilson (2020), *Self and Identity* — [articol](https://doi.org/10.1080/15298868.2020.1754283), DOI 10.1080/15298868.2020.1754283
 - Punctele forte (modulul 5): Schutte & Malouff (2019), *Journal of Happiness Studies* — [articol](https://doi.org/10.1007/s10902-018-9990-2), DOI 10.1007/s10902-018-9990-2
 - Valorile personale (modulul 6): Zhang și colab. (2025), *American Psychologist* — [articol](https://doi.org/10.1037/amp0001591), DOI 10.1037/amp0001591; Russo-Netzer & Atad (2024), *Frontiers in Psychology* — [articol](https://doi.org/10.3389/fpsyg.2024.1375237), DOI 10.3389/fpsyg.2024.1375237
 - Exercițiile scurte de atenție (modulul 5): Hirshberg și colab. (2018), *PLOS ONE* — [articol](https://doi.org/10.1371/journal.pone.0207765), DOI 10.1371/journal.pone.0207765

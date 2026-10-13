@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import Stepper from '../components/Stepper'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useT } from '../i18n'
 import { useSettings } from '../state/settings'
@@ -46,7 +47,7 @@ export default function Dreams() {
           <p>{t('dreams.paper')}</p>
           <div className="field">
             <label htmlFor="pc">{t('dreams.paper.count')}</label>
-            <input id="pc" type="number" min={0} max={100} placeholder={t('dreams.paper.count.placeholder')} value={settings.paperCount} onChange={(e) => update({ paperCount: Math.max(0, Math.min(100, Number(e.target.value) || 0)) })} />
+            <Stepper id="pc" min={0} max={100} value={settings.paperCount} onChange={(v) => update({ paperCount: v })} />
           </div>
         </div>
       ) : (
@@ -86,7 +87,7 @@ export default function Dreams() {
                 <div className="card" style={{ margin: '8px 0 0' }}>
                   <div className="field">
                     <label htmlFor={`score-${d.id}`}>{t('dreams.score')}</label>
-                    <input id={`score-${d.id}`} className="score" type="number" min={1} max={10} value={d.score ?? ''} onChange={(e) => patch(d, { score: e.target.value ? Math.max(1, Math.min(10, Number(e.target.value))) : undefined })} />
+                    <div className="row">{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => <button key={n} className={`chip ${d.score === n ? 'on' : ''}`} onClick={() => patch(d, { score: d.score === n ? undefined : n })} aria-pressed={d.score === n}>{n}</button>)}</div>
                   </div>
                   <div className="field">
                     <label htmlFor={`area-${d.id}`}>{t('dreams.area')}</label>
