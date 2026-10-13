@@ -29,6 +29,11 @@ await p.goto(base + '#/module/02'); await p.getByRole('heading', { name: 'Clarif
 await p.goto(base + '#/dream'); await p.getByLabel(/^Claritate/).waitFor()
 await p.getByLabel(/^Claritate/).fill('în vara viitoare, zece zile pe jos prin Apuseni, cu sora mea'); await p.getByLabel('Drumul 1').fill('dintr-o bucată'); await p.getByLabel('Drumul 1').blur(); await p.waitForTimeout(300); await shot('05b-mydream')
 await p.goto(base + '#/book/print/clarify'); await p.waitForSelector('.sheet'); await shot('07b-print-clarify')
+await p.goto(base + '#/week'); await p.getByLabel('Un lucru pe care îl fac').waitFor()
+for (const x of ['ședința de luni', 'cumpărături', 'am derulat pe telefon o oră', 'am dus copilul la antrenament']) { await p.getByLabel('Un lucru pe care îl fac').fill(x); await p.getByLabel('Un lucru pe care îl fac').press('Enter') }
+await p.getByText('ședința de luni').click(); await p.getByRole('button', { name: 'Fă acum' }).click()
+await p.getByText('am derulat pe telefon o oră').click(); await p.getByRole('button', { name: 'Pun în calendar săptămâna aceasta' }).click(); await p.waitForTimeout(300); await shot('05c-week')
+await p.goto(base + '#/book/print/week'); await p.waitForSelector('.sheet'); await shot('07c-print-week')
 await p.goto(base + '#/'); await p.waitForTimeout(300); await shot('02-home')
 await p.goto(base + '#/modules'); await p.waitForTimeout(300); await shot('03-modules')
 await p.goto(base + '#/book'); await p.waitForTimeout(300); await shot('06-book')

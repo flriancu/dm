@@ -54,11 +54,27 @@ export interface FriendNote {           // Dream Friend's own notes (FR-61), sep
 export const CLARIFY_STEPS = ['clarity', 'imagine', 'feel', 'anchor', 'act'] as const
 export type ClarifyStep = (typeof CLARIFY_STEPS)[number]
 
+export const WOOP_STEPS = ['wish', 'outcome', 'obstacle', 'plan'] as const
+export type WoopStep = (typeof WOOP_STEPS)[number]
+
 export interface DreamWork {
   dreamId: number
   clarify?: Partial<Record<ClarifyStep, string>>   // module 2 (C)
   routes?: string[]                                 // three routes (module 2)
+  woop?: Partial<Record<WoopStep, string>>         // module 3 (O), FR-21
   updated: string
+}
+
+/** Eisenhower matrix items from a real week (FR-13), module 3. */
+export const QUADRANTS = ['now', 'plan', 'delegate', 'drop'] as const
+export type Quadrant = (typeof QUADRANTS)[number]
+export interface WeekTask {
+  id?: number
+  text: string
+  quadrant?: Quadrant
+  moved?: 0 | 1          // the one task moved to "plan" this week
+  when?: string          // day and hour given to it
+  created: string
 }
 
 export class DreamDB extends Dexie {
@@ -68,6 +84,7 @@ export class DreamDB extends Dexie {
   settings!: EntityTable<Setting, 'key'>
   friendNotes!: EntityTable<FriendNote, 'id'>
   dreamWork!: EntityTable<DreamWork, 'dreamId'>
+  weekTasks!: EntityTable<WeekTask, 'id'>
 
   constructor(name = 'dream-course') {
     super(name)
@@ -80,6 +97,9 @@ export class DreamDB extends Dexie {
     })
     this.version(2).stores({
       dreamWork: 'dreamId',
+    })
+    this.version(3).stores({
+      weekTasks: '++id, quadrant, moved, created',
     })
   }
 }

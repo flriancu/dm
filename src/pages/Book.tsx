@@ -3,11 +3,11 @@ import { Link, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useT, contentLocaleFor } from '../i18n'
 import { useSettings } from '../state/settings'
-import { db, CLARIFY_STEPS } from '../db/db'
+import { db, CLARIFY_STEPS, WOOP_STEPS, QUADRANTS } from '../db/db'
 import { loadDoc } from '../content/loader'
 
 /** Dream Book sheets available so far (FR-04). Each sheet is a `.sheet` block that prints on its own page. */
-const SHEETS = ['cover', 'dreams', 'rating', 'clarify'] as const
+const SHEETS = ['cover', 'dreams', 'rating', 'clarify', 'week', 'woop'] as const
 type SheetId = (typeof SHEETS)[number]
 
 export default function Book({ print = false }: { print?: boolean }) {
@@ -45,6 +45,8 @@ export default function Book({ print = false }: { print?: boolean }) {
         {ids.includes('dreams') && <DreamsSheet />}
         {ids.includes('rating') && <RatingSheet />}
         {ids.includes('clarify') && <ClarifySheet />}
+        {ids.includes('week') && <WeekSheet />}
+        {ids.includes('woop') && <WoopSheet />}
       </div>
     </>
   )
@@ -129,6 +131,48 @@ function ClarifySheet() {
       </table>
       <h3>{t('mydream.routes')}</h3>
       {routes.map((r, i) => <div key={i}><p style={{ margin: '6px 0 0' }}>{t('mydream.route', { n: i + 1 })}: {r}</p><div className="lines" /></div>)}
+    </section>
+  )
+}
+
+function WeekSheet() {
+  const { t } = useT()
+  const tasks = useLiveQuery(() => db.weekTasks.toArray(), []) ?? []
+  const cell = (q: (typeof QUADRANTS)[number]) => tasks.filter((x) => x.quadrant === q).map((x) => x.text).join(' · ')
+  return (
+    <section className="sheet">
+      <h1>{t('book.sheet.week')}</h1>
+      <p>{t('week.intro')}</p>
+      <table>
+        <thead><tr><th style={{ width: '18%' }} /><th>{t('week.axis.urgent')}</th><th>{t('week.axis.notUrgent')}</th></tr></thead>
+        <tbody>
+          <tr><th>{t('week.axis.important')}</th><td><strong>{t('week.quadrant.now')}</strong><div style={{ minHeight: '40mm' }}>{cell('now')}</div></td><td><strong>{t('week.quadrant.plan')}</strong><div style={{ minHeight: '40mm' }}>{cell('plan')}</div></td></tr>
+          <tr><th>{t('week.axis.notImportant')}</th><td><strong>{t('week.quadrant.delegate')}</strong><div style={{ minHeight: '40mm' }}>{cell('delegate')}</div></td><td><strong>{t('week.quadrant.drop')}</strong><div style={{ minHeight: '40mm' }}>{cell('drop')}</div></td></tr>
+        </tbody>
+      </table>
+      <h3>{t('week.reflect')}</h3>
+      {[1, 2, 3, 4].map((i) => <div key={i}><p style={{ margin: '6px 0 0' }}>{t(`week.reflect.${i}`)}</p><div className="lines" /></div>)}
+    </section>
+  )
+}
+
+function WoopSheet() {
+  const { t } = useT()
+  const dream = useLiveQuery(() => db.dreams.where('chosen').equals(1).first(), [])
+  const work = useLiveQuery(() => (dream?.id ? db.dreamWork.get(dream.id) : undefined), [dream?.id])
+  return (
+    <section className="sheet">
+      <h1>{t('book.sheet.woop')}</h1>
+      <p>{t('home.chosen')}: <strong>{dream?.text ?? ''}</strong></p>
+      <p>{t('woop.help')}</p>
+      <table>
+        <thead><tr><th style={{ width: '7em' }}>{t('book.col.step')}</th><th style={{ width: '38%' }}>{t('book.col.what')}</th><th>{t('book.col.answer')}</th></tr></thead>
+        <tbody>
+          {WOOP_STEPS.map((s) => (
+            <tr key={s}><td>{t(`woop.${s}`)}</td><td>{t(`woop.${s}.q`)}</td><td>{work?.woop?.[s] ?? ''}<div style={{ minHeight: '26mm' }} /></td></tr>
+          ))}
+        </tbody>
+      </table>
     </section>
   )
 }

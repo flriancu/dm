@@ -1,4 +1,4 @@
-import { db, type DreamDB, type Dream, type Plan, type ModuleNote, type Setting, type FriendNote, type DreamWork } from './db'
+import { db, type DreamDB, type Dream, type Plan, type ModuleNote, type Setting, type FriendNote, type DreamWork, type WeekTask } from './db'
 
 /** FR-50: one JSON file is the backup; import restores it. FR-61: friend notes exported apart. */
 export interface ExportFile {
@@ -11,15 +11,16 @@ export interface ExportFile {
   settings: Setting[]
   friendNotes?: FriendNote[]
   dreamWork?: DreamWork[]
+  weekTasks?: WeekTask[]
 }
 
 export async function exportAll(d: DreamDB = db, includeFriend = true): Promise<ExportFile> {
-  const [dreams, plans, moduleNotes, settings, friendNotes, dreamWork] = await Promise.all([
+  const [dreams, plans, moduleNotes, settings, friendNotes, dreamWork, weekTasks] = await Promise.all([
     d.dreams.toArray(), d.plans.toArray(), d.moduleNotes.toArray(), d.settings.toArray(),
     includeFriend ? d.friendNotes.toArray() : Promise.resolve(undefined),
-    d.dreamWork.toArray(),
+    d.dreamWork.toArray(), d.weekTasks.toArray(),
   ])
-  return { app: 'dream-course', schema: 1, exportedAt: new Date().toISOString(), dreams, plans, moduleNotes, settings, friendNotes, dreamWork }
+  return { app: 'dream-course', schema: 1, exportedAt: new Date().toISOString(), dreams, plans, moduleNotes, settings, friendNotes, dreamWork, weekTasks }
 }
 
 export function isExportFile(x: unknown): x is ExportFile {
@@ -31,14 +32,15 @@ export function isExportFile(x: unknown): x is ExportFile {
 /** Replaces everything on the device with the file's content. */
 export async function importAll(file: ExportFile, d: DreamDB = db): Promise<{ dreams: number; plans: number }> {
   if (!isExportFile(file)) throw new Error('not an export file')
-  await d.transaction('rw', [d.dreams, d.plans, d.moduleNotes, d.settings, d.friendNotes, d.dreamWork], async () => {
-    await Promise.all([d.dreams.clear(), d.plans.clear(), d.moduleNotes.clear(), d.settings.clear(), d.friendNotes.clear(), d.dreamWork.clear()])
+  await d.transaction('rw', [d.dreams, d.plans, d.moduleNotes, d.settings, d.friendNotes, d.dreamWork, d.weekTasks], async () => {
+    await Promise.all([d.dreams.clear(), d.plans.clear(), d.moduleNotes.clear(), d.settings.clear(), d.friendNotes.clear(), d.dreamWork.clear(), d.weekTasks.clear()])
     await d.dreams.bulkAdd(file.dreams)
     await d.plans.bulkAdd(file.plans)
     await d.moduleNotes.bulkAdd(file.moduleNotes ?? [])
     await d.settings.bulkAdd(file.settings)
     if (file.friendNotes) await d.friendNotes.bulkAdd(file.friendNotes)
     if (file.dreamWork) await d.dreamWork.bulkAdd(file.dreamWork)
+    if (file.weekTasks) await d.weekTasks.bulkAdd(file.weekTasks)
   })
   return { dreams: file.dreams.length, plans: file.plans.length }
 }
