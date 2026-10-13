@@ -49,9 +49,9 @@ Short reading. Define every term on first use. One idea per paragraph.
 
 ## Cu Prietenul Visului {#friend}
 One sentence that works for all configurations, then:
-### Eu și un Prieten {#solo}
-### Pereche {#pair}
-### Grup {#group}
+### Un Visător și Prietenul lui {#solo}
+### Pereche de egali {#pair}
+### Prieten al Visului și grup {#group}
 
 ## Până data viitoare {#next}
 One practice, at most two. The app turns it into an if-then plan.

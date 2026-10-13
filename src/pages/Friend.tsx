@@ -23,7 +23,7 @@ export default function Friend() {
     <>
       <h1>{t('friend.title')}</h1>
       <div className="row">
-        {['01'].map((m) => <button key={m} className={`chip ${moduleId === m ? 'on' : ''}`} onClick={() => setModuleId(m)}>{t('home.module')} {Number(m)}</button>)}
+        {['01', '02'].map((m) => <button key={m} className={`chip ${moduleId === m ? 'on' : ''}`} onClick={() => setModuleId(m)}>{t('home.module')} {Number(m)}</button>)}
         <span className="chip">{t(`onboarding.config.${settings.config}`)}</span>
       </div>
       <h2>{t('friend.plan')}</h2>

@@ -5,7 +5,7 @@ title: Bun venit
 subtitle: De la modul de supraviețuire înapoi la visat
 takeaway: Este vorba despre tine ca om întreg, nu doar despre ce faci la serviciu sau acasă.
 sources: [DM_Pilot_Intro_Apr2026.pdf, Kick-off slides 3 și 6]
-source_version: 3
+source_version: 4
 duration: 30 de minute, singur
 ---
 
@@ -30,7 +30,7 @@ Nu ai nevoie de un „vis mare”. Aici înveți cum să lucrezi cu un vis, oric
 ## Fă {#do}
 
 1. Fă rost de o **Carte a Visurilor**: orice caiet și un pix. De exemplu, un caiet A5 cu coperți tari, pe care îl ții pe noptieră. Hârtia este mediul principal; aplicația ține doar evidența (câte visuri ai, visul ales, planurile tale) și îți amintește de întâlniri.
-2. Alege cum arată Cartea ta: fie tipărești foile din secțiunea *Carte* (lista celor 100 de visuri, foaia cu criteriile de importanță, pe care o completezi în modulul 2, și, mai târziu, celelalte foi) și le pui într-un dosar sau le lipești în caiet, fie folosești caietul gol și scrii totul liber, fără formulare. Amândouă merg la fel de bine; ce contează e să scrii de mână și să te întorci la ce ai scris.
+2. Alege cum arată Cartea ta: fie tipărești foile din secțiunea *Carte* (lista celor 100 de visuri, foaia „Criteriile mele de importanță”, pe care o completezi în modulul 2, și, mai târziu, celelalte foi) și le pui într-un dosar sau le lipești în caiet, fie folosești caietul gol și scrii totul liber, fără formulare. Amândouă merg la fel de bine; ce contează e să scrii de mână și să te întorci la ce ai scris.
 3. Dacă nu ai făcut-o deja la pornire, setează în *Setări* data primei întâlniri cu Prietenul Visului și limba interfeței.
 
 ### Regulile de bază

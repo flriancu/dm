@@ -3,11 +3,11 @@ import { Link, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useT, contentLocaleFor } from '../i18n'
 import { useSettings } from '../state/settings'
-import { db } from '../db/db'
+import { db, CLARIFY_STEPS } from '../db/db'
 import { loadDoc } from '../content/loader'
 
 /** Dream Book sheets available so far (FR-04). Each sheet is a `.sheet` block that prints on its own page. */
-const SHEETS = ['cover', 'dreams', 'rating'] as const
+const SHEETS = ['cover', 'dreams', 'rating', 'clarify'] as const
 type SheetId = (typeof SHEETS)[number]
 
 export default function Book({ print = false }: { print?: boolean }) {
@@ -44,6 +44,7 @@ export default function Book({ print = false }: { print?: boolean }) {
         {ids.includes('cover') && <CoverSheet />}
         {ids.includes('dreams') && <DreamsSheet />}
         {ids.includes('rating') && <RatingSheet />}
+        {ids.includes('clarify') && <ClarifySheet />}
       </div>
     </>
   )
@@ -104,6 +105,30 @@ function RatingSheet() {
           ))}
         </tbody>
       </table>
+    </section>
+  )
+}
+
+function ClarifySheet() {
+  const { t } = useT()
+  const dream = useLiveQuery(() => db.dreams.where('chosen').equals(1).first(), [])
+  const work = useLiveQuery(() => (dream?.id ? db.dreamWork.get(dream.id) : undefined), [dream?.id])
+  const routes = [...(work?.routes ?? []), '', '', ''].slice(0, 3)
+  return (
+    <section className="sheet">
+      <h1>{t('book.sheet.clarify')}</h1>
+      <p>{t('home.chosen')}: <strong>{dream?.text ?? ''}</strong></p>
+      {!dream && <div className="lines" />}
+      <table>
+        <thead><tr><th style={{ width: '6em' }}>{t('book.col.step')}</th><th style={{ width: '38%' }}>{t('book.col.question')}</th><th>{t('book.col.answer')}</th></tr></thead>
+        <tbody>
+          {CLARIFY_STEPS.map((s) => (
+            <tr key={s}><td>{t(`clarify.${s}`)}</td><td>{t(`clarify.${s}.q`)}</td><td>{work?.clarify?.[s] ?? ''}<div style={{ minHeight: '22mm' }} /></td></tr>
+          ))}
+        </tbody>
+      </table>
+      <h3>{t('mydream.routes')}</h3>
+      {routes.map((r, i) => <div key={i}><p style={{ margin: '6px 0 0' }}>{t('mydream.route', { n: i + 1 })}: {r}</p><div className="lines" /></div>)}
     </section>
   )
 }

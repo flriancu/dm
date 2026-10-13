@@ -55,6 +55,7 @@ export default function ModulePage() {
           <div dangerouslySetInnerHTML={{ __html: md(sec('do')!.body) }} />
           {sec('do')!.sub.map((s) => <div key={s.id}><h3>{s.title}</h3><div dangerouslySetInnerHTML={{ __html: md(s.body) }} /></div>)}
           {doc.meta.order === 1 && <p><Link className="btn" to="/dreams">{t('dreams.title')} →</Link></p>}
+          {doc.meta.order === 2 && <p className="row"><Link className="btn" to="/dreams">{t('dreams.title')} →</Link><Link className="btn" to="/dream">{t('mydream.title')} →</Link></p>}
         </>
       )}
 

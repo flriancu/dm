@@ -50,12 +50,24 @@ export interface FriendNote {           // Dream Friend's own notes (FR-61), sep
   created: string
 }
 
+/** The chosen dream's worksheets, one row per dream (FR-20..23, later FR-21/22/23). */
+export const CLARIFY_STEPS = ['clarity', 'imagine', 'feel', 'anchor', 'act'] as const
+export type ClarifyStep = (typeof CLARIFY_STEPS)[number]
+
+export interface DreamWork {
+  dreamId: number
+  clarify?: Partial<Record<ClarifyStep, string>>   // module 2 (C)
+  routes?: string[]                                 // three routes (module 2)
+  updated: string
+}
+
 export class DreamDB extends Dexie {
   dreams!: EntityTable<Dream, 'id'>
   plans!: EntityTable<Plan, 'id'>
   moduleNotes!: EntityTable<ModuleNote, 'moduleId'>
   settings!: EntityTable<Setting, 'key'>
   friendNotes!: EntityTable<FriendNote, 'id'>
+  dreamWork!: EntityTable<DreamWork, 'dreamId'>
 
   constructor(name = 'dream-course') {
     super(name)
@@ -65,6 +77,9 @@ export class DreamDB extends Dexie {
       moduleNotes: 'moduleId',
       settings: 'key',
       friendNotes: '++id, moduleId, created',
+    })
+    this.version(2).stores({
+      dreamWork: 'dreamId',
     })
   }
 }

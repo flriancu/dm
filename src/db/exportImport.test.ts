@@ -19,6 +19,8 @@ describe('export / import round trip (FR-50, acceptance 3)', () => {
     await a.moduleNotes.put({ moduleId: '01', oneWord: 'curios', takeaways: 'lista nu are termen' })
     await writeSettings({ role: 'both', config: 'pair', paperMode: true, paperCount: 37 }, a)
     await a.friendNotes.add({ moduleId: '01', text: 'ritm lent, ok', created: today() })
+    const chosenId = (await a.dreams.where('chosen').equals(1).first())!.id!
+    await a.dreamWork.put({ dreamId: chosenId, clarify: { clarity: 'zece zile pe jos prin Apuseni' }, routes: ['vara', 'toamna'], updated: today() })
 
     const file = await exportAll(a)
     expect(isExportFile(file)).toBe(true)
@@ -31,6 +33,7 @@ describe('export / import round trip (FR-50, acceptance 3)', () => {
     expect((await readSettings(b)).paperCount).toBe(37)
     expect((await readSettings(b)).config).toBe('pair')
     expect(await b.friendNotes.count()).toBe(1)
+    expect((await b.dreamWork.toArray())[0]?.clarify?.clarity).toBe('zece zile pe jos prin Apuseni')
   })
 
   it('refuses a file that is not an export', async () => {

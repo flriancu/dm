@@ -10,6 +10,7 @@ const Onboarding = lazy(() => import('./pages/Onboarding'))
 const Modules = lazy(() => import('./pages/Modules'))
 const ModulePage = lazy(() => import('./pages/ModulePage'))
 const Dreams = lazy(() => import('./pages/Dreams'))
+const MyDream = lazy(() => import('./pages/MyDream'))
 const Book = lazy(() => import('./pages/Book'))
 const Friend = lazy(() => import('./pages/Friend'))
 const Settings = lazy(() => import('./pages/Settings'))
@@ -30,6 +31,7 @@ function Gate() {
             <Route path="/modules" element={<Modules />} />
             <Route path="/module/:id" element={<ModulePage />} />
             <Route path="/dreams" element={<Dreams />} />
+            <Route path="/dream" element={<MyDream />} />
             <Route path="/book" element={<Book />} />
             <Route path="/book/print/:which" element={<Book print />} />
             <Route path="/friend" element={<Friend />} />

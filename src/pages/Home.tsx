@@ -50,7 +50,7 @@ export default function Home() {
         <>
           <h2>{t('home.chosen')}</h2>
           <div className="card">
-            {chosen ? <strong>{chosen.text}</strong> : <span className="muted">{t('home.chosen.none')}</span>}
+            {chosen ? <><strong>{chosen.text}</strong><div><Link className="btn sm" to="/dream">{t('home.chosen.open')}</Link></div></> : <span className="muted">{t('home.chosen.none')}</span>}
           </div>
 
           <h2>{t('home.plans')}</h2>

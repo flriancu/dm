@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useT } from '../i18n'
 import { useSettings } from '../state/settings'
@@ -74,7 +75,7 @@ export default function Dreams() {
             <div>
               <div className="text" onClick={() => setOpen(open === d.id ? null : d.id!)} style={{ cursor: 'pointer' }}>{d.text}</div>
               <div className="meta small muted">
-                {d.chosen ? <span className="chip on">{t('dreams.chosen')}</span> : null}
+                {d.chosen ? <Link className="chip on" to="/dream" style={{ textDecoration: 'none' }}>{t('dreams.chosen')} →</Link> : null}
                 {d.score ? <span>{d.score}/10</span> : null}
                 {d.area ? <span>{t(`area.${d.area}`)}</span> : null}
                 {d.why ? <span>{t(`dreams.tag.${d.why}`)}</span> : null}
