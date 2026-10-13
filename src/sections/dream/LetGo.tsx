@@ -2,15 +2,16 @@ import { Link } from 'react-router-dom'
 import { useT } from '../../i18n'
 import AutoText from '../../components/AutoText'
 import SectionHead from '../../components/SectionHead'
-import { saveDreamWork, releaseDream } from '../../db/dreams'
-import { today, type Dream, type DreamWork } from '../../db/db'
+import { saveDreamWork, setLetgoSign, decideLetgo } from '../../db/dreams'
+import { useAction } from '../../state/useAction'
+import { sheetPath } from '../../lib/paths'
+import { LETGO_SIGNS, type Dream, type DreamWork } from '../../db/db'
 
 /** Letting go (FR-46): the signs, costs and benefits, and the continue/release decision. */
-const LETGO_SIGNS = ['oscillate', 'sleep', 'stalled', 'outside'] as const
-
 export default function LetGo({ dream, work }: { dream: Dream; work?: DreamWork }) {
   const { t, fmtDate } = useT()
-  const save = (patch: Partial<DreamWork>) => saveDreamWork(dream.id!, patch)
+  const signs = work?.letgo?.signs ?? []
+  const [decide, deciding] = useAction((d: 'continue' | 'release') => decideLetgo(dream, d))
   return (
     <>
       <SectionHead id="letgo" label={t('mydream.section.letgo')} title={t('letgo.title')} />
@@ -22,12 +23,9 @@ export default function LetGo({ dream, work }: { dream: Dream; work?: DreamWork 
             <label key={s} className="row" style={{ minHeight: 32 }}>
               <input
                 type="checkbox"
-                key={`${s}-${(work?.letgo?.signs ?? []).includes(s) ? 1 : 0}`}
-                defaultChecked={(work?.letgo?.signs ?? []).includes(s)}
-                onChange={(e) => {
-                  const cur = work?.letgo?.signs ?? []
-                  save({ letgo: { signs: e.target.checked ? [...cur, s] : cur.filter((x) => x !== s) } })
-                }}
+                key={`${s}-${signs.includes(s) ? 1 : 0}`}
+                defaultChecked={signs.includes(s)}
+                onChange={(e) => setLetgoSign(dream.id!, s, e.target.checked)}
               />
               <span>{t(`letgo.sign.${s}`)}</span>
             </label>
@@ -41,7 +39,7 @@ export default function LetGo({ dream, work }: { dream: Dream; work?: DreamWork 
               placeholder={t(`letgo.${k}.placeholder`)}
               style={{ minHeight: 64 }}
               value={work?.letgo?.[k] ?? ''}
-              onSave={(v) => save({ letgo: { [k]: v } })}
+              onSave={(v) => saveDreamWork(dream.id!, { letgo: { [k]: v } })}
               multiline
             />
           </div>
@@ -56,16 +54,10 @@ export default function LetGo({ dream, work }: { dream: Dream; work?: DreamWork 
               <p className="small muted">{t('letgo.continued', { date: fmtDate(work.letgo.decided) })}</p>
             )}
             <div className="row">
-              <button className="btn" onClick={() => save({ letgo: { decision: 'continue', decided: today() } })}>
+              <button className="btn" onClick={() => decide('continue')} disabled={deciding}>
                 {t('letgo.continue')}
               </button>
-              <button
-                className="btn ghost"
-                onClick={async () => {
-                  await save({ letgo: { decision: 'release', decided: today() } })
-                  await releaseDream(dream)
-                }}
-              >
+              <button className="btn ghost" onClick={() => decide('release')} disabled={deciding}>
                 {t('letgo.release')}
               </button>
             </div>
@@ -73,7 +65,7 @@ export default function LetGo({ dream, work }: { dream: Dream; work?: DreamWork 
         )}
       </div>
       <p className="small muted">
-        {t('mydream.saved')} <Link to="/book/print/letgo">{t('letgo.print')}</Link>
+        {t('mydream.saved')} <Link to={sheetPath('letgo', dream.id)}>{t('letgo.print')}</Link>
       </p>
     </>
   )

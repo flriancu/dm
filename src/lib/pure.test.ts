@@ -1,10 +1,19 @@
 import { describe, it, expect } from 'vitest'
 import { weekStart } from '../db/db'
-import { dateIcs } from './ics'
-import { addMonths, localIso, parseLocal, today } from './dates'
-import { extrinsicWarning } from '../pages/Dreams'
+import { dateIcs, foldLine } from './ics'
+import { addMonths, isIsoDate, localIso, parseLocal, today } from './dates'
 import { comboIssue, reconcile, configHelpKey, CONFIGS_FOR_ROLE } from '../state/combos'
-import { moduleDate, nextModule, leaderAfterMeeting, letterDue } from './course'
+import {
+  moduleDate,
+  nextModule,
+  nextMeeting,
+  meetingIdsOf,
+  leaderAfterMeeting,
+  letterDue,
+  letterState,
+  extrinsicWarning,
+  nextCheckinAfterRhythm,
+} from './course'
 import { mergeDoc } from '../db/docs'
 import { vttToParagraphs } from './vtt'
 import { configOfHeading, orderedConfigs, CONFIGS } from '../content/plans'
@@ -39,7 +48,22 @@ describe('dateIcs', () => {
     expect(ics).toContain('DTSTART;VALUE=DATE:20270113')
     expect(ics).toContain('SUMMARY:Verificarea\\; viziunii')
     expect(ics).toContain('DESCRIPTION:linie1\\nlinie2\\, cu virgulă')
-    expect(ics.split('\r\n').at(-1)).toBe('END:VCALENDAR')
+    expect(ics.endsWith('END:VCALENDAR\r\n')).toBe(true) // every line ends with CRLF, the last one too
+    expect(ics).toContain('UID:checkin@cartea-visurilor') // one event per purpose: a new date moves it
+  })
+  it('folds lines over 75 octets without splitting a character', () => {
+    const line = 'DESCRIPTION:' + 'ă'.repeat(60)
+    const parts = foldLine(line).split('\r\n')
+    expect(parts.length).toBeGreaterThan(1)
+    for (const p of parts) expect(new TextEncoder().encode(p).length).toBeLessThanOrEqual(75)
+    expect(parts.slice(1).every((p) => p.startsWith(' '))).toBe(true)
+    expect(parts.map((p, i) => (i ? p.slice(1) : p)).join('')).toBe(line)
+    expect(foldLine('short')).toBe('short')
+  })
+  it('keeps a line break typed as CR or CRLF inside one property', () => {
+    const ics = dateIcs('2027-01-13', 'x', 'a\r\nb', 'c\rd')
+    expect(ics).toContain('SUMMARY:a\\nb')
+    expect(ics).toContain('DESCRIPTION:c\\nd')
   })
 })
 
@@ -87,6 +111,18 @@ describe('role and configuration rules', () => {
 })
 
 describe('local dates', () => {
+  it('reads years below 100 as written, not as 19xx', () => {
+    expect(localIso(parseLocal('0001-01-01'))).toBe('0001-01-01')
+  })
+  it('accepts only real calendar days in a sensible range', () => {
+    expect(isIsoDate('2028-02-29')).toBe(true)
+    expect(isIsoDate('2027-02-29')).toBe(false)
+    expect(isIsoDate('2026-04-31')).toBe(false)
+    expect(isIsoDate('9999-99-99')).toBe(false)
+    expect(isIsoDate('0001-01-01')).toBe(false)
+    expect(isIsoDate('x')).toBe(false)
+    expect(isIsoDate(20260101)).toBe(false)
+  })
   it('round-trips a local date without touching UTC', () => {
     expect(localIso(parseLocal('2026-10-13'))).toBe('2026-10-13')
     expect(today()).toMatch(/^\d{4}-\d{2}-\d{2}$/)
@@ -117,6 +153,20 @@ describe('nextModule', () => {
   it('does not skip a gap: an unmarked module stays next', () => {
     expect(nextModule(mods, new Set(['00', '02']))?.id).toBe('01')
   })
+  it('names the next meeting: module 0 has none, a gap stays next', () => {
+    expect(meetingIdsOf(mods)).toEqual(['01', '02'])
+    expect(nextMeeting(meetingIdsOf(mods), new Set(['00']))).toBe('01')
+    expect(nextMeeting(['01', '02', '03'], new Set(['01', '03']))).toBe('02')
+    expect(nextMeeting(['01'], new Set(['01']))).toBeUndefined()
+  })
+  it('a change of check-in rhythm keeps a due check-in due, and counts from the last one otherwise', () => {
+    expect(nextCheckinAfterRhythm({ next: '2027-01-13', everyMonths: 3 }, 6, '2027-01-20')).toBe('2027-01-13')
+    expect(
+      nextCheckinAfterRhythm({ lastDone: '2026-10-13', next: '2027-01-13', everyMonths: 3 }, 6, '2026-11-01'),
+    ).toBe('2027-04-13')
+    expect(nextCheckinAfterRhythm({ next: '2027-01-13', everyMonths: 3 }, 6, '2026-11-01')).toBe('2027-04-13')
+    expect(nextCheckinAfterRhythm({}, 3, '2026-10-13')).toBe('2027-01-13')
+  })
 })
 
 describe('pair leadership and the sealed letter', () => {
@@ -130,6 +180,12 @@ describe('pair leadership and the sealed letter', () => {
     expect(letterDue({ sealed: true, deliverDate: '2026-10-01', opened: true }, '2026-10-13')).toBe(false)
     expect(letterDue({ sealed: false, deliverDate: '2026-10-01' }, '2026-10-13')).toBe(false)
     expect(letterDue(undefined, '2026-10-13')).toBe(false)
+  })
+  it('knows where the letter is: draft, sealed, arrived, read', () => {
+    expect(letterState(undefined, '2026-10-13')).toBe('draft')
+    expect(letterState({ sealed: true, deliverDate: '2026-12-01' }, '2026-10-13')).toBe('sealed')
+    expect(letterState({ sealed: true, deliverDate: '2026-10-13' }, '2026-10-13')).toBe('arrived')
+    expect(letterState({ sealed: true, deliverDate: '2026-12-01', opened: true }, '2026-10-13')).toBe('read')
   })
 })
 

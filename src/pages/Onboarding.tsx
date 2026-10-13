@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useT, UI_LOCALES, LOCALE_META } from '../i18n'
 import { useSettings } from '../state/settings'
 import { startDateKey } from '../state/roles'
-import { type Role, type Config } from '../db/db'
+import { THEMES, type Role, type Config } from '../db/db'
+import { useAction } from '../state/useAction'
 import RoleConfigPicker from '../components/RoleConfigPicker'
 import Stepper from '../components/Stepper'
 import DateField from '../components/DateField'
@@ -11,7 +11,6 @@ import DateField from '../components/DateField'
 export default function Onboarding() {
   const { t } = useT()
   const { settings, update } = useSettings()
-  const nav = useNavigate()
   const [role, setRole] = useState<Role | undefined>(undefined)
   const [config, setConfig] = useState<Config | undefined>(undefined)
   const [startDate, setStart] = useState(settings.startDate ?? '')
@@ -19,7 +18,8 @@ export default function Onboarding() {
   const [paperMode, setPaper] = useState(settings.paperMode)
   const ready = !!role && !!config
 
-  const go = async () => {
+  // once onboarded is saved, the Gate leaves /start for the page first asked for (or Home)
+  const [go, going] = useAction(async () => {
     if (!ready) return
     await update({
       role: role!,
@@ -27,10 +27,10 @@ export default function Onboarding() {
       startDate: startDate || undefined,
       cadenceDays,
       paperMode,
+      friendToday: false,
       onboarded: true,
     })
-    nav('/', { replace: true })
-  }
+  })
 
   return (
     <>
@@ -55,7 +55,7 @@ export default function Onboarding() {
         <div className="field">
           <label>{t('settings.theme')}</label>
           <div className="row">
-            {(['system', 'light', 'dark'] as const).map((x) => (
+            {THEMES.map((x) => (
               <button
                 key={x}
                 className={`chip ${settings.theme === x ? 'on' : ''}`}
@@ -103,7 +103,7 @@ export default function Onboarding() {
             </div>
           )}
 
-          <button className="btn primary" onClick={go}>
+          <button className="btn primary" onClick={() => go()} disabled={going}>
             {t('onboarding.go')}
           </button>
         </>

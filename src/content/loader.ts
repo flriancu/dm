@@ -55,6 +55,8 @@ export async function listModules(locale: ContentLocale): Promise<ModuleMeta[]> 
 }
 
 export async function loadModule(locale: ContentLocale, id: string): Promise<ModuleDoc | null> {
+  // only the two-digit id: "02-clarifica" would match the file too, and notes would be saved under that address
+  if (!/^\d{2}$/.test(id)) return null
   const p = pathsFor(locale, 'modules').find((x) => x.split('/').pop()!.startsWith(`${id}-`))
   if (!p) return null
   const src = await files[p]()

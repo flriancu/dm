@@ -2,16 +2,11 @@ import { Link } from 'react-router-dom'
 import { useT } from '../../i18n'
 import AutoText from '../../components/AutoText'
 import SectionHead from '../../components/SectionHead'
+import { saveVision } from '../../db/vision'
 import { VISION_SECTIONS, type VisionDoc } from '../../db/db'
 
 /** Modules 6–7: the nine-part vision worksheet and the check on the vision statement (FR-42). */
-export default function Worksheet({
-  v,
-  save,
-}: {
-  v: VisionDoc
-  save: (patch: Partial<VisionDoc>) => Promise<unknown>
-}) {
+export default function Worksheet({ v }: { v: VisionDoc }) {
   const { t } = useT()
   return (
     <>
@@ -33,7 +28,7 @@ export default function Worksheet({
               id={`vs-${s}`}
               placeholder={t(`sheet.${s}.placeholder`)}
               value={v.worksheet[s] ?? ''}
-              onSave={(v) => save({ worksheet: { [s]: v } })}
+              onSave={(text) => saveVision({ worksheet: { [s]: text } })}
               multiline
             />
           </div>

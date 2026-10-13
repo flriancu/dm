@@ -2,16 +2,18 @@ import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useT, UI_LOCALES, LOCALE_META } from '../i18n'
 import { useSettings } from '../state/settings'
+import { useAction } from '../state/useAction'
 import { startDateKey } from '../state/roles'
-import { db, today, type Role, type Config } from '../db/db'
-import { exportAll, importAll, downloadJson } from '../db/exportImport'
+import { today, THEMES, type Role, type Config } from '../db/db'
+import { exportAll, downloadJson, readBackupFile, planImport, applyImport, ImportError } from '../db/exportImport'
+import { replaceData, wipeAll } from '../db/lifecycle'
 import { comboIssue, configHelpKey } from '../state/combos'
 import RoleConfigPicker from '../components/RoleConfigPicker'
 import Stepper from '../components/Stepper'
 import DateField from '../components/DateField'
 
 export default function Settings() {
-  const { t } = useT()
+  const { t, fmtDate } = useT()
   const { settings, update } = useSettings()
   const file = useRef<HTMLInputElement>(null)
   const [msg, setMsg] = useState('')
@@ -19,19 +21,34 @@ export default function Settings() {
   const [draft, setDraft] = useState<{ role?: Role; config?: Config }>({})
   const issue = comboIssue(settings.role, settings.config)
 
-  const doExport = async () => downloadJson(`cartea-visurilor-${today()}.json`, await exportAll())
-  const doImport = async (f: File) => {
+  const [doExport, exporting] = useAction(async () =>
+    downloadJson(`cartea-visurilor-${today()}.json`, await exportAll()),
+  )
+  const [doImport, importing] = useAction(async (f: File) => {
+    setMsg('')
     try {
-      const r = await importAll(JSON.parse(await f.text()))
-      setMsg(t('settings.import.ok', r))
-    } catch {
-      setMsg(t('settings.import.err'))
+      const plan = await planImport(await readBackupFile(f))
+      const date = plan.exportedAt ? fmtDate(plan.exportedAt) : ''
+      const question = [
+        t(date ? 'settings.import.confirm.dated' : 'settings.import.confirm', {
+          date,
+          now: plan.current.dreams,
+          file: plan.incoming.dreams,
+        }),
+        plan.kept.length ? t('settings.import.confirm.kept') : '',
+      ].join(' ')
+      if (!confirm(question.trim())) return
+      await replaceData(() => applyImport(plan))
+      const ok = t('settings.import.ok', plan.incoming)
+      setMsg(plan.dropped ? `${ok} ${t('settings.import.dropped', { n: plan.dropped })}` : ok)
+    } catch (e) {
+      setMsg(t(e instanceof ImportError ? `settings.import.err.${e.reason}` : 'settings.import.err.write'))
+      if (!(e instanceof ImportError)) throw e
     }
-  }
+  })
   const wipe = async () => {
     if (!confirm(t('settings.danger.confirm'))) return
-    await db.delete()
-    location.reload()
+    await wipeAll(() => setMsg(t('settings.danger.blocked')))
   }
   const startEdit = () => {
     setDraft({})
@@ -39,7 +56,9 @@ export default function Settings() {
   }
   const saveEdit = async () => {
     if (!draft.role || !draft.config) return
-    await update({ role: draft.role, config: draft.config, friendToday: false })
+    const changed = draft.role !== settings.role || draft.config !== settings.config
+    // the pair lead belongs to the pair: a new role or configuration starts without it
+    await update({ role: draft.role, config: draft.config, ...(changed ? { friendToday: false } : {}) })
     setEditing(false)
   }
 
@@ -64,7 +83,7 @@ export default function Settings() {
         <div className="field">
           <label>{t('settings.theme')}</label>
           <div className="row">
-            {(['system', 'light', 'dark'] as const).map((x) => (
+            {THEMES.map((x) => (
               <button
                 key={x}
                 className={`chip ${settings.theme === x ? 'on' : ''}`}
@@ -138,7 +157,7 @@ export default function Settings() {
           {t('settings.privacy')}
         </p>
         <div>
-          <button className="btn" onClick={doExport}>
+          <button className="btn" onClick={() => doExport()} disabled={exporting}>
             {t('settings.export')}
           </button>
           <p className="small muted" style={{ margin: '6px 0 0' }}>
@@ -146,7 +165,7 @@ export default function Settings() {
           </p>
         </div>
         <div>
-          <button className="btn" onClick={() => file.current?.click()}>
+          <button className="btn" onClick={() => file.current?.click()} disabled={importing}>
             {t('settings.import')}
           </button>
           <p className="small muted" style={{ margin: '6px 0 0' }}>
@@ -155,12 +174,20 @@ export default function Settings() {
           <input
             ref={file}
             type="file"
-            accept="application/json"
+            accept="application/json,.json"
             className="visually-hidden"
-            onChange={(e) => e.target.files?.[0] && doImport(e.target.files[0])}
+            onChange={(e) => {
+              const f = e.target.files?.[0]
+              e.target.value = '' // picking the same file again must start a new import
+              if (f) doImport(f)
+            }}
           />
         </div>
-        {msg && <p className="small">{msg}</p>}
+        {msg && (
+          <p className="small" role="status">
+            {msg}
+          </p>
+        )}
       </div>
       <div className="card">
         <Link to="/sources">{t('settings.sources')}</Link>

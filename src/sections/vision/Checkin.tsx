@@ -2,25 +2,26 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useT } from '../../i18n'
 import SectionHead from '../../components/SectionHead'
-import { addMonths } from '../../lib/dates'
 import { dateIcs, downloadText as download } from '../../lib/ics'
-import { today, type VisionDoc } from '../../db/db'
+import { setCheckinRhythm, logCheckin } from '../../db/vision'
+import { useAction } from '../../state/useAction'
+import { useToday } from '../../state/useToday'
+import { CHECKIN_STEPS, TEXT_LONG, type VisionDoc } from '../../db/db'
 
 /** The periodic vision check-in: cadence, next date with its calendar file, the steps and the log (FR-45). */
-const CHECKIN_STEPS = ['vision', 'wheel', 'dreams', 'directions', 'yesno', 'letgo'] as const
 
-export default function Checkin({ v, save }: { v: VisionDoc; save: (patch: Partial<VisionDoc>) => Promise<unknown> }) {
+export default function Checkin({ v }: { v: VisionDoc }) {
   const { t, fmtDate } = useT()
+  const now = useToday()
   const C = v.checkin ?? {}
   const every = C.everyMonths ?? 3
-  const setEvery = (m: 3 | 6) => save({ checkin: { everyMonths: m, next: addMonths(C.lastDone ?? today(), m) } })
   const [checkNote, setCheckNote] = useState('')
-  const doneCheckin = async () => {
-    const log = [...(C.log ?? []), { date: today(), note: checkNote.trim() }]
-    await save({ checkin: { log, lastDone: today(), next: addMonths(today(), every) } })
-    setCheckNote('')
-  }
-  const due = !!C.next && C.next <= today()
+  const [done, saving] = useAction(async () => {
+    const note = checkNote
+    await logCheckin(note)
+    setCheckNote((cur) => (cur === note ? '' : cur))
+  })
+  const due = !!C.next && C.next <= now
   return (
     <>
       <SectionHead id="checkin" label={t('vision.section.checkin')} title={t('checkin.title')} />
@@ -30,7 +31,12 @@ export default function Checkin({ v, save }: { v: VisionDoc; save: (patch: Parti
           <label>{t('checkin.every')}</label>
           <div className="row">
             {([3, 6] as const).map((m) => (
-              <button key={m} className={`chip ${every === m && C.next ? 'on' : ''}`} onClick={() => setEvery(m)}>
+              <button
+                key={m}
+                className={`chip ${every === m && C.next ? 'on' : ''}`}
+                aria-pressed={every === m && !!C.next}
+                onClick={() => setCheckinRhythm(m)}
+              >
                 {t(`checkin.every.${m}`)}
               </button>
             ))}
@@ -41,20 +47,24 @@ export default function Checkin({ v, save }: { v: VisionDoc; save: (patch: Parti
             <p style={{ margin: 0 }}>
               <strong>{due ? t('checkin.due') : t('checkin.next', { date: fmtDate(C.next) })}</strong>
             </p>
-            <button
-              className="btn"
-              onClick={() =>
-                download(
-                  'verificarea-viziunii.ics',
-                  dateIcs(C.next!, 'checkin', t('checkin.ics.title'), t('checkin.ics.body')),
-                )
-              }
-            >
-              {t('letter.ics')}
-            </button>
-            <p className="small muted" style={{ margin: 0 }}>
-              {t('letter.ics.help')}
-            </p>
+            {C.next >= now && (
+              <>
+                <button
+                  className="btn"
+                  onClick={() =>
+                    download(
+                      'verificarea-viziunii.ics',
+                      dateIcs(C.next!, 'checkin', t('checkin.ics.title'), t('checkin.ics.body')),
+                    )
+                  }
+                >
+                  {t('letter.ics')}
+                </button>
+                <p className="small muted" style={{ margin: 0 }}>
+                  {t('letter.ics.help')}
+                </p>
+              </>
+            )}
           </>
         ) : (
           <p className="small muted" style={{ margin: 0 }}>
@@ -73,13 +83,14 @@ export default function Checkin({ v, save }: { v: VisionDoc; save: (patch: Parti
           <label htmlFor="checkin-note">{t('checkin.note')}</label>
           <textarea
             id="checkin-note"
+            maxLength={TEXT_LONG}
             placeholder={t('checkin.note.placeholder')}
             value={checkNote}
             onChange={(e) => setCheckNote(e.target.value)}
             style={{ minHeight: 72 }}
           />
         </div>
-        <button className="btn primary" onClick={doneCheckin} disabled={!C.next}>
+        <button className="btn primary" onClick={() => done()} disabled={!C.next || saving}>
           {t('checkin.done')}
         </button>
         {(C.log ?? []).length > 0 && (

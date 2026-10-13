@@ -1,4 +1,4 @@
-/** A section heading with its in-page anchor and an optional progress note on the right. */
+/** A section heading with its in-page anchor (focusable, so a section link moves the keyboard there too) and an optional progress note. */
 export default function SectionHead({
   id,
   label,
@@ -12,7 +12,7 @@ export default function SectionHead({
 }) {
   return (
     <>
-      <p className="small muted" id={id} style={{ marginBottom: -8, marginTop: 28 }}>
+      <p className="small muted" id={id} tabIndex={-1} style={{ marginBottom: -8, marginTop: 28 }}>
         {label}
       </p>
       <h2 style={{ marginTop: 12 }}>

@@ -1,15 +1,15 @@
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react'
 import { parseLocal } from '../lib/dates'
+import { UI_LOCALES, type UiLocale } from './locales'
 import ro from './locales/ro.json'
 import en from './locales/en.json'
 
 /**
  * Interface strings only (FR-03). Course content lives in /content/<lang>/ and is
  * loaded separately. Adding an interface language = add a JSON file here and list it
- * in UI_LOCALES. Components never branch on the language value.
+ * in UI_LOCALES (./locales.ts). Components never branch on the language value.
  */
-export const UI_LOCALES = ['ro', 'en'] as const
-export type UiLocale = (typeof UI_LOCALES)[number]
+export { UI_LOCALES, type UiLocale }
 
 /** Content languages shipped. v1: Romanian only (D4). */
 export const CONTENT_LOCALES = ['ro'] as const
@@ -32,7 +32,7 @@ export function contentLocaleFor(ui: UiLocale): ContentLocale {
 export type T = (key: string, vars?: Record<string, string | number>) => string
 
 function translate(locale: UiLocale, key: string, vars?: Record<string, string | number>): string {
-  const raw = dicts[locale][key] ?? dicts.ro[key] ?? key
+  const raw = dicts[locale]?.[key] ?? dicts.ro[key] ?? key
   if (!vars) return raw
   return raw.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? `{${k}}`))
 }
@@ -42,8 +42,10 @@ interface Ctx {
   t: T
   fmtDate: (d: string | Date) => string
 }
+/** A date in words; an unreadable date shows as nothing rather than breaking the page. */
 function formatDate(locale: UiLocale, d: string | Date): string {
   const date = typeof d === 'string' ? (d.length === 10 ? parseLocal(d) : new Date(d)) : d
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return ''
   return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).format(date)
 }
 // Default value is only reached without a provider (e.g. after a hot reload recreates the context); keep it correct anyway.

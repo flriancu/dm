@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom'
 import { useT } from '../i18n'
 import { useSettings } from '../state/settings'
 import { showsFriendSection, showsDreamerParts } from '../state/roles'
+import SaveErrorBanner from './SaveErrorBanner'
 
 export default function Shell({ children }: { children: ReactNode }) {
   const { t } = useT()
@@ -35,7 +36,10 @@ export default function Shell({ children }: { children: ReactNode }) {
           ))}
         </nav>
       )}
-      <main className="main">{children}</main>
+      <main className="main">
+        <SaveErrorBanner />
+        {children}
+      </main>
     </div>
   )
 }

@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom'
 import { useT } from '../i18n'
 import AutoText from '../components/AutoText'
 import { useWeekTasks, addWeekTask, putInQuadrant, moveToCalendar, setWhen, deleteWeekTask } from '../db/week'
-import { QUADRANTS, type Quadrant, type WeekTask } from '../db/db'
+import { submitDraft } from '../state/useAction'
+import { QUADRANTS, TEXT_SHORT, type Quadrant, type WeekTask } from '../db/db'
 
 /** Eisenhower matrix on a real week (FR-13), module 3. Tap to assign a box; drag works too. */
 export default function WeekPage() {
@@ -21,19 +22,21 @@ function Week() {
   const [text, setText] = useState('')
   const [open, setOpen] = useState<number | null>(null)
 
-  const add = async () => {
-    const v = text.trim()
-    if (!v) return
-    setText('')
-    await addWeekTask(v)
-  }
+  const add = submitDraft(
+    text,
+    setText,
+    '',
+    (typed) => addWeekTask(typed.trim()),
+    (typed) => !!typed.trim(),
+  )
   const onDrop = (q: Quadrant) => (e: React.DragEvent) => {
     e.preventDefault()
     const id = Number(e.dataTransfer.getData('text/plain'))
     const task = tasks.find((x) => x.id === id)
     if (task) putInQuadrant(task, q)
   }
-  const unsorted = tasks.filter((x) => !x.quadrant)
+  // a task without a known box waits in the unsorted row, where it can still be opened and placed
+  const unsorted = tasks.filter((x) => !x.quadrant || !QUADRANTS.includes(x.quadrant))
   const moved = tasks.find((x) => x.moved === 1)
 
   const Item = ({ task }: { task: WeekTask }) => (
@@ -64,6 +67,7 @@ function Week() {
           <input
             type="text"
             aria-label={t('week.add.label')}
+            maxLength={TEXT_SHORT}
             placeholder={t('week.add.placeholder')}
             value={text}
             onChange={(e) => setText(e.target.value)}

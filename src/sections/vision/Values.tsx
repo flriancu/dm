@@ -3,24 +3,23 @@ import { Link } from 'react-router-dom'
 import { useT } from '../../i18n'
 import AutoText from '../../components/AutoText'
 import SectionHead from '../../components/SectionHead'
-import { today, type VisionDoc, type ValueItem } from '../../db/db'
+import { setValueItem, addValueAct } from '../../db/vision'
+import { submitDraft } from '../../state/useAction'
+import { MAX_CHOSEN_VALUES, TEXT_SHORT, type VisionDoc } from '../../db/db'
 
 /** Module 6: ten values, up to five chosen (some non-negotiable), and the log of acts done for a value (FR-40). */
-export default function Values({ v, save }: { v: VisionDoc; save: (patch: Partial<VisionDoc>) => Promise<unknown> }) {
+export default function Values({ v }: { v: VisionDoc }) {
   const { t, fmtDate } = useT()
-  const setValue = (i: number, p: Partial<ValueItem>) => {
-    const n = v.values.map((x) => ({ ...x }))
-    n[i] = { ...n[i], ...p }
-    save({ values: n })
-  }
   const chosenCount = v.values.filter((x) => x.chosen).length
   const [act, setAct] = useState('')
   const [actValue, setActValue] = useState('')
-  const addAct = async () => {
-    if (!act.trim()) return
-    await save({ valueActs: [...v.valueActs, { date: today(), value: actValue, text: act.trim() }] })
-    setAct('')
-  }
+  const addAct = submitDraft(
+    act,
+    setAct,
+    '',
+    (text) => addValueAct(actValue, text),
+    (text) => !!text.trim(),
+  )
   return (
     <>
       <SectionHead
@@ -38,12 +37,12 @@ export default function Values({ v, save }: { v: VisionDoc; save: (patch: Partia
               placeholder={t(`values.placeholder.${(i % 5) + 1}`)}
               style={{ flex: 1 }}
               value={x.text}
-              onSave={(v) => setValue(i, { text: v })}
+              onSave={(text) => setValueItem(i, { text })}
             />
             <button
               className={`chip ${x.chosen ? 'on' : ''}`}
-              onClick={() => setValue(i, { chosen: !x.chosen, nonNegotiable: x.chosen ? false : x.nonNegotiable })}
-              disabled={!x.chosen && chosenCount >= 5}
+              onClick={() => setValueItem(i, { chosen: !x.chosen })}
+              disabled={!x.chosen && chosenCount >= MAX_CHOSEN_VALUES}
               aria-pressed={!!x.chosen}
               aria-label={t('values.choose')}
               title={t('values.choose')}
@@ -53,7 +52,7 @@ export default function Values({ v, save }: { v: VisionDoc; save: (patch: Partia
             {x.chosen && (
               <button
                 className={`chip ${x.nonNegotiable ? 'on' : ''}`}
-                onClick={() => setValue(i, { nonNegotiable: !x.nonNegotiable })}
+                onClick={() => setValueItem(i, { nonNegotiable: !x.nonNegotiable })}
                 aria-pressed={!!x.nonNegotiable}
                 aria-label={t('values.nonneg')}
                 title={t('values.nonneg')}
@@ -74,8 +73,8 @@ export default function Values({ v, save }: { v: VisionDoc; save: (patch: Partia
             <option value="">{t('values.acts.which.none')}</option>
             {v.values
               .filter((x) => x.chosen && x.text)
-              .map((x) => (
-                <option key={x.text} value={x.text}>
+              .map((x, i) => (
+                <option key={`${i}-${x.text}`} value={x.text}>
                   {x.text}
                 </option>
               ))}
@@ -86,6 +85,7 @@ export default function Values({ v, save }: { v: VisionDoc; save: (patch: Partia
           <input
             id="act-text"
             type="text"
+            maxLength={TEXT_SHORT}
             placeholder={t('values.acts.placeholder')}
             value={act}
             onChange={(e) => setAct(e.target.value)}

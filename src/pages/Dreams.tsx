@@ -5,17 +5,20 @@ import Stepper from '../components/Stepper'
 import AutoText from '../components/AutoText'
 import { useT } from '../i18n'
 import { useSettings } from '../state/settings'
-import { useDreams, addDream, patchDream, chooseDream, releaseDream, setPaperChosen } from '../db/dreams'
-import { today, mutateSettings, AREAS, type Dream, type Area, type WhyTag } from '../db/db'
-
-/** True when the top-scored dreams are all extrinsic (FR-11 warning). */
-export function extrinsicWarning(dreams: Dream[], top = 3): boolean {
-  const scored = dreams
-    .filter((d) => d.score && !d.dateReleased && !d.dateAchieved)
-    .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
-    .slice(0, top)
-  return scored.length >= top && scored.every((d) => d.why === 'extrinsic')
-}
+import {
+  useDreams,
+  addDream,
+  patchDream,
+  chooseDream,
+  releaseDream,
+  markAchieved,
+  setPaperChosen,
+  addCriterion,
+  removeCriterion,
+} from '../db/dreams'
+import { submitDraft } from '../state/useAction'
+import { extrinsicWarning } from '../lib/course'
+import { AREAS, MAX_CRITERIA, TEXT_SHORT, WHY_TAGS, type Area } from '../db/db'
 
 export default function DreamsPage() {
   return (
@@ -39,12 +42,13 @@ function Dreams() {
     sort === 'score' ? (b.score ?? 0) - (a.score ?? 0) : (a.id ?? 0) - (b.id ?? 0),
   )
 
-  const add = async () => {
-    const v = text.trim()
-    if (!v) return
-    setText('') // clear first, so a quickly typed next dream is never wiped by a late clear
-    await addDream(v)
-  }
+  const add = submitDraft(
+    text,
+    setText,
+    '',
+    (typed) => addDream(typed.trim()),
+    (typed) => !!typed.trim(),
+  )
   const patch = patchDream
   // paper mode: the one chosen dream is typed here and stored as the single chosen row
   const chosenRow = dreams.find((d) => d.chosen)
@@ -88,6 +92,7 @@ function Dreams() {
             <input
               type="text"
               aria-label={t('dreams.add.label')}
+              maxLength={TEXT_SHORT}
               placeholder={t('dreams.add.placeholder')}
               value={text}
               onChange={(e) => setText(e.target.value)}
@@ -127,10 +132,14 @@ function Dreams() {
               <div>
                 <div
                   className="text"
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={open === d.id}
                   onClick={() => setOpen(open === d.id ? null : d.id!)}
+                  onKeyDown={(e) => e.key === 'Enter' && setOpen(open === d.id ? null : d.id!)}
                   style={{ cursor: 'pointer' }}
                 >
-                  {d.text}
+                  {d.text.trim() ? d.text : <span className="muted">{t('dreams.noText')}</span>}
                 </div>
                 <div className="meta small muted">
                   {d.chosen ? (
@@ -183,7 +192,7 @@ function Dreams() {
                     <div className="field">
                       <label>{t('dreams.tag')}</label>
                       <div className="row">
-                        {(['intrinsic', 'extrinsic'] as WhyTag[]).map((w) => (
+                        {WHY_TAGS.map((w) => (
                           <button
                             key={w}
                             className={`chip ${d.why === w ? 'on' : ''}`}
@@ -202,7 +211,7 @@ function Dreams() {
                         </button>
                       )}
                       {!d.dateAchieved ? (
-                        <button className="btn sm" onClick={() => patch(d, { dateAchieved: today(), chosen: 0 })}>
+                        <button className="btn sm" onClick={() => markAchieved(d)}>
                           {t('dreams.achieved.mark')}
                         </button>
                       ) : (
@@ -234,12 +243,8 @@ function Criteria() {
   const { t } = useT()
   const { settings } = useSettings()
   const [v, setV] = useState('')
-  const add = async () => {
-    const x = v.trim()
-    if (!x) return
-    setV('')
-    await mutateSettings((cur) => ({ criteria: [...cur.criteria, x] }))
-  }
+  const full = settings.criteria.length >= MAX_CRITERIA
+  const add = submitDraft(v, setV, '', addCriterion, (typed) => !!typed.trim() && !full)
   return (
     <details className="card" style={{ marginTop: 20 }}>
       <summary>{t('dreams.criteria')}</summary>
@@ -253,11 +258,7 @@ function Criteria() {
             <span>
               {i + 1}. {c}
             </span>
-            <button
-              className="btn sm ghost"
-              aria-label={t('common.delete')}
-              onClick={() => mutateSettings((cur) => ({ criteria: cur.criteria.filter((_, j) => j !== i) }))}
-            >
+            <button className="btn sm ghost" aria-label={t('common.delete')} onClick={() => removeCriterion(i, c)}>
               ✕
             </button>
           </li>
@@ -267,16 +268,18 @@ function Criteria() {
         <input
           type="text"
           aria-label={t('dreams.criteria.add')}
+          maxLength={TEXT_SHORT}
           placeholder={t('dreams.criteria.placeholder')}
           value={v}
           onChange={(e) => setV(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && add()}
           style={{ flex: 1, minWidth: 160 }}
         />
-        <button className="btn sm" onClick={add} disabled={!v.trim()}>
+        <button className="btn sm" onClick={add} disabled={!v.trim() || full}>
           {t('dreams.criteria.add')}
         </button>
       </div>
+      {full && <p className="small muted">{t('dreams.criteria.full', { n: MAX_CRITERIA })}</p>}
     </details>
   )
 }

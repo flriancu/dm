@@ -1,29 +1,33 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useT, contentLocaleFor } from '../i18n'
 import { useSettings } from '../state/settings'
-import { showsDreamerParts, showsFriendSwitch, leadsMeetings } from '../state/roles'
-import { loadModule, md, type ModuleDoc } from '../content/loader'
+import { useAction, submitDraft } from '../state/useAction'
+import { showsDreamerParts, leadsMeetings } from '../state/roles'
+import { loadModule, md } from '../content/loader'
+import { useContent, useModules } from '../content/useContent'
 import { toolsFor } from '../content/tools'
 import { orderedConfigs } from '../content/plans'
-import { useModuleNote, patchModuleNote, markMeetingHeld, usePlansOf, addPlan } from '../db/notes'
-import { leaderAfterMeeting } from '../lib/course'
+import { useModuleNote, patchModuleNote, markMeetingHeld, unmarkMeetingHeld, usePlansOf, addPlan } from '../db/notes'
+import { meetingIdsOf } from '../lib/course'
+import { TEXT_SHORT, TEXT_WORD } from '../db/db'
 import AutoText from '../components/AutoText'
 import type { Section } from '../content/frontmatter'
 
 export default function ModulePage() {
   const { id = '' } = useParams()
-  const { t, locale } = useT()
-  const { settings, update } = useSettings()
-  const [doc, setDoc] = useState<ModuleDoc | null | undefined>(undefined)
+  const { t, locale, fmtDate } = useT()
+  const { settings } = useSettings()
   const contentLocale = contentLocaleFor(locale)
-  useEffect(() => {
-    loadModule(contentLocale, id).then(setDoc)
-  }, [contentLocale, id])
-
+  const doc = useContent(`module:${contentLocale}:${id}`, () => loadModule(contentLocale, id))
+  const modules = useModules()
   const note = useModuleNote(id)
+  // whether this meeting passes the pair lead is decided in the data module, from the stored notes
+  const [complete, completing] = useAction(() => markMeetingHeld(id, meetingIdsOf(modules ?? [])))
+  const [undo, undoing] = useAction(() => unmarkMeetingHeld(id))
 
-  if (doc === undefined) return <p className="muted">…</p>
+  // wait for this module's own note: the boxes below must not start from the previous module's text
+  if (doc === undefined || note === undefined || modules === undefined) return <p className="muted">…</p>
   if (doc === null)
     return (
       <p className="notice">
@@ -39,13 +43,6 @@ export default function ModulePage() {
   const lead = leadsMeetings(settings) // 'me' | 'other' | null: who leads the next meeting on this device
 
   const saveNote = (patch: Record<string, string>) => patchModuleNote(id, patch)
-  const complete = async () => {
-    const first = !note?.completedOn
-    await markMeetingHeld(id)
-    // in a peer pair the lead passes to the other person after every meeting
-    if (first && !isZero && showsFriendSwitch(settings))
-      await update({ friendToday: leaderAfterMeeting(settings.friendToday) })
-  }
 
   return (
     <article className="content" lang={contentLocale}>
@@ -158,39 +155,55 @@ export default function ModulePage() {
             <label htmlFor="oneword">{t('module.feedback')}</label>
             <AutoText
               id="oneword"
-              maxLength={40}
+              maxLength={TEXT_WORD}
               placeholder={t('module.feedback.placeholder')}
               value={note?.oneWord ?? ''}
               onSave={(v) => saveNote({ oneWord: v })}
             />
           </div>
         )}
-        <button className="btn primary" onClick={complete}>
-          {note?.completedOn ? '✓ ' : ''}
-          {t(isZero ? 'common.done.0' : 'common.done')}
-        </button>
-        <p className="small muted" style={{ margin: '8px 0 0' }}>
-          {t(isZero ? 'module.done.help.0' : 'module.done.help')}
-        </p>
+        {note?.completedOn ? (
+          <p className="row" style={{ margin: 0 }}>
+            <span>
+              ✓ {t(isZero ? 'common.done.0' : 'common.done')} · {fmtDate(note.completedOn)}
+            </span>
+            <button className="btn sm ghost" onClick={() => undo()} disabled={undoing}>
+              {t('module.done.undo')}
+            </button>
+          </p>
+        ) : (
+          <>
+            <button className="btn primary" onClick={() => complete()} disabled={completing}>
+              {t(isZero ? 'common.done.0' : 'common.done')}
+            </button>
+            <p className="small muted" style={{ margin: '8px 0 0' }}>
+              {t(isZero ? 'module.done.help.0' : 'module.done.help')}
+            </p>
+          </>
+        )}
       </div>
     </article>
   )
 }
 
 /** The if-then plan for "Până data viitoare" (FR-14): saved to the plans table, listed on Home. */
+const NO_PLAN = { cond: '', act: '' }
+
 function PlanForm({ moduleId }: { moduleId: string }) {
   const { t } = useT()
   const plans = usePlansOf(moduleId)
-  const [cond, setCond] = useState('')
-  const [act, setAct] = useState('')
+  const [draft, setDraft] = useState(NO_PLAN)
   const [saved, setSaved] = useState(false)
-  const savePlan = async () => {
-    if (!cond.trim() || !act.trim()) return
-    await addPlan(moduleId, cond, act)
-    setCond('')
-    setAct('')
-    setSaved(true)
-  }
+  const savePlan = submitDraft(
+    draft,
+    setDraft,
+    NO_PLAN,
+    async (d) => {
+      await addPlan(moduleId, d.cond, d.act)
+      setSaved(true)
+    },
+    (d) => !!d.cond.trim() && !!d.act.trim(),
+  )
   return (
     <div className="card">
       <p className="small muted">{t('module.next.plan')}</p>
@@ -199,9 +212,10 @@ function PlanForm({ moduleId }: { moduleId: string }) {
         <input
           id="plan-if"
           type="text"
+          maxLength={TEXT_SHORT}
           placeholder={t('module.next.if.placeholder')}
-          value={cond}
-          onChange={(e) => setCond(e.target.value)}
+          value={draft.cond}
+          onChange={(e) => setDraft({ ...draft, cond: e.target.value })}
         />
       </div>
       <div className="field">
@@ -209,12 +223,13 @@ function PlanForm({ moduleId }: { moduleId: string }) {
         <input
           id="plan-then"
           type="text"
+          maxLength={TEXT_SHORT}
           placeholder={t('module.next.then.placeholder')}
-          value={act}
-          onChange={(e) => setAct(e.target.value)}
+          value={draft.act}
+          onChange={(e) => setDraft({ ...draft, act: e.target.value })}
         />
       </div>
-      <button className="btn primary" onClick={savePlan} disabled={!cond.trim() || !act.trim()}>
+      <button className="btn primary" onClick={savePlan} disabled={!draft.cond.trim() || !draft.act.trim()}>
         {t('common.save')}
       </button>
       {saved && (

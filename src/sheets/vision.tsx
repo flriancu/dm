@@ -2,15 +2,17 @@
 import { useVision } from '../db/vision'
 import { useModuleNotes } from '../db/notes'
 import { useT } from '../i18n'
-import { VISION_SECTIONS, REGRET_AREAS } from '../db/db'
+import { VISION_SECTIONS, REGRET_AREAS, VALUE_SLOTS, LETTER_QUESTIONS, CHECKIN_STEPS } from '../db/db'
+import { letterState } from '../lib/course'
+import { useToday } from '../state/useToday'
 
 export function ValuesSheet() {
   const { t } = useT()
   const v = useVision()
   const vals: { text: string; chosen?: boolean; nonNegotiable?: boolean }[] = [
     ...(v?.values ?? []),
-    ...Array.from({ length: 10 }, () => ({ text: '' })),
-  ].slice(0, 10)
+    ...Array.from({ length: VALUE_SLOTS }, () => ({ text: '' })),
+  ].slice(0, VALUE_SLOTS)
   return (
     <section className="sheet">
       <h1>{t('book.sheet.values')}</h1>
@@ -46,15 +48,15 @@ export function ValuesSheet() {
 export function LetterSheet() {
   const { t } = useT()
   const v = useVision()
-  const qs = ['where', 'doing', 'feel', 'built', 'stopped', 'mattered', 'advice']
-  const hidden = !!v?.letter?.sealed && !v?.letter?.opened
+  // hidden only while it is sealed and its date has not come
+  const hidden = letterState(v?.letter, useToday()) === 'sealed'
   return (
     <>
       <section className="sheet">
         <h1>{t('book.sheet.letter')}</h1>
         <p>{t('letter.help')}</p>
         <ol>
-          {qs.map((q) => (
+          {LETTER_QUESTIONS.map((q) => (
             <li key={q}>{t(`letter.q.${q}`)}</li>
           ))}
         </ol>
@@ -146,7 +148,7 @@ export function CheckinSheet() {
       <p>{t('checkin.help')}</p>
       <h3>{t('checkin.steps')}</h3>
       <ol>
-        {['vision', 'wheel', 'dreams', 'directions', 'yesno', 'letgo'].map((k) => (
+        {CHECKIN_STEPS.map((k) => (
           <li key={k}>{t(`checkin.step.${k}`)}</li>
         ))}
       </ol>

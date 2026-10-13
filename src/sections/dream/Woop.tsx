@@ -3,6 +3,7 @@ import { useT } from '../../i18n'
 import AutoText from '../../components/AutoText'
 import SectionHead from '../../components/SectionHead'
 import { saveDreamWork } from '../../db/dreams'
+import { sheetPath } from '../../lib/paths'
 import { WOOP_STEPS, type WoopStep, type Dream, type DreamWork } from '../../db/db'
 
 /** Module 3 (O): the four WOOP steps (FR-21). */
@@ -36,7 +37,7 @@ export default function Woop({ dream, work }: { dream: Dream; work?: DreamWork }
         </div>
       ))}
       <p className="small muted">
-        {t('mydream.saved')} <Link to="/book/print/woop">{t('woop.print')}</Link>
+        {t('mydream.saved')} <Link to={sheetPath('woop', dream.id)}>{t('woop.print')}</Link>
       </p>
     </>
   )

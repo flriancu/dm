@@ -1,11 +1,11 @@
 /** Printable sheets: each `.sheet` section prints on its own A4 page. */
 import { useT } from '../i18n'
-import { HABIT_PARTS } from '../db/db'
-import { useDreamWork } from '../db/dreams'
+import { FRIEND_SLOTS, HABIT_PARTS, LETGO_SIGNS } from '../db/db'
+import { usePrintedDream } from './usePrintedDream'
 
 export function HabitSheet() {
   const { t, fmtDate } = useT()
-  const { dream, work } = useDreamWork()
+  const { dream, work } = usePrintedDream()
   const log = [...(work?.habitLog ?? [])].sort((a, b) => a.week.localeCompare(b.week))
   const rows = [...log, ...Array.from({ length: Math.max(0, 16 - log.length) }, () => null)]
   return (
@@ -58,8 +58,8 @@ export function HabitSheet() {
 
 export function FriendsSheet() {
   const { t } = useT()
-  const { dream, work } = useDreamWork()
-  const friends = [...(work?.friends ?? []), {}, {}, {}].slice(0, 3)
+  const { dream, work } = usePrintedDream()
+  const friends = Array.from({ length: FRIEND_SLOTS }, (_, i) => work?.friends?.[i] ?? {})
   return (
     <section className="sheet">
       <h1>{t('book.sheet.friends')}</h1>
@@ -96,7 +96,7 @@ export function FriendsSheet() {
 
 export function FearSheet() {
   const { t } = useT()
-  const { dream, work } = useDreamWork()
+  const { dream, work } = usePrintedDream()
   return (
     <section className="sheet">
       <h1>{t('book.sheet.fear')}</h1>
@@ -115,7 +115,7 @@ export function FearSheet() {
 
 export function LetgoSheet() {
   const { t } = useT()
-  const { dream, work } = useDreamWork()
+  const { dream, work } = usePrintedDream()
   return (
     <section className="sheet">
       <h1>{t('book.sheet.letgo')}</h1>
@@ -125,8 +125,10 @@ export function LetgoSheet() {
       </p>
       <h3>{t('letgo.signs')}</h3>
       <ul>
-        {['oscillate', 'sleep', 'stalled', 'outside'].map((k) => (
-          <li key={k}>☐ {t(`letgo.sign.${k}`)}</li>
+        {LETGO_SIGNS.map((k) => (
+          <li key={k}>
+            {(work?.letgo?.signs ?? []).includes(k) ? '☒' : '☐'} {t(`letgo.sign.${k}`)}
+          </li>
         ))}
       </ul>
       {(['costs', 'benefits', 'replacement'] as const).map((k) => (

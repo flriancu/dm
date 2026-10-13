@@ -2,19 +2,15 @@ import { Link } from 'react-router-dom'
 import { useT } from '../../i18n'
 import AutoText from '../../components/AutoText'
 import SectionHead from '../../components/SectionHead'
-import { saveDreamWork } from '../../db/dreams'
-import { CLARIFY_STEPS, type ClarifyStep, type Dream, type DreamWork } from '../../db/db'
+import { saveDreamWork, setRoute } from '../../db/dreams'
+import { sheetPath } from '../../lib/paths'
+import { CLARIFY_STEPS, ROUTE_SLOTS, type ClarifyStep, type Dream, type DreamWork } from '../../db/db'
 
 /** Module 2 (C): the five clarify steps and the three routes to the dream. */
 export default function Clarify({ dream, work }: { dream: Dream; work?: DreamWork }) {
   const { t } = useT()
   const setStep = (step: ClarifyStep, v: string) => saveDreamWork(dream.id!, { clarify: { [step]: v } })
-  const routes = [...(work?.routes ?? []), '', '', ''].slice(0, 3)
-  const setRoute = (i: number, v: string) => {
-    const r = [...routes]
-    r[i] = v
-    saveDreamWork(dream.id!, { routes: r })
-  }
+  const routes = Array.from({ length: ROUTE_SLOTS }, (_, i) => work?.routes?.[i] ?? '')
   const filled = CLARIFY_STEPS.filter((s) => (work?.clarify?.[s] ?? '').trim()).length
   return (
     <>
@@ -51,13 +47,13 @@ export default function Clarify({ dream, work }: { dream: Dream; work?: DreamWor
               id={`route-${i}`}
               placeholder={t(`mydream.route.placeholder.${i + 1}`)}
               value={r}
-              onSave={(v) => setRoute(i, v)}
+              onSave={(v) => setRoute(dream.id!, i, v)}
             />
           </div>
         ))}
       </div>
       <p className="small muted">
-        {t('mydream.saved')} <Link to="/book/print/clarify">{t('mydream.print')}</Link>
+        {t('mydream.saved')} <Link to={sheetPath('clarify', dream.id)}>{t('mydream.print')}</Link>
       </p>
     </>
   )

@@ -4,6 +4,7 @@ import { useT } from '../../i18n'
 import SectionHead from '../../components/SectionHead'
 import { WheelSvg } from '../../components/WheelSvg'
 import { useWheels, saveWheel } from '../../db/calm'
+import { useAction } from '../../state/useAction'
 import { WHEEL_AREAS, SWLS_ITEMS } from '../../db/db'
 
 /** Module 5: the Wheel of Life sliders, the five SWLS statements, and the saved snapshots (FR-32, FR-34). */
@@ -22,7 +23,7 @@ export default function Wheel() {
     }
   }, [last, seeded])
   const total = swls.reduce((a, b) => a + b, 0)
-  const save = () => saveWheel(values, swls)
+  const [save, saving] = useAction(() => saveWheel(values, swls))
   return (
     <>
       <SectionHead id="wheel" label={t('calm.section.wheel')} title={t('wheel.title')} />
@@ -78,7 +79,7 @@ export default function Wheel() {
         </p>
       </div>
       <p>
-        <button className="btn primary" onClick={save} disabled={swls.some((v) => v === 0)}>
+        <button className="btn primary" onClick={() => save()} disabled={saving || swls.some((v) => v === 0)}>
           {t('wheel.save')}
         </button>
       </p>

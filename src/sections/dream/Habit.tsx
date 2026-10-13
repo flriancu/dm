@@ -2,25 +2,22 @@ import { Link } from 'react-router-dom'
 import { useT } from '../../i18n'
 import AutoText from '../../components/AutoText'
 import SectionHead from '../../components/SectionHead'
-import { saveDreamWork } from '../../db/dreams'
-import { HABIT_PARTS, today, weekStart, type HabitPart, type HabitWeek, type Dream, type DreamWork } from '../../db/db'
+import { saveDreamWork, setHabitWeek } from '../../db/dreams'
+import { useToday } from '../../state/useToday'
+import { sheetPath } from '../../lib/paths'
+import { HABIT_PARTS, weekStart, type HabitPart, type Dream, type DreamWork } from '../../db/db'
 
 /** Module 4 (P): the habit recipe (anchor, behaviour, celebration) and its weekly log (FR-22, FR-45). */
 export default function Habit({ dream, work }: { dream: Dream; work?: DreamWork }) {
   const { t, fmtDate } = useT()
   const setHabit = (part: HabitPart, v: string) => saveDreamWork(dream.id!, { habit: { [part]: v } })
 
-  // weekly log: this week plus the weeks already logged, newest first
-  const thisWeek = weekStart(today())
+  // weekly log: this week plus the weeks already logged, newest first; "this week" moves on at midnight
+  const thisWeek = weekStart(useToday())
   const logged = new Map((work?.habitLog ?? []).map((w) => [w.week, w]))
   const weeks = Array.from(new Set([thisWeek, ...logged.keys()]))
     .sort()
     .reverse()
-  const setWeek = (week: string, p: Partial<HabitWeek>) => {
-    const next = new Map(logged)
-    next.set(week, { week, ...logged.get(week), ...p })
-    saveDreamWork(dream.id!, { habitLog: Array.from(next.values()) })
-  }
   const doneWeeks = (work?.habitLog ?? []).filter((w) => w.done).length
 
   return (
@@ -65,7 +62,7 @@ export default function Habit({ dream, work }: { dream: Dream; work?: DreamWork 
                   type="checkbox"
                   key={`${w}-${row?.done ? 1 : 0}`}
                   defaultChecked={!!row?.done}
-                  onChange={(e) => setWeek(w, { done: e.target.checked })}
+                  onChange={(e) => setHabitWeek(dream.id!, w, { done: e.target.checked })}
                 />
                 <span>
                   {t('habit.week.of', { date: fmtDate(w) })}
@@ -76,14 +73,14 @@ export default function Habit({ dream, work }: { dream: Dream; work?: DreamWork 
                 aria-label={t('habit.note.label', { date: fmtDate(w) })}
                 placeholder={t('habit.note.placeholder')}
                 value={row?.note ?? ''}
-                onSave={(v) => setWeek(w, { note: v })}
+                onSave={(v) => setHabitWeek(dream.id!, w, { note: v })}
               />
             </div>
           )
         })}
       </div>
       <p className="small muted">
-        {t('mydream.saved')} <Link to="/book/print/habit">{t('habit.print')}</Link>
+        {t('mydream.saved')} <Link to={sheetPath('habit', dream.id)}>{t('habit.print')}</Link>
       </p>
     </>
   )

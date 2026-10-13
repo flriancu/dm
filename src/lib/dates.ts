@@ -4,7 +4,7 @@
  * east of Greenwich).
  */
 export function localIso(d: Date): string {
-  const y = d.getFullYear(),
+  const y = String(d.getFullYear()).padStart(4, '0'),
     m = String(d.getMonth() + 1).padStart(2, '0'),
     day = String(d.getDate()).padStart(2, '0')
   return `${y}-${m}-${day}`
@@ -12,10 +12,25 @@ export function localIso(d: Date): string {
 
 export function parseLocal(iso: string): Date {
   const [y, m, d] = iso.slice(0, 10).split('-').map(Number)
-  return new Date(y, (m || 1) - 1, d || 1)
+  const date = new Date(2000, (m || 1) - 1, d || 1)
+  date.setFullYear(y) // the Date constructor reads years 0–99 as 1900–1999
+  return date
+}
+
+/** True for a real calendar day written as yyyy-mm-dd (no 31 April), in years the course can mean. */
+export function isIsoDate(s: unknown): s is string {
+  if (typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false
+  const y = Number(s.slice(0, 4))
+  return y >= 1900 && y <= 2999 && localIso(parseLocal(s)) === s
 }
 
 export const today = () => localIso(new Date())
+
+/** Milliseconds until the next local midnight, when today() changes. */
+export function msToNextDay(now = new Date()): number {
+  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
+  return next.getTime() - now.getTime()
+}
 
 export function addDays(iso: string, n: number): string {
   const d = parseLocal(iso)

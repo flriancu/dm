@@ -1,18 +1,17 @@
 /** Printable sheets: each `.sheet` section prints on its own A4 page. */
 import { useT, contentLocaleFor } from '../i18n'
 import { useSettings } from '../state/settings'
-import { CLARIFY_STEPS, WOOP_STEPS, QUADRANTS } from '../db/db'
-import { useDreams, useDreamWork } from '../db/dreams'
+import { CLARIFY_STEPS, ROUTE_SLOTS, WOOP_STEPS, QUADRANTS } from '../db/db'
+import { useDreams } from '../db/dreams'
+import { usePrintedDream } from './usePrintedDream'
 import { useWeekTasks } from '../db/week'
 import { loadDoc } from '../content/loader'
-import { useEffect, useState } from 'react'
+import { useContent } from '../content/useContent'
 
 export function CoverSheet() {
   const { locale } = useT()
-  const [doc, setDoc] = useState<{ meta: Record<string, unknown>; html: string } | null>(null)
-  useEffect(() => {
-    loadDoc(contentLocaleFor(locale), 'sheets', 'coperta').then(setDoc)
-  }, [locale])
+  const lang = contentLocaleFor(locale)
+  const doc = useContent(`cover:${lang}`, () => loadDoc(lang, 'sheets', 'coperta'))
   return (
     <section className="sheet">
       <h1>{String(doc?.meta.title ?? '')}</h1>
@@ -24,17 +23,20 @@ export function CoverSheet() {
   )
 }
 
+/** Fifty dreams per page, at least the hundred lines of the paper book, more pages for a longer list. */
+const DREAMS_PER_PAGE = 50
 export function DreamsSheet() {
-  const { t } = useT()
+  const { t, fmtDate } = useT()
   const dreams = useDreams() ?? []
-  const rows = Array.from({ length: 100 }, (_, i) => dreams[i])
-  const half = [rows.slice(0, 50), rows.slice(50)]
+  const pages = Math.max(2, Math.ceil(dreams.length / DREAMS_PER_PAGE))
+  const rows = Array.from({ length: pages * DREAMS_PER_PAGE }, (_, i) => dreams[i])
+  const parts = Array.from({ length: pages }, (_, p) => rows.slice(p * DREAMS_PER_PAGE, (p + 1) * DREAMS_PER_PAGE))
   return (
     <>
-      {half.map((part, p) => (
+      {parts.map((part, p) => (
         <section className="sheet" key={p}>
           <h1>
-            {t('book.sheet.dreams')} {p === 0 ? '1–50' : '51–100'}
+            {t('book.sheet.dreams')} {p * DREAMS_PER_PAGE + 1}–{(p + 1) * DREAMS_PER_PAGE}
           </h1>
           <table>
             <thead>
@@ -49,8 +51,11 @@ export function DreamsSheet() {
             <tbody>
               {part.map((d, i) => (
                 <tr key={i}>
-                  <td>{p * 50 + i + 1}</td>
-                  <td>{d?.text ?? ''}</td>
+                  <td>{p * DREAMS_PER_PAGE + i + 1}</td>
+                  <td>
+                    {d?.text ?? ''}
+                    {d?.dateReleased ? <em> ({t('dreams.released', { date: fmtDate(d.dateReleased) })})</em> : null}
+                  </td>
                   <td>{d?.dateAdded ?? ''}</td>
                   <td>{d?.dateAchieved ?? ''}</td>
                   <td>{d?.area ? t(`area.${d.area}`) : ''}</td>
@@ -110,8 +115,8 @@ export function RatingSheet() {
 
 export function ClarifySheet() {
   const { t } = useT()
-  const { dream, work } = useDreamWork()
-  const routes = [...(work?.routes ?? []), '', '', ''].slice(0, 3)
+  const { dream, work } = usePrintedDream()
+  const routes = Array.from({ length: ROUTE_SLOTS }, (_, i) => work?.routes?.[i] ?? '')
   return (
     <section className="sheet">
       <h1>{t('book.sheet.clarify')}</h1>
@@ -211,7 +216,7 @@ export function WeekSheet() {
 
 export function WoopSheet() {
   const { t } = useT()
-  const { dream, work } = useDreamWork()
+  const { dream, work } = usePrintedDream()
   return (
     <section className="sheet">
       <h1>{t('book.sheet.woop')}</h1>

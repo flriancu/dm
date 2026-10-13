@@ -15,25 +15,27 @@ export default function Rep() {
   const [left, setLeft] = useState<number | null>(null)
   const [sense, setSense] = useState(0)
   const timer = useRef<number | null>(null)
+  const remaining = useRef(0)
   const reps = useRepCount() ?? 0
-  const start = (secs: number) => {
+  const stop = () => {
     if (timer.current) window.clearInterval(timer.current)
+    timer.current = null
+  }
+  // the count lives in a ref and the save happens in the tick itself, never in a state updater
+  // (React may run an updater twice, which counted every rep twice)
+  const start = (secs: number) => {
+    stop()
     setSense(Math.floor(Math.random() * SENSES.length))
+    remaining.current = secs
     setLeft(secs)
-    timer.current = window.setInterval(
-      () =>
-        setLeft((v) => {
-          if (v === null) return null
-          if (v <= 1) {
-            window.clearInterval(timer.current!)
-            timer.current = null
-            addRep(secs)
-            return 0
-          }
-          return v - 1
-        }),
-      1000,
-    )
+    timer.current = window.setInterval(() => {
+      remaining.current -= 1
+      setLeft(Math.max(0, remaining.current))
+      if (remaining.current <= 0) {
+        stop()
+        void addRep(secs)
+      }
+    }, 1000)
   }
   useEffect(
     () => () => {

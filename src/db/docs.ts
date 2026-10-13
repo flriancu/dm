@@ -16,16 +16,26 @@ export function mergeDoc<T extends object>(cur: T, patch: Partial<T>, nested: re
   return out
 }
 
-export interface DocSpec<T extends object, K> {
-  table: Table<T, K>
+/** I is the table's insert type (Dexie's EntityTable makes the key optional on insert). */
+export interface DocSpec<T extends object, K, I = T> {
+  table: Table<T, K, I>
   key: K
   empty: () => T
   nested: readonly (keyof T)[]
 }
 
-export function saveDoc<T extends { updated?: string }, K>(spec: DocSpec<T, K>, patch: Partial<T>) {
+/**
+ * A patch, or a function of the stored document that returns one. Lists (values, friends,
+ * the habit log) must use the function form: a list built from what the page last showed
+ * would overwrite an edit saved in between (a typed name, then a quick tap on its chip).
+ */
+export type DocPatch<T> = Partial<T> | ((cur: T) => Partial<T>)
+
+export async function saveDoc<T extends { updated?: string }, K, I>(spec: DocSpec<T, K, I>, patch: DocPatch<T>) {
   return db.transaction('rw', spec.table, async () => {
     const cur = (await spec.table.get(spec.key)) ?? spec.empty()
-    await spec.table.put({ ...mergeDoc(cur, patch, spec.nested), updated: today() })
+    const p = typeof patch === 'function' ? patch(cur) : patch
+    // a stored document always carries its key, so it is a valid insert value as well
+    await spec.table.put({ ...mergeDoc(cur, p, spec.nested), updated: today() } as unknown as I)
   })
 }

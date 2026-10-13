@@ -2,18 +2,15 @@ import { Link } from 'react-router-dom'
 import { useT } from '../../i18n'
 import AutoText from '../../components/AutoText'
 import SectionHead from '../../components/SectionHead'
-import { saveDreamWork } from '../../db/dreams'
-import { FRIEND_ROLES, type DreamFriend, type Dream, type DreamWork } from '../../db/db'
+import { setFriend } from '../../db/dreams'
+import { sheetPath } from '../../lib/paths'
+import { FRIEND_ROLES, FRIEND_SLOTS, type DreamFriend, type Dream, type DreamWork } from '../../db/db'
 
 /** Module 4 (I): the three people around the dream and what is asked of each (FR-23). */
 export default function Friends({ dream, work }: { dream: Dream; work?: DreamWork }) {
   const { t } = useT()
-  const friends: DreamFriend[] = [...(work?.friends ?? []), {}, {}, {}].slice(0, 3)
-  const setFriend = (i: number, p: Partial<DreamFriend>) => {
-    const f = friends.map((x) => ({ ...x }))
-    f[i] = { ...f[i], ...p }
-    saveDreamWork(dream.id!, { friends: f })
-  }
+  const friends: DreamFriend[] = Array.from({ length: FRIEND_SLOTS }, (_, i) => work?.friends?.[i] ?? {})
+  const set = (i: number, p: Partial<DreamFriend>) => setFriend(dream.id!, i, p)
   return (
     <>
       <SectionHead id="friends" label={t('mydream.section.friends')} title={t('friends.title')} />
@@ -26,7 +23,7 @@ export default function Friends({ dream, work }: { dream: Dream; work?: DreamWor
               id={`friend-name-${i}`}
               placeholder={t('friends.name.placeholder')}
               value={f.name ?? ''}
-              onSave={(v) => setFriend(i, { name: v })}
+              onSave={(v) => set(i, { name: v })}
             />
           </div>
           <div className="field">
@@ -36,7 +33,8 @@ export default function Friends({ dream, work }: { dream: Dream; work?: DreamWor
                 <button
                   key={r}
                   className={`chip ${f.role === r ? 'on' : ''}`}
-                  onClick={() => setFriend(i, { role: r })}
+                  aria-pressed={f.role === r}
+                  onClick={() => set(i, { role: r })}
                 >
                   {t(`friends.role.${r}`)}
                 </button>
@@ -51,7 +49,7 @@ export default function Friends({ dream, work }: { dream: Dream; work?: DreamWor
                 id={`friend-ask-${i}`}
                 placeholder={t('friends.ask.placeholder')}
                 value={f.ask ?? ''}
-                onSave={(v) => setFriend(i, { ask: v })}
+                onSave={(v) => set(i, { ask: v })}
                 multiline
               />
             </div>
@@ -63,14 +61,14 @@ export default function Friends({ dream, work }: { dream: Dream; work?: DreamWor
                 id={`friend-day-${i}`}
                 placeholder={t('friends.day.placeholder')}
                 value={f.day ?? ''}
-                onSave={(v) => setFriend(i, { day: v })}
+                onSave={(v) => set(i, { day: v })}
               />
             </div>
           )}
         </div>
       ))}
       <p className="small muted">
-        {t('friends.note')} <Link to="/book/print/friends">{t('friends.print')}</Link>
+        {t('friends.note')} <Link to={sheetPath('friends', dream.id)}>{t('friends.print')}</Link>
       </p>
     </>
   )

@@ -1,26 +1,24 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useT, contentLocaleFor } from '../i18n'
+import { useT } from '../i18n'
 import { useSettings } from '../state/settings'
 import { showsDreamerParts, showsFriendSwitch, showsFriendSection } from '../state/roles'
 import { useModuleNotes, completedModuleIds, useOpenPlans, hidePlan } from '../db/notes'
 import { useVision } from '../db/vision'
-import { useChosenDream } from '../db/hooks'
-import { listModules, type ModuleMeta } from '../content/loader'
-import { today } from '../lib/dates'
+import { useChosenDream } from '../db/dreams'
+import { useModules } from '../content/useContent'
+import { useToday } from '../state/useToday'
+import { sectionPath } from '../lib/paths'
 import { moduleDate, nextModule, letterDue } from '../lib/course'
 
 export default function Home() {
-  const { t, fmtDate, locale } = useT()
+  const { t, fmtDate } = useT()
   const { settings, update } = useSettings()
-  const [modules, setModules] = useState<ModuleMeta[]>([])
-  useEffect(() => {
-    listModules(contentLocaleFor(locale)).then(setModules)
-  }, [locale])
+  const modules = useModules() ?? []
+  const today = useToday()
 
   const notes = useModuleNotes() ?? []
   const vision = useVision()
-  const checkinDue = !!vision?.checkin?.next && vision.checkin.next <= today()
+  const checkinDue = !!vision?.checkin?.next && vision.checkin.next <= today
   const done = completedModuleIds(notes)
   const next = nextModule(modules, done)
   const nextDate = next ? moduleDate(settings.startDate, settings.cadenceDays, next.order) : null
@@ -72,17 +70,17 @@ export default function Home() {
         <div className="card soft">
           <strong>{t('home.checkin.due')}</strong>
           <div>
-            <Link className="btn sm" to="/vision#checkin">
+            <Link className="btn sm" to={sectionPath('/vision', 'checkin')}>
               {t('home.checkin.open')}
             </Link>
           </div>
         </div>
       )}
-      {dreamer && letterDue(vision?.letter, today()) && (
+      {dreamer && letterDue(vision?.letter, today) && (
         <div className="card soft">
           <strong>{t('home.letter.due')}</strong>
           <div>
-            <Link className="btn sm" to="/vision#letter">
+            <Link className="btn sm" to={sectionPath('/vision', 'letter')}>
               {t('home.letter.open')}
             </Link>
           </div>

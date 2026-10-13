@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { DreamDB, readSettings, writeSettings, today } from './db'
+import { DreamDB, today } from './db'
+import { readSettings, writeSettings } from './settings'
 import { exportAll, importAll, isExportFile } from './exportImport'
 
 describe('export / import round trip (FR-50, acceptance 3)', () => {
@@ -58,7 +59,8 @@ describe('export / import round trip (FR-50, acceptance 3)', () => {
     expect(JSON.parse(JSON.stringify(file))).toEqual(file) // serialisable
 
     const res = await importAll(JSON.parse(JSON.stringify(file)), b)
-    expect(res).toEqual({ dreams: 2, plans: 1 })
+    expect(res.incoming).toEqual({ dreams: 2, plans: 1 })
+    expect(res.dropped).toBe(0)
     expect(await b.dreams.count()).toBe(2)
     expect((await b.dreams.where('chosen').equals(1).first())?.text).toBe('Learn to sail')
     expect((await readSettings(b)).paperCount).toBe(37)

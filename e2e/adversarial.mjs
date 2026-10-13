@@ -51,12 +51,16 @@ check(
   'onboarding: "follow the device" clears the override',
 )
 await page.getByRole('button', { name: /Un Visător și Prietenul lui/ }).click()
-// cadence stepper clamps
+// cadence stepper: shows what is typed, applies the value brought into range, shows that once left
 const cad = page.locator('#cad')
 await cad.fill('100')
+await cad.blur()
 check((await cad.inputValue()) === '42', 'cadence clamps to 42')
 await cad.fill('1')
+await cad.blur()
 check((await cad.inputValue()) === '7', 'cadence clamps to 7')
+await cad.fill('21')
+check((await cad.inputValue()) === '21', 'cadence takes a typed two-digit value (no jump to 7 after the first digit)')
 await cad.pressSequentially('abc')
 check(/^\d+$/.test(await cad.inputValue()), 'cadence ignores letters')
 await page.getByRole('button', { name: 'Începe' }).click()
@@ -258,8 +262,14 @@ check(
   parsed.dreams.length === 3 && parsed.vision?.length === 1,
   `export contains the data (dreams=${parsed.dreams.length}, vision=${parsed.vision?.length})`,
 )
+let importQuestion = ''
+page.once('dialog', (d) => {
+  importQuestion = d.message()
+  d.accept()
+})
 await fileInput.setInputFiles({ name: 'ok.json', mimeType: 'application/json', buffer: Buffer.from(exported) })
 check(await visible(page.getByText(/Copia a fost încărcată: 3 visuri/)), 'round-trip import restores the data')
+check(/înlocuite/.test(importQuestion), 'import asks before replacing the data on the device')
 // role → Prietenul Visului: learner pages hidden
 await page.getByRole('button', { name: /Schimbă rolul/ }).click()
 await page.getByRole('button', { name: 'Prietenul Visului', exact: true }).click()
@@ -318,9 +328,9 @@ await page.waitForTimeout(300)
 await page.goto(base + '#/module/02')
 check(await visible(page.getByText('Eu conduc întâlnirea')), 'Both+group: module page shows the leader chip')
 await page.goto(base + '#/module/00')
-await page.getByRole('button', { name: 'Am citit modulul 0' }).waitFor()
+await page.getByText('Am citit modulul 0').first().waitFor()
 check(!(await page.locator('.chip', { hasText: 'Eu conduc întâlnirea' }).isVisible()), 'module 0 has no leader chip')
-check(await visible(page.getByRole('button', { name: 'Am citit modulul 0' })), 'module 0 has its own done button')
+check(await visible(page.getByText('Am citit modulul 0')), 'module 0 has its own done button (or its done line)')
 check(!(await page.getByLabel(/^Un cuvânt despre cum a fost întâlnirea/).isVisible()), 'module 0 has no one-word box')
 // cadence warning under 14 days
 await page.goto(base + '#/settings')

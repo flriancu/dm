@@ -2,11 +2,12 @@ import { Link } from 'react-router-dom'
 import { useT } from '../../i18n'
 import AutoText from '../../components/AutoText'
 import SectionHead from '../../components/SectionHead'
+import { saveVision } from '../../db/vision'
 import { useModuleNotes } from '../../db/notes'
-import type { VisionDoc } from '../../db/db'
+import { TEXT_WORD, type VisionDoc } from '../../db/db'
 
 /** Module 7 retrospective: the one word per module collected along the course, and four closing questions. */
-export default function Retro({ v, save }: { v: VisionDoc; save: (patch: Partial<VisionDoc>) => Promise<unknown> }) {
+export default function Retro({ v }: { v: VisionDoc }) {
   const { t } = useT()
   const notes = useModuleNotes() ?? []
   return (
@@ -41,10 +42,10 @@ export default function Retro({ v, save }: { v: VisionDoc; save: (patch: Partial
             {k === 'word' ? (
               <AutoText
                 id={`retro-${k}`}
-                maxLength={40}
+                maxLength={TEXT_WORD}
                 placeholder={t(`retro.${k}.placeholder`)}
                 value={v.retro?.[k] ?? ''}
-                onSave={(v) => save({ retro: { [k]: v } })}
+                onSave={(text) => saveVision({ retro: { [k]: text } })}
               />
             ) : (
               <AutoText
@@ -52,7 +53,7 @@ export default function Retro({ v, save }: { v: VisionDoc; save: (patch: Partial
                 placeholder={t(`retro.${k}.placeholder`)}
                 style={{ minHeight: 72 }}
                 value={v.retro?.[k] ?? ''}
-                onSave={(v) => save({ retro: { [k]: v } })}
+                onSave={(text) => saveVision({ retro: { [k]: text } })}
                 multiline
               />
             )}

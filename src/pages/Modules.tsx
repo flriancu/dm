@@ -1,14 +1,10 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useT, contentLocaleFor } from '../i18n'
-import { listModules, type ModuleMeta } from '../content/loader'
+import { useT } from '../i18n'
+import { useModules } from '../content/useContent'
 
 export default function Modules() {
-  const { t, locale } = useT()
-  const [modules, setModules] = useState<ModuleMeta[]>([])
-  useEffect(() => {
-    listModules(contentLocaleFor(locale)).then(setModules)
-  }, [locale])
+  const { t } = useT()
+  const modules = useModules() ?? []
   return (
     <>
       <h1>{t('modules.title')}</h1>

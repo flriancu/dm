@@ -2,55 +2,44 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useT, contentLocaleFor } from '../i18n'
 import { useSettings } from '../state/settings'
+import { submitDraft } from '../state/useAction'
 import { showsFriendSection } from '../state/roles'
-import { listModules, listPlanIds, loadPlan, md, type PlanDoc } from '../content/loader'
+import { listPlanIds, loadPlan, md } from '../content/loader'
+import { useContent, useModules } from '../content/useContent'
 import { configOfHeading } from '../content/plans'
 import { useModuleNotes, completedModuleIds, useFriendNotes, addFriendNote } from '../db/notes'
-import { nextModule } from '../lib/course'
+import { meetingIdsOf, nextMeeting } from '../lib/course'
+import { TEXT_LONG } from '../db/db'
 import type { Section } from '../content/frontmatter'
 
 const configOf = (s: Section) => configOfHeading(s.title)
 
 /** Dream Friend page (FR-60/61): the meeting plan, opened on the chosen configuration, and the Friend's own notes. */
 export default function Friend() {
-  const { t, locale, fmtDate } = useT()
+  const { t, locale } = useT()
   const { settings } = useSettings()
   const { id } = useParams()
   const nav = useNavigate()
-  const [planIds, setPlanIds] = useState<string[]>([])
-  useEffect(() => {
-    listPlanIds(contentLocaleFor(locale)).then(setPlanIds)
-  }, [locale])
+  const lang = contentLocaleFor(locale)
+  const planIds = useContent(`plans:${lang}`, () => listPlanIds(lang)) ?? []
   const moduleId = id && planIds.includes(id) ? id : null
 
   // without an id in the URL, open the next meeting's plan
   const notes = useModuleNotes()
+  const modules = useModules()
   useEffect(() => {
-    if (moduleId || !notes || planIds.length === 0) return
-    listModules(contentLocaleFor(locale)).then((mods) => {
-      const next = nextModule(
-        mods.filter((m) => m.order > 0),
-        completedModuleIds(notes),
-      )
-      nav(`/friend/${next && planIds.includes(next.id) ? next.id : planIds[0]}`, { replace: true })
-    })
-  }, [moduleId, notes, planIds, locale, nav])
+    if (moduleId || !notes || !modules || planIds.length === 0) return
+    const next = nextMeeting(meetingIdsOf(modules), completedModuleIds(notes))
+    nav(`/friend/${next && planIds.includes(next) ? next : planIds[0]}`, { replace: true })
+  }, [moduleId, notes, modules, planIds, nav])
 
-  const [doc, setDoc] = useState<PlanDoc | null | undefined>(undefined)
-  useEffect(() => {
-    if (moduleId) loadPlan(contentLocaleFor(locale), moduleId).then(setDoc)
-  }, [locale, moduleId])
-  const friendNotes = useFriendNotes(moduleId)
-  const [text, setText] = useState('')
+  const doc = useContent(`plan:${lang}:${moduleId}`, () =>
+    moduleId ? loadPlan(lang, moduleId) : Promise.resolve(null),
+  )
 
   if (!showsFriendSection(settings)) return <p className="notice">{t('friend.hidden')}</p>
   if (!moduleId) return <p className="muted">…</p>
 
-  const add = async () => {
-    if (!text.trim()) return
-    await addFriendNote(moduleId, text)
-    setText('')
-  }
   const tables = doc ? doc.sections.filter((s) => configOf(s)) : []
   const chosen = tables.find((s) => configOf(s) === settings.config)
   const others = tables.filter((s) => s !== chosen)
@@ -104,30 +93,49 @@ export default function Friend() {
         </div>
       )}
       <h2>{notesLabel}</h2>
-      <div className="card">
-        <textarea
-          aria-label={notesLabel}
-          placeholder={t('friend.notes.placeholder')}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        />
-        <button className="btn" onClick={add} disabled={!text.trim()}>
-          {t('friend.notes.add')}
-        </button>
-        {friendNotes.length === 0 ? (
-          <p className="small muted" style={{ marginBottom: 0 }}>
-            {t('friend.notes.empty')}
-          </p>
-        ) : (
-          <ul className="list small">
-            {friendNotes.map((n) => (
-              <li key={n.id}>
-                <span className="muted">{fmtDate(n.created)}</span> — {n.text}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      {/* keyed by meeting: a note being written belongs to this meeting and never follows to another plan */}
+      <FriendNotes key={moduleId} moduleId={moduleId} label={notesLabel} />
     </>
+  )
+}
+
+/** The Friend's own notes for one meeting (FR-61): the draft, and the notes already written, newest first. */
+function FriendNotes({ moduleId, label }: { moduleId: string; label: string }) {
+  const { t, fmtDate } = useT()
+  const notes = useFriendNotes(moduleId)
+  const [text, setText] = useState('')
+  const add = submitDraft(
+    text,
+    setText,
+    '',
+    (typed) => addFriendNote(moduleId, typed),
+    (typed) => !!typed.trim(),
+  )
+  return (
+    <div className="card">
+      <textarea
+        aria-label={label}
+        maxLength={TEXT_LONG}
+        placeholder={t('friend.notes.placeholder')}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+      />
+      <button className="btn" onClick={add} disabled={!text.trim()}>
+        {t('friend.notes.add')}
+      </button>
+      {notes.length === 0 ? (
+        <p className="small muted" style={{ marginBottom: 0 }}>
+          {t('friend.notes.empty')}
+        </p>
+      ) : (
+        <ul className="list small">
+          {notes.map((n) => (
+            <li key={n.id}>
+              <span className="muted">{fmtDate(n.created)}</span> — {n.text}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   )
 }

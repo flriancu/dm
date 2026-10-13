@@ -6,7 +6,8 @@ import AutoText from '../../components/AutoText'
 import SectionHead from '../../components/SectionHead'
 import { useSettings } from '../../state/settings'
 import { useStrengthUses, addStrengthUse, toggleSaboteur, setStrength } from '../../db/calm'
-import { SABOTEURS, type Saboteur } from '../../db/db'
+import { submitDraft } from '../../state/useAction'
+import { MAX_SABOTEURS, PICKABLE_SABOTEURS, STRENGTH_SLOTS, TEXT_SHORT, type Saboteur } from '../../db/db'
 
 /** Module 5: the top three saboteurs, the five strengths, and the log of strength uses (FR-30, FR-36). */
 export default function Profile() {
@@ -16,12 +17,14 @@ export default function Profile() {
   const [useText, setUseText] = useState('')
   const [useStrength, setUseStrength] = useState('')
   const top = settings.saboteurs
-  const strengths = [...settings.strengths, '', '', '', '', ''].slice(0, 5)
-  const addUse = async () => {
-    if (!useText.trim()) return
-    await addStrengthUse(useStrength || strengths.find(Boolean) || '', useText.trim())
-    setUseText('')
-  }
+  const strengths = Array.from({ length: STRENGTH_SLOTS }, (_, i) => settings.strengths[i] ?? '')
+  const addUse = submitDraft(
+    useText,
+    setUseText,
+    '',
+    (text) => addStrengthUse(useStrength || strengths.find(Boolean) || '', text),
+    (text) => !!text.trim(),
+  )
   return (
     <>
       <SectionHead id="profile" label={t('calm.section.profile')} title={t('profile.title')} />
@@ -29,15 +32,19 @@ export default function Profile() {
       <div className="card">
         <div className="field">
           <label>
-            {t('profile.saboteurs')} <span className="muted">({top.length}/3)</span>
+            {t('profile.saboteurs')}{' '}
+            <span className="muted">
+              ({top.length}/{MAX_SABOTEURS})
+            </span>
           </label>
           <div className="row">
-            {SABOTEURS.filter((s) => s !== 'judge').map((s) => (
+            {PICKABLE_SABOTEURS.map((s) => (
               <button
                 key={s}
                 className={`chip ${top.includes(s) ? 'on' : ''}`}
                 onClick={() => toggleSaboteur(s)}
-                disabled={!top.includes(s) && top.length >= 3}
+                aria-pressed={top.includes(s)}
+                disabled={!top.includes(s) && top.length >= MAX_SABOTEURS}
               >
                 {t(`sab.${s}`)}
               </button>
@@ -97,8 +104,8 @@ export default function Profile() {
           <label htmlFor="use-strength">{t('profile.uses.which')}</label>
           <select id="use-strength" value={useStrength} onChange={(e) => setUseStrength(e.target.value)}>
             <option value="">{t('profile.uses.which.none')}</option>
-            {strengths.filter(Boolean).map((s) => (
-              <option key={s} value={s}>
+            {strengths.filter(Boolean).map((s, i) => (
+              <option key={`${i}-${s}`} value={s}>
                 {s}
               </option>
             ))}
@@ -109,6 +116,7 @@ export default function Profile() {
           <input
             id="use-text"
             type="text"
+            maxLength={TEXT_SHORT}
             placeholder={t('profile.uses.placeholder')}
             value={useText}
             onChange={(e) => setUseText(e.target.value)}

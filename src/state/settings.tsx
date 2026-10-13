@@ -1,6 +1,7 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, type ReactNode } from 'react'
-import { useLiveQuery } from 'dexie-react-hooks'
-import { db, DEFAULT_SETTINGS, writeSettings, type Settings } from '../db/db'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { DEFAULT_SETTINGS, type Settings } from '../db/db'
+import { useStoredSettings, writeSettings } from '../db/settings'
+import { openStorage } from '../db/lifecycle'
 
 interface Ctx {
   settings: Settings
@@ -10,12 +11,13 @@ interface Ctx {
 const SettingsCtx = createContext<Ctx>({ settings: DEFAULT_SETTINGS, loaded: false, update: async () => {} })
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
-  const rows = useLiveQuery(() => db.settings.toArray(), [])
-  const settings = useMemo(() => {
-    const s: Record<string, unknown> = { ...DEFAULT_SETTINGS }
-    for (const r of rows ?? []) s[r.key] = r.value
-    return s as unknown as Settings
-  }, [rows])
+  // a database that cannot open is thrown to the crash screen, which explains it
+  const [openError, setOpenError] = useState<unknown>(null)
+  useEffect(() => {
+    openStorage().catch(setOpenError)
+  }, [])
+  const stored = useStoredSettings()
+  const settings = stored ?? DEFAULT_SETTINGS
   const update = useCallback((patch: Partial<Settings>) => writeSettings(patch), [])
 
   useEffect(() => {
@@ -25,7 +27,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     root.lang = settings.uiLocale
   }, [settings.theme, settings.uiLocale])
 
-  const value = useMemo(() => ({ settings, loaded: rows !== undefined, update }), [settings, rows, update])
+  const value = useMemo(() => ({ settings, loaded: stored !== undefined, update }), [settings, stored, update])
+  if (openError) throw openError
   return <SettingsCtx.Provider value={value}>{children}</SettingsCtx.Provider>
 }
 

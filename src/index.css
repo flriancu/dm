@@ -607,16 +607,9 @@ textarea {
   align-items: center;
   gap: 8px;
 }
-.stepper input[type='number'] {
+.stepper input {
   width: 4.5em;
   text-align: center;
-  -moz-appearance: textfield;
-  appearance: textfield;
-}
-.stepper input::-webkit-outer-spin-button,
-.stepper input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
 }
 .stepper .btn {
   min-width: var(--tap);
@@ -707,4 +700,25 @@ input[type='number']::-webkit-inner-spin-button {
 }
 .datepop-foot {
   margin-top: 6px;
+}
+
+/* A box whose last save the browser refused (AutoText); the banner above the page says why */
+.unsaved {
+  border-color: var(--warn);
+  box-shadow: 0 0 0 1px var(--warn);
+}
+.save-error {
+  margin-bottom: 12px;
+}
+.save-error .btn {
+  margin-left: 4px;
+}
+/* The letter from the future self, read back after its date: as written, line breaks kept */
+.letter-text {
+  white-space: pre-wrap;
+  font-family: var(--serif);
+  border-left: 4px solid var(--accent);
+  padding: 6px 14px;
+  margin: 8px 0 12px;
+  overflow-wrap: anywhere;
 }

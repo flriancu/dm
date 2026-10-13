@@ -1,10 +1,35 @@
 import Dexie, { type EntityTable } from 'dexie'
+import type { UiLocale } from '../i18n/locales'
 
 /** Local-first store (FR-52). One database, versioned schema, JSON export (FR-50). */
 
-export type Role = 'dreamer' | 'friend' | 'both'
-export type Config = 'solo' | 'pair' | 'group'
-export type WhyTag = 'intrinsic' | 'extrinsic'
+export const ROLES = ['dreamer', 'friend', 'both'] as const
+export type Role = (typeof ROLES)[number]
+/** The three meeting configurations, in the order the plans list them. */
+export const CONFIGS = ['solo', 'pair', 'group'] as const
+export type Config = (typeof CONFIGS)[number]
+export const THEMES = ['system', 'light', 'dark'] as const
+export type Theme = (typeof THEMES)[number]
+export const WHY_TAGS = ['intrinsic', 'extrinsic'] as const
+export type WhyTag = (typeof WHY_TAGS)[number]
+
+/**
+ * Length limits shared by the text boxes and the backup check, so whatever a box accepts
+ * survives an export and import unchanged. Short: one line (a dream, a name, a route).
+ * Long: a paragraph or a letter. Word: the one-word feedback.
+ */
+export const TEXT_SHORT = 1000
+export const TEXT_LONG = 50000
+export const TEXT_WORD = 40
+/**
+ * How long the growing lists may get (far beyond a course's use); the write functions keep
+ * to them, so whatever the app stores also passes the backup check.
+ */
+export const MAX_CRITERIA = 20
+export const MAX_VALUE_ACTS = 5000
+export const MAX_CHECKIN_LOG = 500
+export const MAX_HABIT_WEEKS = 2600
+export const MAX_PAST_LETTERS = 100
 
 export const AREAS = [
   'physical',
@@ -51,6 +76,7 @@ export interface ModuleNote {
   oneWord?: string
   takeaways?: string
   completedOn?: string
+  passedLead?: boolean // marking this meeting held passed the pair lead on, so unmarking passes it back
 }
 
 export interface Setting {
@@ -81,6 +107,10 @@ export interface HabitWeek {
   note?: string
 } // week = Monday ISO date
 
+/** The three people around the dream (module 4); the worksheet has exactly this many rows. */
+export const FRIEND_SLOTS = 3
+/** The three routes to the dream (module 2). */
+export const ROUTE_SLOTS = 3
 export const FRIEND_ROLES = ['friend', 'progress', 'ask'] as const
 export type FriendRole = (typeof FRIEND_ROLES)[number]
 export interface DreamFriend {
@@ -89,6 +119,10 @@ export interface DreamFriend {
   ask?: string
   day?: string
 }
+
+/** Signs of an action crisis on the letting-go sheet (FR-46). */
+export const LETGO_SIGNS = ['oscillate', 'sleep', 'stalled', 'outside'] as const
+export type LetgoSign = (typeof LETGO_SIGNS)[number]
 
 export interface DreamWork {
   dreamId: number
@@ -100,7 +134,7 @@ export interface DreamWork {
   friends?: DreamFriend[] // module 4 (I), FR-23
   fear?: { fear?: string; goodEnough?: string } // module 4, FR-35
   letgo?: {
-    signs?: string[]
+    signs?: LetgoSign[]
     costs?: string
     benefits?: string
     replacement?: string
@@ -124,6 +158,8 @@ export const SABOTEURS = [
   'avoider',
 ] as const
 export type Saboteur = (typeof SABOTEURS)[number]
+/** The Judge is everyone's; the learner picks the top three among the other nine. */
+export const PICKABLE_SABOTEURS = SABOTEURS.filter((s) => s !== 'judge')
 export interface JournalEntry {
   id?: number
   date: string
@@ -171,8 +207,16 @@ export interface Letter {
   deliverDate?: string
   sealed?: boolean
   sealedOn?: string
-  opened?: boolean
+  opened?: boolean // read: on or after the delivery date, or opened early on purpose
+  openedOn?: string
 }
+/** The seven questions the letter answers, in order (keys of letter.q.* in the interface strings). */
+export const LETTER_QUESTIONS = ['where', 'doing', 'feel', 'built', 'stopped', 'mattered', 'advice'] as const
+/** The steps of a vision check-in (keys of checkin.step.*). */
+export const CHECKIN_STEPS = ['vision', 'wheel', 'dreams', 'directions', 'yesno', 'letgo'] as const
+/** The ten value rows of module 6, of which at most five are chosen. */
+export const VALUE_SLOTS = 10
+export const MAX_CHOSEN_VALUES = 5
 export const VISION_SECTIONS = [
   'matters',
   'best',
@@ -198,6 +242,7 @@ export interface VisionDoc {
   values: ValueItem[]
   valueActs: ValueAct[]
   letter?: Letter
+  pastLetters?: Letter[] // letters already read, kept when a new one is started
   worksheet: Partial<Record<VisionSection, string>>
   regret?: Partial<Record<RegretArea, string>> // module 7, FR-44
   yesno?: { yes?: string; no?: string; changes?: string; hardest?: string } // module 7, FR-44
@@ -265,12 +310,12 @@ export const db = new DreamDB()
 
 export { today } from '../lib/dates'
 
-/** Typed settings helpers. */
+/** The settings rows read as one object; the reads and writes live in ./settings. */
 export interface Settings {
   role: Role
   config: Config
-  uiLocale: 'ro' | 'en'
-  theme: 'system' | 'light' | 'dark'
+  uiLocale: UiLocale
+  theme: Theme
   startDate?: string
   cadenceDays: number
   paperMode: boolean
@@ -296,22 +341,6 @@ export const DEFAULT_SETTINGS: Settings = {
   saboteurs: [],
   strengths: [],
 }
-
-export async function readSettings(d: DreamDB = db): Promise<Settings> {
-  const rows = await d.settings.toArray()
-  const s: Record<string, unknown> = { ...DEFAULT_SETTINGS }
-  for (const r of rows) s[r.key] = r.value
-  return s as unknown as Settings
-}
-
-export async function writeSettings(patch: Partial<Settings>, d: DreamDB = db) {
-  await d.settings.bulkPut(Object.entries(patch).map(([key, value]) => ({ key, value })))
-}
-
-/** Read-modify-write of settings inside one transaction, so two quick taps never overwrite each other. */
-export async function mutateSettings(fn: (cur: Settings) => Partial<Settings>, d: DreamDB = db) {
-  await d.transaction('rw', d.settings, async () => {
-    const cur = await readSettings(d)
-    await writeSettings(fn(cur), d)
-  })
-}
+/** At most this many saboteurs are picked from the official test (FR-30), and this many strengths (FR-36). */
+export const MAX_SABOTEURS = 3
+export const STRENGTH_SLOTS = 5
