@@ -224,6 +224,11 @@ for (const [name, viewport] of [
   await page.reload()
   await page.getByLabel('Punctul forte 1').waitFor()
   check((await page.getByLabel('Punctul forte 1').inputValue()) === 'curiozitate', `${name}: strength persisted`)
+  check(
+    (await page.locator('video track[srclang=ro]').count()) === 2 &&
+      (await page.locator('video track[srclang=en]').count()) === 2,
+    `${name}: both recordings carry Romanian and English subtitles`,
+  )
   await page.goto(base + '#/book/print/wheel')
   await page.waitForSelector('.sheet')
   check((await page.locator('svg[role=img]').count()) === 1, `${name}: wheel sheet prints the wheel`)

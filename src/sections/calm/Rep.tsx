@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { useT } from '../../i18n'
+import Transcript from '../../components/Transcript'
 import SectionHead from '../../components/SectionHead'
 import { useRepCount, addRep } from '../../db/calm'
 
 /** Module 5: the short attention exercise with its countdown and counter, plus the two videos (FR-33). */
 const SENSES = ['touch', 'sound', 'breath', 'sight', 'weight'] as const
+
+/** The two Chamine recordings hosted with the course (D12): subtitles in both languages, transcript in Romanian. */
+const VIDEOS = ['chamine-1', 'chamine-2'] as const
 
 export default function Rep() {
   const { t } = useT()
@@ -62,8 +66,16 @@ export default function Rep() {
       <h3>{t('rep.videos')}</h3>
       <p className="muted small">{t('rep.videos.help')}</p>
       <div className="card">
-        <video controls preload="metadata" style={{ width: '100%', borderRadius: 8 }} src="./media/chamine-1.mp4" />
-        <video controls preload="metadata" style={{ width: '100%', borderRadius: 8 }} src="./media/chamine-2.mp4" />
+        {VIDEOS.map((v) => (
+          <div key={v} className="field">
+            <video controls preload="metadata" style={{ width: '100%', borderRadius: 8 }} src={`./media/${v}.mp4`}>
+              <track kind="subtitles" srcLang="ro" label="Română" src={`./media/${v}.ro.vtt`} default />
+              <track kind="subtitles" srcLang="en" label="English" src={`./media/${v}.en.vtt`} />
+            </video>
+            <Transcript src={`./media/${v}.ro.vtt`} label={t('rep.videos.transcript')} />
+          </div>
+        ))}
+        <p className="small muted">{t('rep.videos.subtitles')}</p>
         <p className="small muted">{t('rep.videos.credit')}</p>
       </div>
     </>

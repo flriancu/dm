@@ -393,7 +393,7 @@ link out, never embed copyrighted material; CR-05: rebuild worksheets, never sca
 | Positive Intelligence Chapt 1-8.pdf (book) | Not included. Optional reading pointer, own copy, module 5. |
 | The Dream Manager.pdf (Kelly) | Not included. The twelve life areas and the Dream Book habit are used in modules 0–1, credited. |
 | Atlas_of_Heart.pdf (Brené Brown) | Not included. Reading pointer in module 4, credited. |
-| VID-20260603-WA0000.mp4, VID-20260603-WA0002.mp4 (Chamine recordings) | Hosted in the course as public/media/chamine-1.mp4 and chamine-2.mp4 on the Liniște page, module 5 (D12), credited on Surse. These are Chamine's material; hosting rests on D12 and private use. |
+| VID-20260603-WA0000.mp4, VID-20260603-WA0002.mp4 (Chamine recordings) and their -en-US.vtt subtitles | Hosted in the course as public/media/chamine-1.mp4 and chamine-2.mp4 on the Liniște page, module 5 (D12), credited on Surse; English subtitles (transcription slips corrected) and a Romanian translation as selectable tracks, plus a Romanian transcript under each video. These are Chamine's material; hosting rests on D12 and private use. |
 | Links in the docx (Oprea, Oettingen, Fogg, Sher, VIA, PQ, Zahrai, Gilbert) | Oprea, Oettingen, Fogg, Sher, VIA and PQ are on Surse. Zahrai's doubt profile and the Gilbert article are not used. |
 
 ## Source map

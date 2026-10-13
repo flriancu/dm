@@ -6,6 +6,7 @@ import { extrinsicWarning } from '../pages/Dreams'
 import { comboIssue, reconcile, configHelpKey, CONFIGS_FOR_ROLE } from '../state/combos'
 import { moduleDate, nextModule, leaderAfterMeeting, letterDue } from './course'
 import { mergeDoc } from '../db/docs'
+import { vttToParagraphs } from './vtt'
 import { configOfHeading, orderedConfigs, CONFIGS } from '../content/plans'
 import { completedModuleIds } from '../db/notes'
 import { leadsMeetings, showsFriendSwitch } from '../state/roles'
@@ -183,5 +184,27 @@ describe('module notes and leadership', () => {
     expect(leadsMeetings({ role: 'dreamer', config: 'solo', friendToday: false })).toBeNull()
     expect(showsFriendSwitch({ role: 'both', config: 'pair' })).toBe(true)
     expect(showsFriendSwitch({ role: 'both', config: 'group' })).toBe(false)
+  })
+})
+
+describe('vttToParagraphs', () => {
+  it('drops timings and ids, joins cue lines and splits at sentence ends', () => {
+    const vtt = [
+      'WEBVTT',
+      '',
+      'abc-0',
+      '00:00:01.000 --> 00:00:02.000',
+      'Hi, this',
+      'is Shirzad.',
+      '',
+      '00:00:03.000 --> 00:00:04.000',
+      'Sit down',
+      '',
+      '00:00:05.000 --> 00:00:06.000',
+      'and breathe.',
+      '',
+    ].join('\n')
+    expect(vttToParagraphs(vtt)).toEqual(['Hi, this is Shirzad.', 'Sit down and breathe.'])
+    expect(vttToParagraphs('WEBVTT')).toEqual([])
   })
 })
