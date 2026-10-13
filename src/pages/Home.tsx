@@ -5,12 +5,11 @@ import { useT, contentLocaleFor } from '../i18n'
 import { useSettings, showsDreamerParts, showsFriendSwitch } from '../state/settings'
 import { db } from '../db/db'
 import { listModules, type ModuleMeta } from '../content/loader'
+import { addDays, parseLocal, today } from '../lib/dates'
 
 export function moduleDate(start: string | undefined, cadence: number, order: number): Date | null {
   if (!start) return null
-  const d = new Date(start + 'T00:00:00')
-  d.setDate(d.getDate() + cadence * Math.max(0, order - 1))   // module 0 is solo, module 1 is meeting one
-  return d
+  return parseLocal(addDays(start, cadence * Math.max(0, order - 1)))   // module 0 is solo, module 1 is meeting one
 }
 
 export default function Home() {
@@ -23,7 +22,7 @@ export default function Home() {
   const plans = useLiveQuery(() => db.plans.filter((p) => !p.done).toArray(), []) ?? []
   const chosen = useLiveQuery(() => db.dreams.where('chosen').equals(1).first(), [])
   const vision = useLiveQuery(() => db.vision.get('me'), [])
-  const checkinDue = !!vision?.checkin?.next && vision.checkin.next <= new Date().toISOString().slice(0, 10)
+  const checkinDue = !!vision?.checkin?.next && vision.checkin.next <= today()
   const done = new Set(notes.filter((n) => n.completedOn).map((n) => n.moduleId))
   const next = modules.find((m) => m.order > 0 && !done.has(m.id))
   const nextDate = next ? moduleDate(settings.startDate, settings.cadenceDays, next.order) : null

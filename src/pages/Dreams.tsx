@@ -1,10 +1,11 @@
+import DreamerOnly from '../components/DreamerOnly'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Stepper from '../components/Stepper'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useT } from '../i18n'
 import { useSettings } from '../state/settings'
-import { db, today, AREAS, type Dream, type Area, type WhyTag } from '../db/db'
+import { db, today, mutateSettings, AREAS, type Dream, type Area, type WhyTag } from '../db/db'
 
 /** True when the top-scored dreams are all extrinsic (FR-11 warning). */
 export function extrinsicWarning(dreams: Dream[], top = 3): boolean {
@@ -12,7 +13,11 @@ export function extrinsicWarning(dreams: Dream[], top = 3): boolean {
   return scored.length >= top && scored.every((d) => d.why === 'extrinsic')
 }
 
-export default function Dreams() {
+export default function DreamsPage() {
+  return <DreamerOnly><Dreams /></DreamerOnly>
+}
+
+function Dreams() {
   const { t, fmtDate } = useT()
   const { settings, update } = useSettings()
   const dreams = useLiveQuery(() => db.dreams.toArray(), []) ?? []
@@ -127,9 +132,9 @@ export default function Dreams() {
 
 function Criteria() {
   const { t } = useT()
-  const { settings, update } = useSettings()
+  const { settings } = useSettings()
   const [v, setV] = useState('')
-  const add = () => { if (!v.trim()) return; update({ criteria: [...settings.criteria, v.trim()] }); setV('') }
+  const add = async () => { const x = v.trim(); if (!x) return; setV(''); await mutateSettings((cur) => ({ criteria: [...cur.criteria, x] })) }
   return (
     <details className="card" style={{ marginTop: 20 }}>
       <summary>{t('dreams.criteria')}</summary>
@@ -139,7 +144,7 @@ function Criteria() {
         {settings.criteria.map((c, i) => (
           <li key={i} className="row" style={{ justifyContent: 'space-between' }}>
             <span>{i + 1}. {c}</span>
-            <button className="btn sm ghost" aria-label={t('common.delete')} onClick={() => update({ criteria: settings.criteria.filter((_, j) => j !== i) })}>✕</button>
+            <button className="btn sm ghost" aria-label={t('common.delete')} onClick={() => mutateSettings((cur) => ({ criteria: cur.criteria.filter((_, j) => j !== i) }))}>✕</button>
           </li>
         ))}
       </ul>

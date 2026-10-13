@@ -106,13 +106,7 @@ export interface VisionDoc {
   updated: string
 }
 
-/** Monday of the week containing an ISO date. */
-export function weekStart(iso: string): string {
-  const d = new Date(iso + 'T00:00:00')
-  const day = (d.getDay() + 6) % 7
-  d.setDate(d.getDate() - day)
-  return d.toISOString().slice(0, 10)
-}
+export { weekStart } from '../lib/dates'
 
 /** Eisenhower matrix items from a real week (FR-13), module 3. */
 export const QUADRANTS = ['now', 'plan', 'delegate', 'drop'] as const
@@ -169,7 +163,7 @@ export class DreamDB extends Dexie {
 
 export const db = new DreamDB()
 
-export const today = () => new Date().toISOString().slice(0, 10)
+export { today } from '../lib/dates'
 
 /** Typed settings helpers. */
 export interface Settings {
@@ -203,4 +197,12 @@ export async function readSettings(d: DreamDB = db): Promise<Settings> {
 
 export async function writeSettings(patch: Partial<Settings>, d: DreamDB = db) {
   await d.settings.bulkPut(Object.entries(patch).map(([key, value]) => ({ key, value })))
+}
+
+/** Read-modify-write of settings inside one transaction, so two quick taps never overwrite each other. */
+export async function mutateSettings(fn: (cur: Settings) => Partial<Settings>, d: DreamDB = db) {
+  await d.transaction('rw', d.settings, async () => {
+    const cur = await readSettings(d)
+    await writeSettings(fn(cur), d)
+  })
 }

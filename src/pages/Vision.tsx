@@ -1,3 +1,4 @@
+import DreamerOnly from '../components/DreamerOnly'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
@@ -12,7 +13,8 @@ export function emptyVision(): VisionDoc {
   return { id: 'me', values: Array.from({ length: 10 }, () => ({ text: '' })), valueActs: [], worksheet: {}, updated: today() }
 }
 
-export function addMonths(iso: string, m: number) { const d = new Date(iso + 'T00:00:00'); d.setMonth(d.getMonth() + m); return d.toISOString().slice(0, 10) }
+import { addMonths } from '../lib/dates'
+export { addMonths }
 
 /** iCalendar file for a date (FR-41, FR-45). */
 export function dateIcs(date: string, uid: string, title: string, body: string): string {
@@ -38,7 +40,11 @@ function SectionHead({ id, label, title, right }: { id: string; label: string; t
   )
 }
 
-export default function Vision() {
+export default function VisionPage() {
+  return <DreamerOnly><Vision /></DreamerOnly>
+}
+
+function Vision() {
   const { t, fmtDate } = useT()
   const doc = useLiveQuery(() => db.vision.get('me'), [])
   const notes = useLiveQuery(() => db.moduleNotes.orderBy('moduleId').toArray(), []) ?? []

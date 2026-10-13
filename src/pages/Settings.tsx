@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useT, UI_LOCALES, LOCALE_META } from '../i18n'
 import { useSettings } from '../state/settings'
-import { db, type Role, type Config } from '../db/db'
+import { db, today, type Role, type Config } from '../db/db'
 import { exportAll, importAll, downloadJson } from '../db/exportImport'
 import { comboIssue } from '../state/combos'
 import RoleConfigPicker from '../components/RoleConfigPicker'
@@ -17,7 +17,7 @@ export default function Settings() {
   const [draft, setDraft] = useState<{ role?: Role; config?: Config }>({})
   const issue = comboIssue(settings.role, settings.config)
 
-  const doExport = async () => downloadJson(`cartea-visurilor-${new Date().toISOString().slice(0, 10)}.json`, await exportAll())
+  const doExport = async () => downloadJson(`cartea-visurilor-${today()}.json`, await exportAll())
   const doImport = async (f: File) => {
     try {
       const r = await importAll(JSON.parse(await f.text()))

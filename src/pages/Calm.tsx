@@ -1,12 +1,17 @@
+import DreamerOnly from '../components/DreamerOnly'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useT } from '../i18n'
 import { useSettings } from '../state/settings'
-import { db, today, SABOTEURS, WHEEL_AREAS, SWLS_ITEMS, type Saboteur, type JournalEntry, type WheelSnapshot } from '../db/db'
+import { db, today, mutateSettings, SABOTEURS, WHEEL_AREAS, SWLS_ITEMS, type Saboteur, type JournalEntry, type WheelSnapshot } from '../db/db'
 
 /** Module 5 (L): saboteurs and strengths, the catch-the-saboteur journal, the short attention exercise, the Wheel of Life. */
-export default function Calm() {
+export default function CalmPage() {
+  return <DreamerOnly><Calm /></DreamerOnly>
+}
+
+function Calm() {
   const { t } = useT()
   return (
     <>
@@ -40,17 +45,19 @@ function SectionHead({ id, label, title }: { id: string; label: string; title: s
 /* ---------- 1. saboteurs and strengths ---------- */
 function Profile() {
   const { t, fmtDate } = useT()
-  const { settings, update } = useSettings()
+  const { settings } = useSettings()
   const uses = useLiveQuery(() => db.strengthUses.orderBy('date').reverse().toArray(), []) ?? []
   const [useText, setUseText] = useState('')
   const [useStrength, setUseStrength] = useState('')
   const top = settings.saboteurs
-  const toggle = (s: Saboteur) => {
-    if (top.includes(s)) update({ saboteurs: top.filter((x) => x !== s) })
-    else if (top.length < 3) update({ saboteurs: [...top, s] })
-  }
+  // read the current list inside the handler: two quick taps must not overwrite each other
+  const toggle = (s: Saboteur) => mutateSettings((cur) => {
+    const list = cur.saboteurs
+    if (list.includes(s)) return { saboteurs: list.filter((x) => x !== s) }
+    return list.length < 3 ? { saboteurs: [...list, s] } : {}
+  })
   const strengths = [...settings.strengths, '', '', '', '', ''].slice(0, 5)
-  const setStrength = (i: number, v: string) => { const n = [...strengths]; n[i] = v; update({ strengths: n }) }
+  const setStrength = (i: number, v: string) => mutateSettings((cur) => { const n = [...cur.strengths, '', '', '', '', ''].slice(0, 5); n[i] = v; return { strengths: n } })
   const addUse = async () => {
     if (!useText.trim()) return
     await db.strengthUses.add({ date: today(), strength: useStrength || strengths.find(Boolean) || '', text: useText.trim() })

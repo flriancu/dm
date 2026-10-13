@@ -608,5 +608,7 @@
   "book.sheet.regret": "The view from 75 and the Yes and No lists (from module 7)",
   "book.sheet.letgo": "Let the dream go with honour (any time)",
   "book.sheet.checkin": "The vision check-in (after the course)",
-  "book.sheet.retro": "Looking back (from module 7)"
+  "book.sheet.retro": "Looking back (from module 7)",
+  "dreamerOnly.text": "This page is for the Dreamer. On this device the chosen role is Dream Friend; the meeting plans are on the Dream Friend page. If you also want to work on a dream of your own, change the role in Settings.",
+  "module.friendNote": "You are in the Dream Friend role: the exercises above are the Dreamer's. This meeting's plan, with timings and questions, is on the Dream Friend page."
 }

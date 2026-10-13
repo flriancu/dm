@@ -55,6 +55,7 @@ body {
   font-family: var(--font);
   font-size: 17px;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 a { color: var(--accent); }
 h1, h2, h3 { line-height: 1.2; font-weight: 650; }

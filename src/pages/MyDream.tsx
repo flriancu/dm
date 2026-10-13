@@ -1,3 +1,4 @@
+import DreamerOnly from '../components/DreamerOnly'
 import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useT } from '../i18n'
@@ -8,10 +9,14 @@ import {
 
 /** The chosen dream's worksheets: module 2 (clarify, routes), 3 (WOOP), 4 (habit, friends, fear), and letting go (FR-46). */
 const LETGO_SIGNS = ['oscillate', 'sleep', 'stalled', 'outside'] as const
-export default function MyDream() {
+export default function MyDreamPage() {
+  return <DreamerOnly><MyDream /></DreamerOnly>
+}
+
+function MyDream() {
   const { t, fmtDate } = useT()
   // the chosen dream, or the most recently released one (so the letting-go note stays visible)
-  const dream = useLiveQuery(async () => (await db.dreams.where('chosen').equals(1).first()) ?? (await db.dreams.orderBy('dateReleased').reverse().first()), [])
+  const dream = useLiveQuery(async () => (await db.dreams.where('chosen').equals(1).first()) ?? (await db.dreams.orderBy('dateReleased').reverse().first()) ?? null, [])
   const work = useLiveQuery(() => (dream?.id ? db.dreamWork.get(dream.id) : undefined), [dream?.id])
 
   if (dream === undefined) return <p className="muted">…</p>

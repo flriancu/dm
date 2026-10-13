@@ -608,5 +608,7 @@
   "book.sheet.regret": "Privirea de la 75 de ani și listele Da și Nu (din modulul 7)",
   "book.sheet.letgo": "Las visul cu onoare (oricând)",
   "book.sheet.checkin": "Verificarea viziunii (după curs)",
-  "book.sheet.retro": "Privirea înapoi (din modulul 7)"
+  "book.sheet.retro": "Privirea înapoi (din modulul 7)",
+  "dreamerOnly.text": "Această pagină este pentru Visător. Pe acest dispozitiv rolul ales este Prietenul Visului; planurile întâlnirilor sunt pe pagina Prietenul Visului. Dacă vrei să lucrezi și la un vis al tău, schimbă rolul în Setări.",
+  "module.friendNote": "Ești în rolul Prietenului Visului: exercițiile de mai sus sunt ale Visătorului. Planul acestei întâlniri, cu timpi și întrebări, este pe pagina Prietenul Visului."
 }

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { useT } from '../i18n'
-import { useSettings, showsFriendSection } from '../state/settings'
+import { useSettings, showsFriendSection, showsDreamerParts } from '../state/settings'
 
 export default function Shell({ children }: { children: ReactNode }) {
   const { t } = useT()
@@ -12,7 +12,7 @@ export default function Shell({ children }: { children: ReactNode }) {
   const items = [
     { to: '/', label: t('nav.home'), ico: '🏠' },
     { to: '/modules', label: t('nav.modules'), ico: '📚' },
-    { to: '/dreams', label: t('nav.dreams'), ico: '✨' },
+    ...(showsDreamerParts(settings) ? [{ to: '/dreams', label: t('nav.dreams'), ico: '✨' }] : []),
     { to: '/book', label: t('nav.book'), ico: '📖' },
     ...(showsFriendSection(settings) ? [{ to: '/friend', label: t('nav.friend'), ico: '🤝' }] : []),
     { to: '/settings', label: t('nav.settings'), ico: '⚙️' },

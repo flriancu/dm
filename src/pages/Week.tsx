@@ -1,3 +1,4 @@
+import DreamerOnly from '../components/DreamerOnly'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
@@ -5,7 +6,11 @@ import { useT } from '../i18n'
 import { db, today, QUADRANTS, type Quadrant, type WeekTask } from '../db/db'
 
 /** Eisenhower matrix on a real week (FR-13), module 3. Tap to assign a box; drag works too. */
-export default function Week() {
+export default function WeekPage() {
+  return <DreamerOnly><Week /></DreamerOnly>
+}
+
+function Week() {
   const { t } = useT()
   const tasks = useLiveQuery(() => db.weekTasks.toArray(), []) ?? []
   const [text, setText] = useState('')

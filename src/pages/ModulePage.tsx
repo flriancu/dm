@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useT, contentLocaleFor } from '../i18n'
-import { useSettings, isFriendNow } from '../state/settings'
+import { useSettings, isFriendNow, showsDreamerParts } from '../state/settings'
 import { db, today } from '../db/db'
 import { loadModule, md, type ModuleDoc } from '../content/loader'
 import type { Section } from '../content/frontmatter'
@@ -31,6 +31,7 @@ export default function ModulePage() {
   const friend = sec('friend')
   const ordered = [settings.config, ...VARIANTS.filter((v) => v !== settings.config)]
   const friendNow = isFriendNow(settings)
+  const dreamer = showsDreamerParts(settings)
 
   const savePlan = async () => {
     if (!cond.trim() || !act.trim()) return
@@ -82,7 +83,7 @@ export default function ModulePage() {
         <>
           <h2>{t('module.next')}</h2>
           <div dangerouslySetInnerHTML={{ __html: md(sec('next')!.body) }} />
-          <div className="card">
+          {dreamer && <div className="card">
             <p className="small muted">{t('module.next.plan')}</p>
             <div className="field"><label htmlFor="plan-if">{t('module.next.if')}</label><input id="plan-if" type="text" placeholder={t('module.next.if.placeholder')} value={cond} onChange={(e) => setCond(e.target.value)} /></div>
             <div className="field"><label htmlFor="plan-then">{t('module.next.then')}</label><input id="plan-then" type="text" placeholder={t('module.next.then.placeholder')} value={act} onChange={(e) => setAct(e.target.value)} /></div>
@@ -93,14 +94,16 @@ export default function ModulePage() {
                 {plans.map((p) => <li key={p.id} className={p.done ? 'muted' : ''}>{p.done ? '✓ ' : ''}{t('plan.if')} {p.condition}, {t('plan.then')} {p.action}</li>)}
               </ul>
             )}
-          </div>
+          </div>}
         </>
       )}
 
       <h2>{t('module.takeaway')}</h2>
       <p className="takeaway">{doc.meta.takeaway}</p>
 
-      <div className="card">
+      {!dreamer && <p className="notice">{t('module.friendNote')} <Link to="/friend">{t('nav.friend')} →</Link></p>}
+
+      {dreamer && <div className="card">
         <div className="field">
           <label htmlFor="mine">{t('module.takeaways.mine')}</label>
           <textarea id="mine" placeholder={t('module.takeaways.placeholder')} defaultValue={note?.takeaways ?? ''} onBlur={(e) => saveNote({ takeaways: e.target.value })} />
@@ -110,7 +113,7 @@ export default function ModulePage() {
           <input id="oneword" type="text" maxLength={40} placeholder={t('module.feedback.placeholder')} defaultValue={note?.oneWord ?? ''} onBlur={(e) => saveNote({ oneWord: e.target.value })} />
         </div>
         <button className="btn primary" onClick={complete}>{note?.completedOn ? '✓ ' : ''}{t('common.done')}</button>
-      </div>
+      </div>}
 
     </article>
   )

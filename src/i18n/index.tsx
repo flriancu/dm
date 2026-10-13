@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react'
+import { parseLocal } from '../lib/dates'
 import ro from './locales/ro.json'
 import en from './locales/en.json'
 
@@ -38,7 +39,7 @@ function translate(locale: UiLocale, key: string, vars?: Record<string, string |
 
 interface Ctx { locale: UiLocale; t: T; fmtDate: (d: string | Date) => string }
 function formatDate(locale: UiLocale, d: string | Date): string {
-  const date = typeof d === 'string' ? new Date(d.length === 10 ? d + 'T00:00:00' : d) : d
+  const date = typeof d === 'string' ? (d.length === 10 ? parseLocal(d) : new Date(d)) : d
   return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).format(date)
 }
 // Default value is only reached without a provider (e.g. after a hot reload recreates the context); keep it correct anyway.
