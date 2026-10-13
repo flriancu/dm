@@ -1,0 +1,6 @@
+dist
+node_modules
+e2e/shots
+content
+*.md
+package-lock.json

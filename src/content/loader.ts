@@ -80,3 +80,8 @@ export async function loadPlan(locale: ContentLocale, id: string): Promise<PlanD
   const preamble = first < 0 ? body : body.slice(0, first)
   return { meta, preamble: preamble.trim(), sections: splitSections(first < 0 ? '' : body.slice(first)) }
 }
+
+/** Ids of the meeting plans present for a locale ("01" … "07"), from the content tree itself. */
+export async function listPlanIds(locale: ContentLocale): Promise<string[]> {
+  return pathsFor(locale, 'friend').map((p) => p.split('/').pop()!.replace(/\.md$/, ''))
+}

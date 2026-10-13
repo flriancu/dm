@@ -7,7 +7,11 @@ import { CONFIGS_FOR_ROLE, configHelpKey } from '../state/combos'
  * Step 1 shows the roles only. Once a role is picked, step 2 shows only the
  * configurations that make sense for it. Nothing further is shown until both are set.
  */
-export default function RoleConfigPicker({ role, config, onChange }: {
+export default function RoleConfigPicker({
+  role,
+  config,
+  onChange,
+}: {
   role?: Role
   config?: Config
   onChange: (next: { role?: Role; config?: Config }) => void
@@ -22,10 +26,24 @@ export default function RoleConfigPicker({ role, config, onChange }: {
           <label>{t('picker.step1')}</label>
           <div className="row">
             {roles.map((r) => (
-              <button key={r} className={`chip ${role === r ? 'on' : ''}`} onClick={() => onChange({ role: r, config: undefined })}>{t(`onboarding.role.${r}`)}</button>
+              <button
+                key={r}
+                className={`chip ${role === r ? 'on' : ''}`}
+                onClick={() => onChange({ role: r, config: undefined })}
+              >
+                {t(`onboarding.role.${r}`)}
+              </button>
             ))}
           </div>
-          {role ? <p className="small" style={{ margin: '4px 0 0' }}>{t(`role.help.${role}`)}</p> : <p className="small muted" style={{ margin: '4px 0 0' }}>{t('picker.pickRole')}</p>}
+          {role ? (
+            <p className="small" style={{ margin: '4px 0 0' }}>
+              {t(`role.help.${role}`)}
+            </p>
+          ) : (
+            <p className="small muted" style={{ margin: '4px 0 0' }}>
+              {t('picker.pickRole')}
+            </p>
+          )}
         </div>
       </div>
       {role && (
@@ -34,10 +52,24 @@ export default function RoleConfigPicker({ role, config, onChange }: {
             <label>{t('picker.step2')}</label>
             <div className="row">
               {configs.map((c) => (
-                <button key={c} className={`chip ${config === c ? 'on' : ''}`} onClick={() => onChange({ role, config: c })}>{t(`onboarding.config.${c}`)}</button>
+                <button
+                  key={c}
+                  className={`chip ${config === c ? 'on' : ''}`}
+                  onClick={() => onChange({ role, config: c })}
+                >
+                  {t(`onboarding.config.${c}`)}
+                </button>
               ))}
             </div>
-            {config ? <p className="small" style={{ margin: '4px 0 0' }}>{t(configHelpKey(role!, config))}</p> : <p className="small muted" style={{ margin: '4px 0 0' }}>{t(`picker.pickConfig.${role}`)}</p>}
+            {config ? (
+              <p className="small" style={{ margin: '4px 0 0' }}>
+                {t(configHelpKey(role!, config))}
+              </p>
+            ) : (
+              <p className="small muted" style={{ margin: '4px 0 0' }}>
+                {t(`picker.pickConfig.${role}`)}
+              </p>
+            )}
           </div>
         </div>
       )}

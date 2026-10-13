@@ -7,11 +7,24 @@ const base = process.argv[2] ?? 'http://localhost:4173/'
 mkdirSync('e2e/shots', { recursive: true })
 const browser = await chromium.launch()
 let failures = 0
-const check = (ok, msg) => { console.log(`${ok ? '✓' : '✗'} ${msg}`); if (!ok) failures++ }
+const check = (ok, msg) => {
+  console.log(`${ok ? '✓' : '✗'} ${msg}`)
+  if (!ok) failures++
+}
 // Wait up to 5 s for a locator to be visible; lazy routes render after navigation settles.
-const visible = async (loc) => loc.first().waitFor({ state: 'visible', timeout: 5000 }).then(() => true, () => false)
+const visible = async (loc) =>
+  loc
+    .first()
+    .waitFor({ state: 'visible', timeout: 5000 })
+    .then(
+      () => true,
+      () => false,
+    )
 
-for (const [name, viewport] of [['phone', { width: 360, height: 740 }], ['laptop', { width: 1280, height: 800 }]]) {
+for (const [name, viewport] of [
+  ['phone', { width: 360, height: 740 }],
+  ['laptop', { width: 1280, height: 800 }],
+]) {
   const ctx = await browser.newContext({ viewport, locale: 'ro-RO' })
   const page = await ctx.newPage()
   const errors = []
@@ -22,30 +35,49 @@ for (const [name, viewport] of [['phone', { width: 360, height: 740 }], ['laptop
   await page.goto(base)
   await page.waitForURL(/#\/start/)
   check(await visible(page.getByText('Bun venit')), `${name}: onboarding shown in Romanian`)
-  check(!(await page.getByRole('button', { name: 'Pereche de egali' }).isVisible()), `${name}: configurations hidden until a role is chosen`)
+  check(
+    !(await page.getByRole('button', { name: 'Pereche de egali' }).isVisible()),
+    `${name}: configurations hidden until a role is chosen`,
+  )
   await page.getByRole('button', { name: 'Ambele' }).click()
-  check(!(await page.getByRole('button', { name: /Un Visător și Prietenul lui/ }).isVisible()), `${name}: solo configuration not offered for role Both`)
+  check(
+    !(await page.getByRole('button', { name: /Un Visător și Prietenul lui/ }).isVisible()),
+    `${name}: solo configuration not offered for role Both`,
+  )
   await page.getByRole('button', { name: 'Pereche de egali' }).click()
   await page.getByRole('button', { name: 'Începe' }).click()
   await page.waitForURL(/#\/$/)
-  check(await visible(page.getByText('Înainte de prima întâlnire')), `${name}: home after onboarding starts with module 0`)
+  check(
+    await visible(page.getByText('Înainte de prima întâlnire')),
+    `${name}: home after onboarding starts with module 0`,
+  )
   check(await visible(page.getByText('Modulul 0: Bun venit')), `${name}: module 0 is first`)
-  await page.getByRole('link', { name: 'Deschide modulul' }).click(); await page.waitForURL(/#\/module\/00$/)
-  await page.getByRole('button', { name: 'Am citit modulul 0' }).click(); await page.waitForTimeout(200)
+  await page.getByRole('link', { name: 'Deschide modulul' }).click()
+  await page.waitForURL(/#\/module\/00$/)
+  await page.getByRole('button', { name: 'Am citit modulul 0' }).click()
+  await page.waitForTimeout(200)
   await page.goto(base + '#/')
   check(await visible(page.getByText('Următoarea întâlnire')), `${name}: next meeting card after module 0`)
   check(await visible(page.getByText('Modulul 1: Visează din nou')), `${name}: next meeting is module 1`)
-  check(await visible(page.getByText('La această întâlnire conduce celălalt.')), `${name}: pair: the other leads module 1 by default`)
+  check(
+    await visible(page.getByText('La această întâlnire conduce celălalt.')),
+    `${name}: pair: the other leads module 1 by default`,
+  )
   await page.screenshot({ path: `e2e/shots/${name}-home.png`, fullPage: true })
 
   // No horizontal scroll (NFR-02)
-  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+  )
   check(!overflow, `${name}: no horizontal scroll on home`)
 
   // Dreams: add, score, tag, choose
   await page.goto(base + '#/dreams')
   const input = page.getByLabel('Un vis nou')
-  for (const d of ['Să învăț să navighez', 'Un ceas scump', 'O casă la munte']) { await input.fill(d); await input.press('Enter') }
+  for (const d of ['Să învăț să navighez', 'Un ceas scump', 'O casă la munte']) {
+    await input.fill(d)
+    await input.press('Enter')
+  }
   check(await visible(page.getByText('3 din 100')), `${name}: three dreams counted`)
   await page.getByText('Să învăț să navighez').click()
   await page.getByRole('button', { name: '9', exact: true }).first().click()
@@ -65,12 +97,21 @@ for (const [name, viewport] of [['phone', { width: 360, height: 740 }], ['laptop
   await page.getByLabel('atunci (ce fac)').fill('scriu trei visuri în caiet')
   await page.getByRole('button', { name: 'Salvează' }).click()
   check(await visible(page.getByText('Plan salvat')), `${name}: if-then plan saved`)
-  await page.getByLabel(/^Un cuvânt despre cum a fost întâlnirea/).fill('curios'); await page.getByLabel(/^Un cuvânt despre cum a fost întâlnirea/).blur(); await page.waitForTimeout(200)
-  await page.getByRole('button', { name: 'Întâlnirea a avut loc' }).click(); await page.waitForTimeout(200)
+  await page.getByLabel(/^Un cuvânt despre cum a fost întâlnirea/).fill('curios')
+  await page.getByLabel(/^Un cuvânt despre cum a fost întâlnirea/).blur()
+  await page.waitForTimeout(200)
+  await page.getByRole('button', { name: 'Întâlnirea a avut loc' }).click()
+  await page.waitForTimeout(200)
   await page.goto(base + '#/')
   check(await visible(page.getByText('scriu trei visuri în caiet')), `${name}: plan listed on home`)
-  check(await visible(page.getByText('La această întâlnire conduci tu.')), `${name}: pair: lead passes to me after the meeting`)
-  check(await visible(page.getByRole('link', { name: 'Deschide planul întâlnirii' })), `${name}: home links to the meeting plan`)
+  check(
+    await visible(page.getByText('La această întâlnire conduci tu.')),
+    `${name}: pair: lead passes to me after the meeting`,
+  )
+  check(
+    await visible(page.getByRole('link', { name: 'Deschide planul întâlnirii' })),
+    `${name}: home links to the meeting plan`,
+  )
 
   // Module 2: My dream worksheet saves and prints (FR-20)
   await page.goto(base + '#/module/02')
@@ -84,9 +125,16 @@ for (const [name, viewport] of [['phone', { width: 360, height: 740 }], ['laptop
   await page.waitForTimeout(300)
   await page.reload()
   check(await visible(page.getByText('1 din 5 întrebări cu răspuns')), `${name}: clarification answer persisted`)
-  check((await page.getByLabel('Drumul 1').inputValue()) === 'vara viitoare, dintr-o bucată', `${name}: route persisted`)
-  await page.goto(base + '#/book/print/clarify'); await page.waitForSelector('.sheet')
-  check(await visible(page.getByText('zece zile pe jos prin Apuseni')), `${name}: clarification sheet prints the answer`)
+  check(
+    (await page.getByLabel('Drumul 1').inputValue()) === 'vara viitoare, dintr-o bucată',
+    `${name}: route persisted`,
+  )
+  await page.goto(base + '#/book/print/clarify')
+  await page.waitForSelector('.sheet')
+  check(
+    await visible(page.getByText('zece zile pe jos prin Apuseni')),
+    `${name}: clarification sheet prints the answer`,
+  )
 
   // Module 3: matrix and WOOP (FR-13, FR-21)
   await page.goto(base + '#/module/03')
@@ -94,19 +142,27 @@ for (const [name, viewport] of [['phone', { width: 360, height: 740 }], ['laptop
   await page.getByRole('link', { name: /Săptămâna mea/ }).click()
   await page.waitForURL(/#\/week$/)
   const wk = page.getByLabel('Un lucru pe care îl fac')
-  for (const x of ['ședința de luni', 'am derulat pe telefon o oră']) { await wk.fill(x); await wk.press('Enter') }
+  for (const x of ['ședința de luni', 'am derulat pe telefon o oră']) {
+    await wk.fill(x)
+    await wk.press('Enter')
+  }
   await page.getByText('ședința de luni').click()
   await page.getByRole('button', { name: 'Fă acum' }).click()
   await page.getByText('am derulat pe telefon o oră').click()
   await page.getByRole('button', { name: 'Pun în calendar săptămâna aceasta' }).click()
   await page.waitForTimeout(300)
-  check(await visible(page.locator('.cell.plan').getByText('am derulat pe telefon o oră')), `${name}: task moved to Plan quadrant`)
+  check(
+    await visible(page.locator('.cell.plan').getByText('am derulat pe telefon o oră')),
+    `${name}: task moved to Plan quadrant`,
+  )
   await page.goto(base + '#/dream')
   await page.getByLabel(/^Obstacolul/).fill('seara deschid telefonul')
-  await page.getByLabel(/^Obstacolul/).blur(); await page.waitForTimeout(300)
+  await page.getByLabel(/^Obstacolul/).blur()
+  await page.waitForTimeout(300)
   await page.reload()
   check(await visible(page.getByText('1 din 4 rânduri scrise')), `${name}: WOOP line persisted`)
-  await page.goto(base + '#/book/print/woop'); await page.waitForSelector('.sheet')
+  await page.goto(base + '#/book/print/woop')
+  await page.waitForSelector('.sheet')
   check(await visible(page.getByText('seara deschid telefonul')), `${name}: WOOP sheet prints the answer`)
 
   // Module 4: habit recipe, weekly log, friends map, fear page (FR-22, FR-23, FR-35)
@@ -128,37 +184,56 @@ for (const [name, viewport] of [['phone', { width: 360, height: 740 }], ['laptop
   await page.reload()
   check(await visible(page.getByText('1 săptămâni bifate')), `${name}: habit week persisted`)
   check((await page.getByLabel('Persoana 1').inputValue()) === 'Mihai', `${name}: friend persisted`)
-  await page.goto(base + '#/book/print/friends'); await page.waitForSelector('.sheet')
+  await page.goto(base + '#/book/print/friends')
+  await page.waitForSelector('.sheet')
   check(await visible(page.getByText('o oră duminică')), `${name}: friends sheet prints the ask`)
 
   // Module 5: saboteurs, journal, rep timer, wheel (FR-30..34, FR-36)
   await page.goto(base + '#/module/05')
   check(await visible(page.getByRole('heading', { name: 'Liniște și limite' })), `${name}: module 5 opens`)
-  await page.getByRole('link', { name: /Liniște/ }).first().click()
+  await page
+    .getByRole('link', { name: /Liniște/ })
+    .first()
+    .click()
   await page.waitForURL(/#\/calm$/)
-  await page.getByRole('button', { name: /Perfecționistul/ }).first().click()
-  await page.getByLabel('Punctul forte 1').fill('curiozitate'); await page.getByLabel('Punctul forte 1').blur()
+  await page
+    .getByRole('button', { name: /Perfecționistul/ })
+    .first()
+    .click()
+  await page.getByLabel('Punctul forte 1').fill('curiozitate')
+  await page.getByLabel('Punctul forte 1').blur()
   await page.getByRole('button', { name: 'Scriu o întâmplare' }).click()
   await page.getByLabel('Ce s-a întâmplat').fill('mi-a scris șefa să refac raportul')
   await page.getByLabel(/^Ce i-aș spune unui prieten/).fill('ia-l pe bucăți')
   await page.getByRole('button', { name: 'Salvează întâmplarea' }).click()
   check(await visible(page.getByText('mi-a scris șefa să refac raportul')), `${name}: journal entry saved`)
   await page.getByRole('button', { name: '10 secunde' }).click()
-  check(await visible(page.getByText(/Freacă|Ascultă|Respiră|Privește|Simte/)), `${name}: rep timer shows a sense prompt`)
-  for (const v of [1, 2, 3, 4, 5]) { await page.getByRole('radiogroup').nth(v - 1).getByRole('button', { name: '5', exact: true }).click() }
+  check(
+    await visible(page.getByText(/Freacă|Ascultă|Respiră|Privește|Simte/)),
+    `${name}: rep timer shows a sense prompt`,
+  )
+  for (const v of [1, 2, 3, 4, 5]) {
+    await page
+      .getByRole('radiogroup')
+      .nth(v - 1)
+      .getByRole('button', { name: '5', exact: true })
+      .click()
+  }
   await page.getByRole('button', { name: 'Salvează fotografia de azi' }).click()
   check(await visible(page.getByText('total: 25 din 35')), `${name}: wheel snapshot saved`)
   await page.reload()
   await page.getByLabel('Punctul forte 1').waitFor()
   check((await page.getByLabel('Punctul forte 1').inputValue()) === 'curiozitate', `${name}: strength persisted`)
-  await page.goto(base + '#/book/print/wheel'); await page.waitForSelector('.sheet')
+  await page.goto(base + '#/book/print/wheel')
+  await page.waitForSelector('.sheet')
   check((await page.locator('svg[role=img]').count()) === 1, `${name}: wheel sheet prints the wheel`)
 
   // Module 6: values, sealed letter, vision sheet (FR-40, FR-41, FR-42)
   await page.goto(base + '#/module/06')
   check(await visible(page.getByRole('heading', { name: /Viziunea visului, partea 1/ })), `${name}: module 6 opens`)
   await page.goto(base + '#/vision')
-  await page.getByLabel('Valoarea 1', { exact: true }).fill('familia'); await page.getByLabel('Valoarea 1', { exact: true }).blur()
+  await page.getByLabel('Valoarea 1', { exact: true }).fill('familia')
+  await page.getByLabel('Valoarea 1', { exact: true }).blur()
   await page.getByRole('button', { name: 'Una din cele cinci' }).first().click()
   await page.waitForTimeout(300)
   check(await visible(page.getByText('1 din 5 alese')), `${name}: value chosen`)
@@ -166,33 +241,48 @@ for (const [name, viewport] of [['phone', { width: 360, height: 740 }], ['laptop
   await page.getByLabel(/^Scrisoarea, de la mine/).blur()
   await page.getByRole('button', { name: 'Sigilez scrisoarea' }).click()
   check(await visible(page.getByText(/Sigilată până pe/)), `${name}: letter sealed`)
-  const [ics] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Pune data în calendar/ }).click()])
+  const [ics] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: /Pune data în calendar/ }).click(),
+  ])
   check(ics.suggestedFilename() === 'scrisoarea.ics', `${name}: calendar note downloads`)
   await page.getByLabel(/^Modulul 6 1\. Ce contează/).fill('timpul cu ai mei')
-  await page.getByLabel(/^Modulul 6 1\. Ce contează/).blur(); await page.waitForTimeout(300)
+  await page.getByLabel(/^Modulul 6 1\. Ce contează/).blur()
+  await page.waitForTimeout(300)
   await page.reload()
   check(await visible(page.getByText(/Sigilată până pe/)), `${name}: letter stays sealed after reload`)
-  await page.goto(base + '#/book/print/sheet'); await page.waitForSelector('.sheet')
+  await page.goto(base + '#/book/print/sheet')
+  await page.waitForSelector('.sheet')
   check(await visible(page.getByText('timpul cu ai mei')), `${name}: vision sheet prints the answer`)
 
   // Module 7: regret, check-in with calendar file, retrospective, letting go (FR-44..46)
   await page.goto(base + '#/module/07')
   check(await visible(page.getByRole('heading', { name: /Viziunea visului, partea 2/ })), `${name}: module 7 opens`)
   await page.goto(base + '#/vision')
-  await page.getByLabel(/^Curajul/).fill('că nu am plecat niciodată singur la drum'); await page.getByLabel(/^Curajul/).blur()
+  await page.getByLabel(/^Curajul/).fill('că nu am plecat niciodată singur la drum')
+  await page.getByLabel(/^Curajul/).blur()
   await page.getByRole('button', { name: 'la 3 luni' }).click()
   check(await visible(page.getByText(/Următoarea verificare:/)), `${name}: check-in date set`)
-  const [ics2] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Pune data în calendar/ }).last().click()])
+  const [ics2] = await Promise.all([
+    page.waitForEvent('download'),
+    page
+      .getByRole('button', { name: /Pune data în calendar/ })
+      .last()
+      .click(),
+  ])
   check(ics2.suggestedFilename() === 'verificarea-viziunii.ics', `${name}: check-in calendar file downloads`)
   check(await visible(page.getByText('Modulul 1: curios')), `${name}: retrospective lists the module word`)
-  await page.getByLabel(/^Un cuvânt despre tot cursul/).fill('viu'); await page.getByLabel(/^Un cuvânt despre tot cursul/).blur(); await page.waitForTimeout(300)
+  await page.getByLabel(/^Un cuvânt despre tot cursul/).fill('viu')
+  await page.getByLabel(/^Un cuvânt despre tot cursul/).blur()
+  await page.waitForTimeout(300)
   await page.goto(base + '#/dream')
   await page.getByRole('checkbox', { name: /Pașii mici nu se mai fac/ }).check()
   await page.getByRole('button', { name: 'Las visul' }).click()
   check(await visible(page.getByText(/Visul a fost lăsat pe/)), `${name}: dream released with honour`)
   await page.goto(base + '#/dreams')
   check(await visible(page.getByText(/Renunțat pe/)), `${name}: released dream marked in the list`)
-  await page.goto(base + '#/book/print/retro'); await page.waitForSelector('.sheet')
+  await page.goto(base + '#/book/print/retro')
+  await page.waitForSelector('.sheet')
   check(await visible(page.getByText('viu')), `${name}: retrospective sheet prints the word`)
 
   // Friend section visible for role "both", gated for "dreamer"
@@ -218,7 +308,10 @@ for (const [name, viewport] of [['phone', { width: 360, height: 740 }], ['laptop
   await page.getByRole('button', { name: 'Română' }).click()
 
   // Export produces a file
-  const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Salvează o copie' }).click()])
+  const [dl] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: 'Salvează o copie' }).click(),
+  ])
   check(/cartea-visurilor-.*\.json/.test(dl.suggestedFilename()), `${name}: export downloads JSON`)
 
   // Print sheets render (acceptance 2, in part)

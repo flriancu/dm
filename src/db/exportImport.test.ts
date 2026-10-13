@@ -13,20 +13,45 @@ describe('export / import round trip (FR-50, acceptance 3)', () => {
   it('restores dreams, plans, notes, settings and friend notes on another device', async () => {
     await a.dreams.bulkAdd([
       { text: 'Learn to sail', area: 'adventure', why: 'intrinsic', score: 9, chosen: 1, dateAdded: today() },
-      { text: 'Buy a watch', area: 'material', why: 'extrinsic', score: 4, chosen: 0, dateAdded: today(), dateAchieved: today() },
+      {
+        text: 'Buy a watch',
+        area: 'material',
+        why: 'extrinsic',
+        score: 4,
+        chosen: 0,
+        dateAdded: today(),
+        dateAchieved: today(),
+      },
     ])
     await a.plans.add({ moduleId: '01', condition: 'e duminică seara', action: 'scriu 3 visuri', created: today() })
     await a.moduleNotes.put({ moduleId: '01', oneWord: 'curios', takeaways: 'lista nu are termen' })
     await writeSettings({ role: 'both', config: 'pair', paperMode: true, paperCount: 37 }, a)
     await a.friendNotes.add({ moduleId: '01', text: 'ritm lent, ok', created: today() })
     const chosenId = (await a.dreams.where('chosen').equals(1).first())!.id!
-    await a.dreamWork.put({ dreamId: chosenId, clarify: { clarity: 'zece zile pe jos prin Apuseni' }, routes: ['vara', 'toamna'], woop: { obstacle: 'telefonul seara' }, habit: { anchor: 'după cafea' }, habitLog: [{ week: '2026-10-12', done: true, note: '5 din 7' }], friends: [{ name: 'Mihai', role: 'ask', ask: 'o oră duminică' }], fear: { fear: 'râs' }, updated: today() })
+    await a.dreamWork.put({
+      dreamId: chosenId,
+      clarify: { clarity: 'zece zile pe jos prin Apuseni' },
+      routes: ['vara', 'toamna'],
+      woop: { obstacle: 'telefonul seara' },
+      habit: { anchor: 'după cafea' },
+      habitLog: [{ week: '2026-10-12', done: true, note: '5 din 7' }],
+      friends: [{ name: 'Mihai', role: 'ask', ask: 'o oră duminică' }],
+      fear: { fear: 'râs' },
+      updated: today(),
+    })
     await a.weekTasks.add({ text: 'ședința de luni', quadrant: 'now', created: today() })
     await a.journal.add({ date: today(), happened: 'raport refăcut', saboteur: 'judge', friend: 'ia-l pe bucăți' })
     await a.wheels.add({ date: today(), values: [5, 6, 4, 7, 8, 6, 5, 3], swls: [4, 5, 5, 4, 3] })
     await a.reps.add({ date: today(), seconds: 60 })
     await a.strengthUses.add({ date: today(), strength: 'curiozitate', text: 'am sunat un ghid' })
-    await a.vision.put({ id: 'me', values: [{ text: 'familia', chosen: true, nonNegotiable: true }], valueActs: [], letter: { text: 'e marți dimineață', sealed: true, deliverDate: '2027-04-01' }, worksheet: { matters: 'familia' }, updated: today() })
+    await a.vision.put({
+      id: 'me',
+      values: [{ text: 'familia', chosen: true, nonNegotiable: true }],
+      valueActs: [],
+      letter: { text: 'e marți dimineață', sealed: true, deliverDate: '2027-04-01' },
+      worksheet: { matters: 'familia' },
+      updated: today(),
+    })
 
     const file = await exportAll(a)
     expect(isExportFile(file)).toBe(true)

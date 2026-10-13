@@ -17,15 +17,29 @@ interface Props {
  * unmounts (a tap on a nav link does not always blur first). Keeps the typed text
  * while a save is pending, so a late live-query update never wipes it.
  */
-export default function AutoText({ id, value, onSave, placeholder, multiline, maxLength, style, delay = 500, ...rest }: Props) {
+export default function AutoText({
+  id,
+  value,
+  onSave,
+  placeholder,
+  multiline,
+  maxLength,
+  style,
+  delay = 500,
+  ...rest
+}: Props) {
   const [text, setText] = useState(value)
   const dirty = useRef(false)
   const timer = useRef<number | undefined>(undefined)
   const latest = useRef({ text, onSave })
-  latest.current = { text, onSave }
+  useEffect(() => {
+    latest.current = { text, onSave }
+  })
 
   // adopt outside changes only while the box is not being edited
-  useEffect(() => { if (!dirty.current) setText(value) }, [value])
+  useEffect(() => {
+    if (!dirty.current) setText(value)
+  }, [value])
 
   const flush = () => {
     window.clearTimeout(timer.current)
@@ -33,16 +47,19 @@ export default function AutoText({ id, value, onSave, placeholder, multiline, ma
     dirty.current = false
     void latest.current.onSave(latest.current.text)
   }
-  useEffect(() => () => flush(), [])   // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => flush(), []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const change = (v: string) => {
-    setText(v); dirty.current = true
+    setText(v)
+    dirty.current = true
     window.clearTimeout(timer.current)
     timer.current = window.setTimeout(flush, delay)
   }
 
   const common = { id, value: text, placeholder, maxLength, style, onBlur: flush, 'aria-label': rest['aria-label'] }
-  return multiline
-    ? <textarea {...common} onChange={(e) => change(e.target.value)} />
-    : <input type="text" {...common} onChange={(e) => change(e.target.value)} />
+  return multiline ? (
+    <textarea {...common} onChange={(e) => change(e.target.value)} />
+  ) : (
+    <input type="text" {...common} onChange={(e) => change(e.target.value)} />
+  )
 }

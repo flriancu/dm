@@ -5,7 +5,9 @@ import { loadDoc } from '../content/loader'
 export default function Sources() {
   const { t, locale } = useT()
   const [doc, setDoc] = useState<{ html: string } | null>(null)
-  useEffect(() => { loadDoc(contentLocaleFor(locale), 'pages', 'surse').then(setDoc) }, [locale])
+  useEffect(() => {
+    loadDoc(contentLocaleFor(locale), 'pages', 'surse').then(setDoc)
+  }, [locale])
   return (
     <article className="content" lang="ro">
       <h1>{t('sources.title')}</h1>

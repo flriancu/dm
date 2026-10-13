@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useT, UI_LOCALES, LOCALE_META } from '../i18n'
-import { useSettings, startDateKey } from '../state/settings'
+import { useSettings } from '../state/settings'
+import { startDateKey } from '../state/roles'
 import { type Role, type Config } from '../db/db'
 import RoleConfigPicker from '../components/RoleConfigPicker'
 import Stepper from '../components/Stepper'
@@ -20,7 +21,14 @@ export default function Onboarding() {
 
   const go = async () => {
     if (!ready) return
-    await update({ role: role!, config: config!, startDate: startDate || undefined, cadenceDays, paperMode, onboarded: true })
+    await update({
+      role: role!,
+      config: config!,
+      startDate: startDate || undefined,
+      cadenceDays,
+      paperMode,
+      onboarded: true,
+    })
     nav('/', { replace: true })
   }
 
@@ -34,7 +42,13 @@ export default function Onboarding() {
           <label>{t('onboarding.lang')}</label>
           <div className="row">
             {UI_LOCALES.map((l) => (
-              <button key={l} className={`chip ${settings.uiLocale === l ? 'on' : ''}`} onClick={() => update({ uiLocale: l })}>{LOCALE_META[l].name}</button>
+              <button
+                key={l}
+                className={`chip ${settings.uiLocale === l ? 'on' : ''}`}
+                onClick={() => update({ uiLocale: l })}
+              >
+                {LOCALE_META[l].name}
+              </button>
             ))}
           </div>
         </div>
@@ -42,14 +56,27 @@ export default function Onboarding() {
           <label>{t('settings.theme')}</label>
           <div className="row">
             {(['system', 'light', 'dark'] as const).map((x) => (
-              <button key={x} className={`chip ${settings.theme === x ? 'on' : ''}`} onClick={() => update({ theme: x })}>{t(`settings.theme.${x}`)}</button>
+              <button
+                key={x}
+                className={`chip ${settings.theme === x ? 'on' : ''}`}
+                onClick={() => update({ theme: x })}
+              >
+                {t(`settings.theme.${x}`)}
+              </button>
             ))}
           </div>
           <p className="small muted">{t('onboarding.theme.help')}</p>
         </div>
       </div>
 
-      <RoleConfigPicker role={role} config={config} onChange={(n) => { setRole(n.role); setConfig(n.config) }} />
+      <RoleConfigPicker
+        role={role}
+        config={config}
+        onChange={(n) => {
+          setRole(n.role)
+          setConfig(n.config)
+        }}
+      />
 
       {ready && (
         <>
@@ -69,13 +96,16 @@ export default function Onboarding() {
           {role !== 'friend' && (
             <div className="card">
               <label className="row" style={{ minHeight: 44 }}>
-                <input type="checkbox" checked={paperMode} onChange={(e) => setPaper(e.target.checked)} /> {t('onboarding.paper')}
+                <input type="checkbox" checked={paperMode} onChange={(e) => setPaper(e.target.checked)} />{' '}
+                {t('onboarding.paper')}
               </label>
               <p className="small muted">{t('onboarding.paper.help')}</p>
             </div>
           )}
 
-          <button className="btn primary" onClick={go}>{t('onboarding.go')}</button>
+          <button className="btn primary" onClick={go}>
+            {t('onboarding.go')}
+          </button>
         </>
       )}
     </>

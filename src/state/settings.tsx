@@ -1,8 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, type ReactNode } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { db, DEFAULT_SETTINGS, writeSettings, type Settings, type Role, type Config } from '../db/db'
+import { db, DEFAULT_SETTINGS, writeSettings, type Settings } from '../db/db'
 
-interface Ctx { settings: Settings; loaded: boolean; update: (patch: Partial<Settings>) => Promise<void> }
+interface Ctx {
+  settings: Settings
+  loaded: boolean
+  update: (patch: Partial<Settings>) => Promise<void>
+}
 const SettingsCtx = createContext<Ctx>({ settings: DEFAULT_SETTINGS, loaded: false, update: async () => {} })
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
@@ -25,32 +29,6 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   return <SettingsCtx.Provider value={value}>{children}</SettingsCtx.Provider>
 }
 
-export function useSettings() { return useContext(SettingsCtx) }
-
-/** The per-meeting switch only makes sense in a pair, where the role rotates. */
-export function showsFriendSwitch(s: Settings) {
-  return s.role === 'both' && s.config === 'pair'
-}
-export function showsFriendSection(s: Settings) {
-  return s.role === 'friend' || s.role === 'both'
-}
-export function showsDreamerParts(s: Settings) {
-  return s.role !== 'friend'
-}
-/**
- * Who leads the next meeting, as seen from this device: 'me' (Friend role, group leader,
- * or the pair member whose turn it is), 'other' (pair member whose turn it is not), or
- * null when the question does not arise (a Dreamer with an outside Friend).
- */
-export function leadsMeetings(s: Settings): 'me' | 'other' | null {
-  if (s.role === 'friend') return 'me'
-  if (s.role === 'both' && s.config === 'group') return 'me'
-  if (s.role === 'both' && s.config === 'pair') return s.friendToday ? 'me' : 'other'
-  return null
-}
-/** The label of the first-meeting date depends on who is asking. */
-export function startDateKey(s: { role: Role; config: Config }): string {
-  if (s.config === 'group') return 'onboarding.start.group'
-  if (s.role === 'friend') return 'onboarding.start.friend'
-  return 'onboarding.start'
+export function useSettings() {
+  return useContext(SettingsCtx)
 }

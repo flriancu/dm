@@ -4,7 +4,9 @@
  * east of Greenwich).
  */
 export function localIso(d: Date): string {
-  const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), day = String(d.getDate()).padStart(2, '0')
+  const y = d.getFullYear(),
+    m = String(d.getMonth() + 1).padStart(2, '0'),
+    day = String(d.getDate()).padStart(2, '0')
   return `${y}-${m}-${day}`
 }
 
@@ -16,14 +18,17 @@ export function parseLocal(iso: string): Date {
 export const today = () => localIso(new Date())
 
 export function addDays(iso: string, n: number): string {
-  const d = parseLocal(iso); d.setDate(d.getDate() + n); return localIso(d)
+  const d = parseLocal(iso)
+  d.setDate(d.getDate() + n)
+  return localIso(d)
 }
 
 /** Adds months, clamping to the last day of the target month (31 Jan + 1 → 28/29 Feb). */
 export function addMonths(iso: string, n: number): string {
   const d = parseLocal(iso)
   const day = d.getDate()
-  d.setDate(1); d.setMonth(d.getMonth() + n)
+  d.setDate(1)
+  d.setMonth(d.getMonth() + n)
   const last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()
   d.setDate(Math.min(day, last))
   return localIso(d)

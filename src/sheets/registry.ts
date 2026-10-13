@@ -5,7 +5,11 @@ import { ProfileSheet, JournalSheet, WheelSheet } from './calm'
 import { ValuesSheet, LetterSheet, VisionSheet, RegretSheet, CheckinSheet, RetroSheet } from './vision'
 
 /** Every printable sheet of the Dream Book, in book order (FR-04). Adding a sheet = one line here. */
-export interface SheetDef { id: string; module: number; Component: ComponentType }
+export interface SheetDef {
+  id: string
+  module: number
+  Component: ComponentType
+}
 
 export const SHEETS: readonly SheetDef[] = [
   { id: 'cover', module: 0, Component: CoverSheet },

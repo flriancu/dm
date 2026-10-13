@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { useT } from '../i18n'
-import { useSettings, showsDreamerParts } from '../state/settings'
+import { useSettings } from '../state/settings'
+import { showsDreamerParts } from '../state/roles'
 
 /** Wraps a learner page: a device in the Dream Friend role sees a pointer to its own page instead (FR-06). */
 export default function DreamerOnly({ children }: { children: ReactNode }) {
@@ -11,7 +12,14 @@ export default function DreamerOnly({ children }: { children: ReactNode }) {
   return (
     <>
       <p className="notice">{t('dreamerOnly.text')}</p>
-      <p><Link className="btn" to="/friend">{t('nav.friend')} →</Link> <Link className="btn ghost" to="/settings">{t('nav.settings')}</Link></p>
+      <p>
+        <Link className="btn" to="/friend">
+          {t('nav.friend')} →
+        </Link>{' '}
+        <Link className="btn ghost" to="/settings">
+          {t('nav.settings')}
+        </Link>
+      </p>
     </>
   )
 }

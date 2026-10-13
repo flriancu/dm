@@ -10,7 +10,8 @@ export function mergeDoc<T extends object>(cur: T, patch: Partial<T>, nested: re
   const out = { ...cur, ...patch } as T
   for (const k of nested) {
     const p = patch[k]
-    if (p && typeof p === 'object' && !Array.isArray(p)) out[k] = { ...((cur[k] as object) ?? {}), ...(p as object) } as T[keyof T]
+    if (p && typeof p === 'object' && !Array.isArray(p))
+      out[k] = { ...(cur[k] as object), ...(p as object) } as T[keyof T]
   }
   return out
 }

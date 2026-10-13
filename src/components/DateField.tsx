@@ -5,7 +5,13 @@ import '@daypicker/react/style.css'
 import { useT } from '../i18n'
 import { localIso, parseLocal, today } from '../lib/dates'
 
-interface Props { id: string; value: string; onChange: (v: string) => void; min?: string; max?: string }
+interface Props {
+  id: string
+  value: string
+  onChange: (v: string) => void
+  min?: string
+  max?: string
+}
 const LOCALES = { ro, en: enUS } as const
 
 /**
@@ -20,22 +26,42 @@ export default function DateField({ id, value, onChange, min, max }: Props) {
 
   useEffect(() => {
     if (!open) return
-    const away = (e: MouseEvent) => { if (!box.current?.contains(e.target as Node)) setOpen(false) }
-    const key = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
-    document.addEventListener('mousedown', away); document.addEventListener('keydown', key)
-    return () => { document.removeEventListener('mousedown', away); document.removeEventListener('keydown', key) }
+    const away = (e: MouseEvent) => {
+      if (!box.current?.contains(e.target as Node)) setOpen(false)
+    }
+    const key = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', away)
+    document.addEventListener('keydown', key)
+    return () => {
+      document.removeEventListener('mousedown', away)
+      document.removeEventListener('keydown', key)
+    }
   }, [open])
 
-  const pick = (v: string) => { onChange(v); setOpen(false) }
+  const pick = (v: string) => {
+    onChange(v)
+    setOpen(false)
+  }
   const now = today()
   const todayAllowed = (!min || now >= min) && (!max || now <= max)
   const selected = value ? parseLocal(value) : undefined
 
   return (
     <span className="datefield" ref={box}>
-      <button type="button" id={id} className={`datefield-btn ${value ? '' : 'empty'}`} aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+      <button
+        type="button"
+        id={id}
+        className={`datefield-btn ${value ? '' : 'empty'}`}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+      >
         <span>{value ? fmtDate(value) : t('date.pick')}</span>
-        <span className="datefield-ico" aria-hidden>📅</span>
+        <span className="datefield-ico" aria-hidden>
+          📅
+        </span>
       </button>
       {open && (
         <div className="datepop" role="dialog" aria-label={t('date.pick')}>
@@ -44,17 +70,31 @@ export default function DateField({ id, value, onChange, min, max }: Props) {
             locale={LOCALES[locale as keyof typeof LOCALES] ?? ro}
             weekStartsOn={1}
             selected={selected}
-            defaultMonth={selected ?? (min && now < min ? parseLocal(min) : max && now > max ? parseLocal(max) : undefined)}
+            defaultMonth={
+              selected ?? (min && now < min ? parseLocal(min) : max && now > max ? parseLocal(max) : undefined)
+            }
             startMonth={min ? parseLocal(min) : undefined}
             endMonth={max ? parseLocal(max) : undefined}
             disabled={[...(min ? [{ before: parseLocal(min) }] : []), ...(max ? [{ after: parseLocal(max) }] : [])]}
-            onSelect={(d) => { if (d) pick(localIso(d)) }}
+            onSelect={(d) => {
+              if (d) pick(localIso(d))
+            }}
             labels={{ labelPrevious: () => t('date.prev'), labelNext: () => t('date.next') }}
           />
           <div className="row datepop-foot">
-            {todayAllowed && <button type="button" className="btn sm" onClick={() => pick(now)}>{t('date.today')}</button>}
-            {value && !min && <button type="button" className="btn sm ghost" onClick={() => pick('')}>{t('date.clear')}</button>}
-            <button type="button" className="btn sm ghost" onClick={() => setOpen(false)}>{t('common.cancel')}</button>
+            {todayAllowed && (
+              <button type="button" className="btn sm" onClick={() => pick(now)}>
+                {t('date.today')}
+              </button>
+            )}
+            {value && !min && (
+              <button type="button" className="btn sm ghost" onClick={() => pick('')}>
+                {t('date.clear')}
+              </button>
+            )}
+            <button type="button" className="btn sm ghost" onClick={() => setOpen(false)}>
+              {t('common.cancel')}
+            </button>
           </div>
         </div>
       )}

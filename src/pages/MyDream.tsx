@@ -1,65 +1,39 @@
 import DreamerOnly from '../components/DreamerOnly'
 import { Link } from 'react-router-dom'
-import { useLiveQuery } from 'dexie-react-hooks'
 import { useT } from '../i18n'
-import AutoText from '../components/AutoText'
-import { saveDoc } from '../db/docs'
-import {
-  db, today, CLARIFY_STEPS, WOOP_STEPS, HABIT_PARTS, FRIEND_ROLES, weekStart,
-  type ClarifyStep, type WoopStep, type HabitPart, type DreamWork, type DreamFriend, type HabitWeek,
-} from '../db/db'
+import { useChosenOrReleasedDream, useWorkOf } from '../db/dreams'
+import Clarify from '../sections/dream/Clarify'
+import Woop from '../sections/dream/Woop'
+import Habit from '../sections/dream/Habit'
+import Friends from '../sections/dream/Friends'
+import Fear from '../sections/dream/Fear'
+import LetGo from '../sections/dream/LetGo'
 
 /** The chosen dream's worksheets: module 2 (clarify, routes), 3 (WOOP), 4 (habit, friends, fear), and letting go (FR-46). */
-const LETGO_SIGNS = ['oscillate', 'sleep', 'stalled', 'outside'] as const
 export default function MyDreamPage() {
-  return <DreamerOnly><MyDream /></DreamerOnly>
+  return (
+    <DreamerOnly>
+      <MyDream />
+    </DreamerOnly>
+  )
 }
 
 function MyDream() {
-  const { t, fmtDate } = useT()
-  // the chosen dream, or the most recently released one (so the letting-go note stays visible)
-  const dream = useLiveQuery(async () => (await db.dreams.where('chosen').equals(1).first()) ?? (await db.dreams.orderBy('dateReleased').reverse().first()) ?? null, [])
-  const work = useLiveQuery(() => (dream?.id ? db.dreamWork.get(dream.id) : undefined), [dream?.id])
+  const { t } = useT()
+  const dream = useChosenOrReleasedDream()
+  const work = useWorkOf(dream?.id)
 
   if (dream === undefined) return <p className="muted">…</p>
   if (!dream) {
     return (
       <>
         <h1>{t('mydream.title')}</h1>
-        <p className="notice">{t('mydream.none')} <Link to="/dreams">{t('nav.dreams')}</Link></p>
+        <p className="notice">
+          {t('mydream.none')} <Link to="/dreams">{t('nav.dreams')}</Link>
+        </p>
       </>
     )
   }
-
-  // read-modify-write inside one transaction, so two quick edits never overwrite each other
-  const save = (patch: Partial<DreamWork>) => saveDoc({ table: db.dreamWork, key: dream.id!, empty: () => ({ dreamId: dream.id!, updated: today() }), nested: ['clarify', 'woop', 'habit', 'fear', 'letgo'] }, patch)
-  const setStep = (step: ClarifyStep, v: string) => save({ clarify: { [step]: v } })
-  const routes = [...(work?.routes ?? []), '', '', ''].slice(0, 3)
-  const setRoute = (i: number, v: string) => { const r = [...routes]; r[i] = v; save({ routes: r }) }
-  const filled = CLARIFY_STEPS.filter((s) => (work?.clarify?.[s] ?? '').trim()).length
-  const setWoop = (step: WoopStep, v: string) => save({ woop: { [step]: v } })
-  const woopFilled = WOOP_STEPS.filter((s) => (work?.woop?.[s] ?? '').trim()).length
-  const setHabit = (part: HabitPart, v: string) => save({ habit: { [part]: v } })
-  const friends: DreamFriend[] = [...(work?.friends ?? []), {}, {}, {}].slice(0, 3)
-  const setFriend = (i: number, p: Partial<DreamFriend>) => { const f = friends.map((x) => ({ ...x })); f[i] = { ...f[i], ...p }; save({ friends: f }) }
-  const setFear = (k: 'fear' | 'goodEnough', v: string) => save({ fear: { [k]: v } })
-
-  // weekly log: this week plus the weeks already logged, newest first (FR-22)
-  const thisWeek = weekStart(today())
-  const logged = new Map((work?.habitLog ?? []).map((w) => [w.week, w]))
-  const weeks = Array.from(new Set([thisWeek, ...logged.keys()])).sort().reverse()
-  const setWeek = (week: string, p: Partial<HabitWeek>) => {
-    const next = new Map(logged); next.set(week, { week, ...(logged.get(week) ?? {}), ...p })
-    save({ habitLog: Array.from(next.values()) })
-  }
-  const doneWeeks = (work?.habitLog ?? []).filter((w) => w.done).length
-
-  const Section = ({ id, label, title, right }: { id: string; label: string; title: string; right?: string }) => (
-    <>
-      <p className="small muted" id={id} style={{ marginBottom: -8, marginTop: 28 }}>{label}</p>
-      <h2 style={{ marginTop: 12 }}>{title}{right && <span className="small muted" style={{ fontWeight: 400 }}> · {right}</span>}</h2>
-    </>
-  )
 
   return (
     <>
@@ -76,146 +50,12 @@ function MyDream() {
           <a href="#letgo">{t('mydream.section.letgo')}</a>
         </div>
       </div>
-
-      <Section id="clarify" label={t('mydream.section.clarify')} title={t('mydream.clarify')} right={t('mydream.progress', { n: filled })} />
-      <p className="muted small">{t('mydream.clarify.help')}</p>
-      {CLARIFY_STEPS.map((s) => (
-        <div className="card" key={s}>
-          <div className="field">
-            <label htmlFor={`step-${s}`}><strong>{t(`clarify.${s}`)}</strong> — {t(`clarify.${s}.q`)}</label>
-            <AutoText id={`step-${s}`} placeholder={t(`clarify.${s}.placeholder`)} value={work?.clarify?.[s] ?? ''} onSave={(v) => setStep(s, v)} multiline />
-          </div>
-        </div>
-      ))}
-      <h3>{t('mydream.routes')}</h3>
-      <p className="muted small">{t('mydream.routes.help')}</p>
-      <div className="card">
-        {routes.map((r, i) => (
-          <div className="field" key={i}>
-            <label htmlFor={`route-${i}`}>{t('mydream.route', { n: i + 1 })}</label>
-            <AutoText id={`route-${i}`} placeholder={t(`mydream.route.placeholder.${i + 1}`)} value={r} onSave={(v) => setRoute(i, v)} />
-          </div>
-        ))}
-      </div>
-      <p className="small muted">{t('mydream.saved')} <Link to="/book/print/clarify">{t('mydream.print')}</Link></p>
-
-      <Section id="woop" label={t('mydream.section.woop')} title={t('woop.title')} right={t('woop.progress', { n: woopFilled })} />
-      <p className="muted small">{t('woop.help')}</p>
-      {WOOP_STEPS.map((s) => (
-        <div className="card" key={s}>
-          <div className="field">
-            <label htmlFor={`woop-${s}`}><strong>{t(`woop.${s}`)}</strong> — {t(`woop.${s}.q`)}</label>
-            <AutoText id={`woop-${s}`} placeholder={t(`woop.${s}.placeholder`)} value={work?.woop?.[s] ?? ''} onSave={(v) => setWoop(s, v)} multiline />
-          </div>
-        </div>
-      ))}
-      <p className="small muted">{t('mydream.saved')} <Link to="/book/print/woop">{t('woop.print')}</Link></p>
-
-      <Section id="habit" label={t('mydream.section.habit')} title={t('habit.title')} right={t('habit.weeks', { n: doneWeeks })} />
-      <p className="muted small">{t('habit.help')}</p>
-      <div className="card">
-        {HABIT_PARTS.map((p) => (
-          <div className="field" key={p}>
-            <label htmlFor={`habit-${p}`}><strong>{t(`habit.${p}`)}</strong> — {t(`habit.${p}.q`)}</label>
-            <AutoText id={`habit-${p}`} placeholder={t(`habit.${p}.placeholder`)} value={work?.habit?.[p] ?? ''} onSave={(v) => setHabit(p, v)} />
-          </div>
-        ))}
-        <p className="small"><em>{[work?.habit?.anchor, work?.habit?.behaviour, work?.habit?.celebration].filter(Boolean).join(' ') || t('habit.sentence.empty')}</em></p>
-      </div>
-      <h3>{t('habit.log')}</h3>
-      <p className="muted small">{t('habit.log.help')}</p>
-      <div className="card">
-        {weeks.map((w) => {
-          const row = logged.get(w)
-          return (
-            <div key={w} className="field">
-              <label className="row" style={{ minHeight: 32 }}>
-                <input type="checkbox" key={`${w}-${row?.done ? 1 : 0}`} defaultChecked={!!row?.done} onChange={(e) => setWeek(w, { done: e.target.checked })} />
-                <span>{t('habit.week.of', { date: fmtDate(w) })}{w === thisWeek ? ` (${t('habit.week.this')})` : ''}: {t('habit.week.done')}</span>
-              </label>
-              <AutoText aria-label={t('habit.note.label', { date: fmtDate(w) })} placeholder={t('habit.note.placeholder')} value={row?.note ?? ''} onSave={(v) => setWeek(w, { note: v })} />
-            </div>
-          )
-        })}
-      </div>
-      <p className="small muted">{t('mydream.saved')} <Link to="/book/print/habit">{t('habit.print')}</Link></p>
-
-      <Section id="friends" label={t('mydream.section.friends')} title={t('friends.title')} />
-      <p className="muted small">{t('friends.help')}</p>
-      {friends.map((f, i) => (
-        <div className="card" key={i}>
-          <div className="field">
-            <label htmlFor={`friend-name-${i}`}>{t('friends.name', { n: i + 1 })}</label>
-            <AutoText id={`friend-name-${i}`} placeholder={t('friends.name.placeholder')} value={f.name ?? ''} onSave={(v) => setFriend(i, { name: v })} />
-          </div>
-          <div className="field">
-            <label>{t('friends.role')}</label>
-            <div className="row">
-              {FRIEND_ROLES.map((r) => <button key={r} className={`chip ${f.role === r ? 'on' : ''}`} onClick={() => setFriend(i, { role: r })}>{t(`friends.role.${r}`)}</button>)}
-            </div>
-            {f.role && <p className="small muted">{t(`friends.role.${f.role}.help`)}</p>}
-          </div>
-          {f.role === 'ask' && (
-            <div className="field">
-              <label htmlFor={`friend-ask-${i}`}>{t('friends.ask')}</label>
-              <AutoText id={`friend-ask-${i}`} placeholder={t('friends.ask.placeholder')} value={f.ask ?? ''} onSave={(v) => setFriend(i, { ask: v })} multiline />
-            </div>
-          )}
-          {f.role === 'progress' && (
-            <div className="field">
-              <label htmlFor={`friend-day-${i}`}>{t('friends.day')}</label>
-              <AutoText id={`friend-day-${i}`} placeholder={t('friends.day.placeholder')} value={f.day ?? ''} onSave={(v) => setFriend(i, { day: v })} />
-            </div>
-          )}
-        </div>
-      ))}
-      <p className="small muted">{t('friends.note')} <Link to="/book/print/friends">{t('friends.print')}</Link></p>
-
-      <Section id="fear" label={t('mydream.section.fear')} title={t('fear.title')} />
-      <p className="muted small">{t('fear.help')}</p>
-      <div className="card">
-        <div className="field">
-          <label htmlFor="fear-fear"><strong>{t('fear.fear')}</strong> — {t('fear.fear.q')}</label>
-          <AutoText id="fear-fear" placeholder={t('fear.fear.placeholder')} value={work?.fear?.fear ?? ''} onSave={(v) => setFear('fear', v)} multiline />
-        </div>
-        <div className="field">
-          <label htmlFor="fear-good"><strong>{t('fear.goodEnough')}</strong> — {t('fear.goodEnough.q')}</label>
-          <AutoText id="fear-good" placeholder={t('fear.goodEnough.placeholder')} value={work?.fear?.goodEnough ?? ''} onSave={(v) => setFear('goodEnough', v)} multiline />
-        </div>
-      </div>
-      <p className="small muted">{t('mydream.saved')} <Link to="/book/print/fear">{t('fear.print')}</Link></p>
-
-      <Section id="letgo" label={t('mydream.section.letgo')} title={t('letgo.title')} />
-      <p className="muted small">{t('letgo.help')}</p>
-      <div className="card">
-        <div className="field">
-          <label>{t('letgo.signs')}</label>
-          {LETGO_SIGNS.map((s) => (
-            <label key={s} className="row" style={{ minHeight: 32 }}>
-              <input type="checkbox" key={`${s}-${(work?.letgo?.signs ?? []).includes(s) ? 1 : 0}`} defaultChecked={(work?.letgo?.signs ?? []).includes(s)} onChange={(e) => { const cur = work?.letgo?.signs ?? []; save({ letgo: { signs: e.target.checked ? [...cur, s] : cur.filter((x) => x !== s) } }) }} />
-              <span>{t(`letgo.sign.${s}`)}</span>
-            </label>
-          ))}
-        </div>
-        {(['costs', 'benefits', 'replacement'] as const).map((k) => (
-          <div className="field" key={k}>
-            <label htmlFor={`letgo-${k}`}>{t(`letgo.${k}`)}</label>
-            <AutoText id={`letgo-${k}`} placeholder={t(`letgo.${k}.placeholder`)} style={{ minHeight: 64 }} value={work?.letgo?.[k] ?? ''} onSave={(v) => save({ letgo: { [k]: v } })} multiline />
-          </div>
-        ))}
-        {dream.dateReleased ? (
-          <p className="notice small">{t('letgo.released', { date: fmtDate(dream.dateReleased) })} <Link to="/dreams">{t('dreams.title')} →</Link></p>
-        ) : (
-          <>
-            {work?.letgo?.decision === 'continue' && work.letgo.decided && <p className="small muted">{t('letgo.continued', { date: fmtDate(work.letgo.decided) })}</p>}
-            <div className="row">
-              <button className="btn" onClick={() => save({ letgo: { decision: 'continue', decided: today() } })}>{t('letgo.continue')}</button>
-              <button className="btn ghost" onClick={async () => { await save({ letgo: { decision: 'release', decided: today() } }); await db.dreams.update(dream.id!, { dateReleased: today(), chosen: 0 }) }}>{t('letgo.release')}</button>
-            </div>
-          </>
-        )}
-      </div>
-      <p className="small muted">{t('mydream.saved')} <Link to="/book/print/letgo">{t('letgo.print')}</Link></p>
+      <Clarify dream={dream} work={work} />
+      <Woop dream={dream} work={work} />
+      <Habit dream={dream} work={work} />
+      <Friends dream={dream} work={work} />
+      <Fear dream={dream} work={work} />
+      <LetGo dream={dream} work={work} />
     </>
   )
 }

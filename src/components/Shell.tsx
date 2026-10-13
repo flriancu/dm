@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { useT } from '../i18n'
-import { useSettings, showsFriendSection, showsDreamerParts } from '../state/settings'
+import { useSettings } from '../state/settings'
+import { showsFriendSection, showsDreamerParts } from '../state/roles'
 
 export default function Shell({ children }: { children: ReactNode }) {
   const { t } = useT()
@@ -21,10 +22,15 @@ export default function Shell({ children }: { children: ReactNode }) {
     <div className="shell">
       {!onboarding && !printing && (
         <nav className="nav" aria-label="main">
-          <Link to="/" className="brand">{t('app.title')}</Link>
+          <Link to="/" className="brand">
+            {t('app.title')}
+          </Link>
           {items.map((i) => (
             <NavLink key={i.to} to={i.to} end={i.to === '/'} className={({ isActive }) => (isActive ? 'active' : '')}>
-              <span className="ico" aria-hidden>{i.ico}</span>{i.label}
+              <span className="ico" aria-hidden>
+                {i.ico}
+              </span>
+              {i.label}
             </NavLink>
           ))}
         </nav>
