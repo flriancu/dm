@@ -53,7 +53,7 @@ export default function Settings() {
           <div className="small muted" style={{ marginTop: 8 }}>{t('settings.config')}</div>
           <div><strong>{t(`onboarding.config.${settings.config}`)}</strong> <span className="small">— {t(settings.config === 'group' && settings.role === 'both' ? 'config.help.group.both' : `config.help.${settings.config}`)}</span></div>
           {issue && <p className="notice small">{t(`combo.${issue}`)}</p>}
-          <button className="btn sm" style={{ marginTop: 10 }} onClick={startEdit}>{t('settings.change')}</button>
+          <button className="btn sm" onClick={startEdit}>{t('settings.change')}</button>
         </div>
       ) : (
         <>
@@ -75,15 +75,13 @@ export default function Settings() {
       <div className="card">
         <div className="small muted">{t('settings.backup')}</div>
         <p className="small muted" style={{ marginTop: 2 }}>{t('settings.privacy')}</p>
-        <div className="row" style={{ alignItems: 'flex-start' }}>
-          <div style={{ flex: 1, minWidth: 150 }}>
-            <button className="btn" onClick={doExport}>{t('settings.export')}</button>
-            <p className="small muted" style={{ margin: '4px 0 0' }}>{t('settings.export.help')}</p>
-          </div>
-          <div style={{ flex: 1, minWidth: 150 }}>
-            <button className="btn" onClick={() => file.current?.click()}>{t('settings.import')}</button>
-            <p className="small muted" style={{ margin: '4px 0 0' }}>{t('settings.import.help')}</p>
-          </div>
+        <div>
+          <button className="btn" onClick={doExport}>{t('settings.export')}</button>
+          <p className="small muted" style={{ margin: '6px 0 0' }}>{t('settings.export.help')}</p>
+        </div>
+        <div>
+          <button className="btn" onClick={() => file.current?.click()}>{t('settings.import')}</button>
+          <p className="small muted" style={{ margin: '6px 0 0' }}>{t('settings.import.help')}</p>
           <input ref={file} type="file" accept="application/json" className="visually-hidden" onChange={(e) => e.target.files?.[0] && doImport(e.target.files[0])} />
         </div>
         {msg && <p className="small">{msg}</p>}

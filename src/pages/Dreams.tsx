@@ -82,7 +82,7 @@ export default function Dreams() {
                 {d.dateReleased ? <span>{t('dreams.released', { date: fmtDate(d.dateReleased) })}</span> : null}
               </div>
               {open === d.id && (
-                <div className="card" style={{ marginTop: 8 }}>
+                <div className="card" style={{ margin: '8px 0 0' }}>
                   <div className="field">
                     <label htmlFor={`score-${d.id}`}>{t('dreams.score')}</label>
                     <input id={`score-${d.id}`} className="score" type="number" min={1} max={10} value={d.score ?? ''} onChange={(e) => patch(d, { score: e.target.value ? Math.max(1, Math.min(10, Number(e.target.value))) : undefined })} />
@@ -129,7 +129,7 @@ function Criteria() {
   const [v, setV] = useState('')
   const add = () => { if (!v.trim()) return; update({ criteria: [...settings.criteria, v.trim()] }); setV('') }
   return (
-    <details className="card" style={{ marginTop: 24 }}>
+    <details className="card" style={{ marginTop: 20 }}>
       <summary>{t('dreams.criteria')}</summary>
       <p className="small muted">{t('dreams.criteria.help')}</p>
       <ul className="list small">

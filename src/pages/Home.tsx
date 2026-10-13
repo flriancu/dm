@@ -34,7 +34,7 @@ export default function Home() {
           <>
             <div style={{ fontSize: '1.2rem', fontWeight: 650 }}>{t('home.module')} {next.order}: {next.title}</div>
             <div>{nextDate ? fmtDate(nextDate) : t('home.next.none')}</div>
-            <Link className="btn sm" style={{ marginTop: 8, display: 'inline-flex', alignItems: 'center' }} to={`/module/${next.id}`}>{t('common.continue')}</Link>
+            <Link className="btn sm" to={`/module/${next.id}`}>{t('common.continue')}</Link>
           </>
         ) : modules.length === 0 ? <div className="muted">…</div> : <div>{t('home.next.allDone')}</div>}
       </div>
