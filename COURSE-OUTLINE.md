@@ -388,8 +388,8 @@ link out, never embed copyrighted material; CR-05: rebuild worksheets, never sca
 | DM_Pilot_Intro, Kick-off, S3, S5, S6, S7, Closing decks | Source only. Agendas became the meeting plans; the closing survey shaped the requirements; no slide is reproduced. |
 | Dream Vision worksheet.pdf (Adina's) | Rebuilt as app sections and a printable sheet in modules 6–7, credited on Surse. |
 | WheelOfLife.pdf (Co-Active Coaching, reproduction permitted) | Rebuilt as the interactive wheel and printable sheet in module 5, credited. |
-| Mental Fitness – The Sage Powers.pdf (Chamine handout) | Rewritten in the course's own words as the five Sage powers with their games, module 5; the PDF is not included. |
-| Sboteurs Assesment-1.pdf (Chamine) | Ten names and one-paragraph descriptions in the course's own words, module 5 and the Liniște page; link to the official free test; the PDF is not included. |
+| Mental Fitness – The Sage Powers.pdf (Chamine handout) | A print of the public blog post "How to Access Your Inner Sage" (positiveintelligence.com/blog/five-sage-powers). Rewritten in the course's own words as the five Sage powers, module 5; the course links to the post (Liniște profile, Surse). Not hosted: Positive Intelligence's terms (12 Sept 2022) forbid copying, distributing or downloading their content. |
+| Sboteurs Assesment-1.pdf (Chamine) | A print of the ten public support articles (support.positiveintelligence.com/article/108 … 117). Ten names and one-paragraph descriptions in the course's own words, module 5 and the Liniște page; links to the official test and to each article (Liniște profile: the Judge plus the chosen three; Surse: all ten). Not hosted, same terms. Rights checked 2026-10-13; the two hosted recordings and their subtitles fall under the same terms and rest on D12 pending a permission request. |
 | Positive Intelligence Chapt 1-8.pdf (book) | Not included. Optional reading pointer, own copy, module 5. |
 | The Dream Manager.pdf (Kelly) | Not included. The twelve life areas and the Dream Book habit are used in modules 0–1, credited. |
 | Atlas_of_Heart.pdf (Brené Brown) | Not included. Reading pointer in module 4, credited. |

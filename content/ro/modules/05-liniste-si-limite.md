@@ -6,7 +6,7 @@ subtitle: Vocile care te trag înapoi, partea din tine care vede clar
 letter: L
 takeaway: Nu poți trece la Înțelept până nu întrerupi sabotorul. Fii la fel de blând(ă) cu tine cum ești cu ceilalți.
 sources: [Session 4 and 5 notes, Session 5 deck, Sage Powers handout, saboteurs reference, Wheel of Life sheet]
-source_version: 4
+source_version: 5
 duration: "1,5–2 ore cu Prietenul Visului; în grup, 2 ore"
 ---
 
@@ -14,7 +14,7 @@ duration: "1,5–2 ore cu Prietenul Visului; în grup, 2 ore"
 
 Până acum ai lucrat cu visul, cu timpul și cu oamenii. Ultimul pas al metodei COPIL, L · Liniște și limite, lucrează cu mintea ta: cu vocile care te trag înapoi și cu partea din tine care vede clar. „Limite” înseamnă aici granița pe care o pui între tine și vocile acestea: a le spune „nu” lor e prima limită; a spune „nu” unei cereri din afară, ca să rămână loc pentru pasul spre vis, e a doua (la a doua te ajută matricea timpului din modulul 3).
 
-**Sabotorii.** În curs numim „sabotori” gândurile automate care lucrează împotriva ta: „nu ești în stare”, „nu e momentul”, „ce o să zică lumea”. Numele vin de la Shirzad Chamine (pe pagina Surse, la „Shirzad Chamine”); sunt nume date, în joacă, unor gânduri pe care le avem toți; nu un diagnostic și nu o etichetă despre cine ești. Testul sabotorilor din modulul 3 (unul din cele două teste de pe internet) îți arată care voci sunt mai tari la tine; testul e în engleză, așa că numele din test sunt în paranteză. Dacă nu l-ai făcut, tabelul de mai jos ajunge. Toți avem o voce comună, **Judecătorul** (Judge): vocea care te ceartă pentru greșeli, te sperie cu ce ar putea merge rău și găsește ce e în neregulă cu ceilalți și cu viața. Pe lângă el vin nouă voci care îl ajută, complicii lui, fiecare cu promisiunea ei care nu se ține:
+**Sabotorii.** În curs numim „sabotori” gândurile automate care lucrează împotriva ta: „nu ești în stare”, „nu e momentul”, „ce o să zică lumea”. Numele vin de la Shirzad Chamine (pe pagina Surse, la „Shirzad Chamine”); sunt nume date, în joacă, unor gânduri pe care le avem toți; nu un diagnostic și nu o etichetă despre cine ești. Testul sabotorilor din modulul 3 (unul din cele două teste de pe internet) îți arată care voci sunt mai tari la tine; testul e în engleză, așa că numele din test sunt în paranteză. Dacă nu l-ai făcut, tabelul de mai jos ajunge. Toți avem o voce comună, **Judecătorul** (Judge): vocea care te ceartă pentru greșeli, te sperie cu ce ar putea merge rău și găsește ce e în neregulă cu ceilalți și cu viața. Pe lângă el vin nouă voci care îl ajută, complicii lui, fiecare cu promisiunea ei care nu se ține: Descrierea completă a fiecărei voci (în engleză) e pe site-ul Positive Intelligence; linkurile sunt pe pagina *Liniște*, lângă vocile pe care le alegi, și pe pagina *Surse*.
 
 | Vocea (numele din test) | Ce îți spune | Ce promite și nu ține |
 |---|---|---|

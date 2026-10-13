@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useT } from '../../i18n'
+import { SABOTEUR_LINKS, SAGE_POWERS_URL, SABOTEURS_OVERVIEW_URL } from '../../content/links'
 import AutoText from '../../components/AutoText'
 import SectionHead from '../../components/SectionHead'
 import { useSettings } from '../../state/settings'
 import { useStrengthUses, addStrengthUse, toggleSaboteur, setStrength } from '../../db/calm'
-import { SABOTEURS } from '../../db/db'
+import { SABOTEURS, type Saboteur } from '../../db/db'
 
 /** Module 5: the top three saboteurs, the five strengths, and the log of strength uses (FR-30, FR-36). */
 export default function Profile() {
@@ -52,6 +53,26 @@ export default function Profile() {
           </p>
         ))}
         <p className="small muted">{t('profile.saboteurs.note')}</p>
+        <p className="small">
+          {t('profile.links')}{' '}
+          {(['judge', ...top] as Saboteur[]).map((s, i) => (
+            <span key={s}>
+              {i > 0 && ' · '}
+              <a href={SABOTEUR_LINKS[s]} target="_blank" rel="noopener noreferrer">
+                {t(`sab.${s}`)}
+              </a>
+            </span>
+          ))}
+          {' · '}
+          <a href={SABOTEURS_OVERVIEW_URL} target="_blank" rel="noopener noreferrer">
+            {t('profile.links.all')}
+          </a>
+        </p>
+        <p className="small">
+          <a href={SAGE_POWERS_URL} target="_blank" rel="noopener noreferrer">
+            {t('profile.links.sage')}
+          </a>
+        </p>
       </div>
       <div className="card">
         <div className="field">

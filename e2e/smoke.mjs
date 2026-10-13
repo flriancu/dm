@@ -229,6 +229,11 @@ for (const [name, viewport] of [
       (await page.locator('video track[srclang=en]').count()) === 2,
     `${name}: both recordings carry Romanian and English subtitles`,
   )
+  check(
+    (await page.locator('a[href*="support.positiveintelligence.com/article/108"]').count()) >= 1 &&
+      (await page.locator('a[href*="five-sage-powers"]').count()) === 1,
+    `${name}: profile links to the Judge article and the Sage powers guide`,
+  )
   await page.goto(base + '#/book/print/wheel')
   await page.waitForSelector('.sheet')
   check((await page.locator('svg[role=img]').count()) === 1, `${name}: wheel sheet prints the wheel`)
