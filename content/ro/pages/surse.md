@@ -1,6 +1,6 @@
 ---
 title: Surse și mulțumiri
-source_version: 4
+source_version: 6
 ---
 
 Cursul este o adaptare, pentru uz privat între prieteni și familie, a unui program de „management al visurilor” (Dream Management) la care autorul a participat în 2026. Nu este vândut și nu înlocuiește un program certificat.
@@ -12,10 +12,12 @@ Cursul este o adaptare, pentru uz privat între prieteni și familie, a unui pro
 - **Matthew Kelly** – *The Dream Manager* (2007), cele douăsprezece zone ale vieții și obiceiul Cărții Visurilor.
 - **Gabriele Oettingen** – contrastul mental (a-ți imagina visul și obstacolul împreună) și metoda WOOP (Wish, Outcome, Obstacle, Plan: dorință, rezultat, obstacol, plan). [woopmylife.org](https://woopmylife.org)
 - **BJ Fogg** – rețeta Tiny Habits (obiceiuri minuscule). [tinyhabits.com](https://tinyhabits.com)
-- **Shirzad Chamine** – numele „sabotorilor” (vocile interioare care te trag înapoi) și al „Înțeleptului” (partea din tine care vede clar), din programul Positive Intelligence (inteligență pozitivă). Testul gratuit: [positiveintelligence.com/assessments](https://www.positiveintelligence.com/assessments/)
+- **Shirzad Chamine** – numele „sabotorilor” (vocile interioare care te trag înapoi) și al „Înțeleptului” (partea din tine care vede clar), din programul Positive Intelligence (inteligență pozitivă), cele cinci feluri de a lucra ale Înțeleptului, două înregistrări scurte folosite în modulul 5 și cartea *Positive Intelligence* (2012, în engleză), lectură opțională. Testul gratuit: [positiveintelligence.com/assessments](https://www.positiveintelligence.com/assessments/)
 - **VIA Institute on Character** – chestionarul punctelor forte. [viacharacter.org](https://www.viacharacter.org)
 - **Matricea timpului** – cele patru căsuțe important / urgent, atribuite președintelui american Dwight Eisenhower și popularizate de Stephen Covey; un instrument practic, fără studii proprii.
-- **Co-Active Coaching** – Roata Vieții (un desen rotund cu zonele vieții, pe care notezi cât de mulțumit ești de fiecare; o folosești într-un modul următor).
+- **Co-Active Coaching** – Roata vieții (un desen rotund cu opt zone ale vieții, pe care notezi cât de mulțumit ești de fiecare; modulul 5), din *Co-Active Coaching*, ediția a doua (2007), cu permisiune de reproducere pentru uz personal.
+- **Ed Diener și colab.** – cele cinci afirmații despre viața mea (Satisfaction With Life Scale, 1985), folosite în modulul 5 în traducerea cursului; vezi „Mulțumirea de viață” mai jos.
+- **Barbara Sher** – despre izolare ca dușman al visurilor (în engleză): [înregistrare](https://www.youtube.com/watch?v=H2rG4Dg6xyI)
 - **Brené Brown** – *Atlas of the Heart*, carte despre emoții, ca lectură recomandată.
 
 Numele sabotorilor sunt un vocabular de coaching, nu un diagnostic. Cursul nu reproduce niciun test și nu include statistici din materialele comerciale.
@@ -34,7 +36,9 @@ Metodele din curs se sprijină pe studii publicate în reviste de specialitate. 
 - Scrisoarea către sinele viitor (modulul 6): Carrillo și colab. (2019), *PLOS ONE* — [articol](https://doi.org/10.1371/journal.pone.0222386), DOI 10.1371/journal.pone.0222386; Rutchick și colab. (2018), *Journal of Experimental Psychology: Applied* — [articol](https://doi.org/10.1037/xap0000153), DOI 10.1037/xap0000153; Chishima & Wilson (2020), *Self and Identity* — [articol](https://doi.org/10.1080/15298868.2020.1754283), DOI 10.1080/15298868.2020.1754283
 - Punctele forte (modulul 5): Schutte & Malouff (2019), *Journal of Happiness Studies* — [articol](https://doi.org/10.1007/s10902-018-9990-2), DOI 10.1007/s10902-018-9990-2
 - Valorile personale (modulul 6): Zhang și colab. (2025), *American Psychologist* — [articol](https://doi.org/10.1037/amp0001591), DOI 10.1037/amp0001591; Russo-Netzer & Atad (2024), *Frontiers in Psychology* — [articol](https://doi.org/10.3389/fpsyg.2024.1375237), DOI 10.3389/fpsyg.2024.1375237
-- Blândețea cu tine și criticul interior (modulul 5): Wakelin, Perman & Simonds (2022), *Clinical Psychology & Psychotherapy* — [articol](https://doi.org/10.1002/cpp.2586), DOI 10.1002/cpp.2586; Kroener, Mahler & Sosic-Vasic (2024), *Frontiers in Psychiatry* — [articol](https://doi.org/10.3389/fpsyt.2024.1397925), DOI 10.3389/fpsyt.2024.1397925
+- Exercițiile scurte de atenție (modulul 5): Hirshberg și colab. (2018), *PLOS ONE* — [articol](https://doi.org/10.1371/journal.pone.0207765), DOI 10.1371/journal.pone.0207765
+- Mulțumirea de viață, cele cinci afirmații (modulul 5): Diener, Emmons, Larsen & Griffin (1985), *Journal of Personality Assessment* — [articol](https://doi.org/10.1207/s15327752jpa4901_13), DOI 10.1207/s15327752jpa4901_13
+- Blândețea cu tine, criticul interior și exercițiul cu două scaune (modulul 5): Wakelin, Perman & Simonds (2022), *Clinical Psychology & Psychotherapy* — [articol](https://doi.org/10.1002/cpp.2586), DOI 10.1002/cpp.2586; Kroener, Mahler & Sosic-Vasic (2024), *Frontiers in Psychiatry* — [articol](https://doi.org/10.3389/fpsyt.2024.1397925), DOI 10.3389/fpsyt.2024.1397925
 - Numirea emoțiilor (modulul 5): Torre & Lieberman (2018), *Emotion Review* — [articol](https://doi.org/10.1177/1754073917742706), DOI 10.1177/1754073917742706; Kashdan, Barrett & McKnight (2015), *Current Directions in Psychological Science* — [articol](https://doi.org/10.1177/0963721414550708), DOI 10.1177/0963721414550708
 - A renunța cu onoare la un vis (modulul 7): Wrosch și colab. (2003), *Personality and Social Psychology Bulletin* — [articol](https://doi.org/10.1177/0146167203256921), DOI 10.1177/0146167203256921; Brandstätter & Bernecker (2022), *Annual Review of Psychology* — [articol](https://doi.org/10.1146/annurev-psych-020821-110710), DOI 10.1146/annurev-psych-020821-110710
 - Regretul anticipat, ca unealtă de decizie (modulul 7): Brewer, DeFrank & Gilkey (2016), *Health Psychology* — [articol](https://doi.org/10.1037/hea0000294), DOI 10.1037/hea0000294

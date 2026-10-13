@@ -77,6 +77,16 @@ export interface DreamWork {
   updated: string
 }
 
+/** Module 5 (L): saboteur vocabulary, strengths, journal, attention reps, wheel of life (FR-30..34, FR-36). */
+export const SABOTEURS = ['judge', 'vigilant', 'achiever', 'controller', 'stickler', 'victim', 'rational', 'pleaser', 'restless', 'avoider'] as const
+export type Saboteur = (typeof SABOTEURS)[number]
+export interface JournalEntry { id?: number; date: string; happened: string; thought?: string; felt?: string; did?: string; saboteur?: Saboteur; friend?: string }
+export interface StrengthUse { id?: number; date: string; strength: string; text: string }
+export interface RepDone { id?: number; date: string; seconds: number }
+export const WHEEL_AREAS = ['home', 'work', 'money', 'health', 'friends', 'partner', 'growth', 'fun'] as const
+export const SWLS_ITEMS = ['ideal', 'conditions', 'satisfied', 'gotten', 'again'] as const
+export interface WheelSnapshot { id?: number; date: string; values: number[]; swls: number[] }
+
 /** Monday of the week containing an ISO date. */
 export function weekStart(iso: string): string {
   const d = new Date(iso + 'T00:00:00')
@@ -105,6 +115,10 @@ export class DreamDB extends Dexie {
   friendNotes!: EntityTable<FriendNote, 'id'>
   dreamWork!: EntityTable<DreamWork, 'dreamId'>
   weekTasks!: EntityTable<WeekTask, 'id'>
+  journal!: EntityTable<JournalEntry, 'id'>
+  strengthUses!: EntityTable<StrengthUse, 'id'>
+  reps!: EntityTable<RepDone, 'id'>
+  wheels!: EntityTable<WheelSnapshot, 'id'>
 
   constructor(name = 'dream-course') {
     super(name)
@@ -120,6 +134,12 @@ export class DreamDB extends Dexie {
     })
     this.version(3).stores({
       weekTasks: '++id, quadrant, moved, created',
+    })
+    this.version(4).stores({
+      journal: '++id, date',
+      strengthUses: '++id, date',
+      reps: '++id, date',
+      wheels: '++id, date',
     })
   }
 }
@@ -141,11 +161,14 @@ export interface Settings {
   criteria: string[]           // learner's own importance criteria (FR-11)
   friendToday: boolean         // "today I am the Dream Friend" (FR-06)
   onboarded: boolean
+  saboteurs: Saboteur[]        // top three from the official test (FR-30)
+  strengths: string[]          // top five VIA strengths (FR-36)
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   role: 'dreamer', config: 'solo', uiLocale: 'ro', theme: 'system',
   cadenceDays: 14, paperMode: false, paperCount: 0, criteria: [], friendToday: false, onboarded: false,
+  saboteurs: [], strengths: [],
 }
 
 export async function readSettings(d: DreamDB = db): Promise<Settings> {

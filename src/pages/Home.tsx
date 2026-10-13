@@ -70,6 +70,16 @@ export default function Home() {
         </>
       )}
 
+      <h2>{t('home.work')}</h2>
+      <div className="card">
+        <p className="small muted" style={{ marginTop: 0 }}>{t('home.work.help')}</p>
+        <div className="row">
+          <Link className="btn sm" to="/dream">{t('mydream.title')}</Link>
+          <Link className="btn sm" to="/week">{t('week.title')}</Link>
+          <Link className="btn sm" to="/calm">{t('calm.title')}</Link>
+        </div>
+      </div>
+
       <h2>{t('modules.title')}</h2>
       <div className="progress" aria-hidden>
         {modules.filter((m) => m.order > 0).map((m) => <span key={m.id} className={done.has(m.id) ? 'on' : ''} />)}

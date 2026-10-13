@@ -377,6 +377,25 @@ exists in three variants: Solo + Friend, Peer pair, Friend + group.
   want to deal with the saboteurs early, so do not postpone D too long; keep homework to
   one thing; longer sessions with more pair time beat short weekly ones.
 
+## Local resources: what ends up on the site
+
+Every file from the pilot folder, and what the site does with it (D7: attribute and
+link out, never embed copyrighted material; CR-05: rebuild worksheets, never scan).
+
+| Local resource | On the site |
+|---|---|
+| dream_management.docx (facilitator notes) | Source only. Rewritten into modules 1–7 and the meeting plans; never shown. |
+| DM_Pilot_Intro, Kick-off, S3, S5, S6, S7, Closing decks | Source only. Agendas became the meeting plans; the closing survey shaped the requirements; no slide is reproduced. |
+| Dream Vision worksheet.pdf (Adina's) | Rebuilt as app sections and a printable sheet in modules 6–7, credited on Surse. |
+| WheelOfLife.pdf (Co-Active Coaching, reproduction permitted) | Rebuilt as the interactive wheel and printable sheet in module 5, credited. |
+| Mental Fitness – The Sage Powers.pdf (Chamine handout) | Rewritten in the course's own words as the five Sage powers with their games, module 5; the PDF is not included. |
+| Sboteurs Assesment-1.pdf (Chamine) | Ten names and one-paragraph descriptions in the course's own words, module 5 and the Liniște page; link to the official free test; the PDF is not included. |
+| Positive Intelligence Chapt 1-8.pdf (book) | Not included. Optional reading pointer, own copy, module 5. |
+| The Dream Manager.pdf (Kelly) | Not included. The twelve life areas and the Dream Book habit are used in modules 0–1, credited. |
+| Atlas_of_Heart.pdf (Brené Brown) | Not included. Reading pointer in module 4, credited. |
+| VID-20260603-WA0000.mp4, VID-20260603-WA0002.mp4 (Chamine recordings) | Hosted in the course as public/media/chamine-1.mp4 and chamine-2.mp4 on the Liniște page, module 5 (D12), credited on Surse. These are Chamine's material; hosting rests on D12 and private use. |
+| Links in the docx (Oprea, Oettingen, Fogg, Sher, VIA, PQ, Zahrai, Gilbert) | Oprea, Oettingen, Fogg, Sher, VIA and PQ are on Surse. Zahrai's doubt profile and the Gilbert article are not used. |
+
 ## Source map
 
 | Pilot material | Used in |

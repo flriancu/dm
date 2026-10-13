@@ -57,6 +57,7 @@ export default function ModulePage() {
           {doc.meta.order === 1 && <p><Link className="btn" to="/dreams">{t('dreams.title')} →</Link></p>}
           {doc.meta.order === 2 && <p className="row"><Link className="btn" to="/dreams">{t('dreams.title')} →</Link><Link className="btn" to="/dream">{t('mydream.title')} →</Link></p>}
           {doc.meta.order === 3 && <p className="row"><Link className="btn" to="/week">{t('week.title')} →</Link><Link className="btn" to="/dream#woop">{t('woop.title')} →</Link></p>}
+          {doc.meta.order === 5 && <p className="row"><Link className="btn" to="/calm">{t('calm.title')} →</Link></p>}
           {doc.meta.order === 4 && <p className="row"><Link className="btn" to="/dream#habit">{t('habit.title')} →</Link><Link className="btn" to="/dream#friends">{t('friends.title')} →</Link><Link className="btn" to="/dream#fear">{t('fear.title')} →</Link></p>}
         </>
       )}
