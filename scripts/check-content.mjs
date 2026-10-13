@@ -17,6 +17,8 @@ const SRC = join(here, '..', 'src')
 const SOURCE = 'ro'
 const REQUIRED_META = ['id', 'order', 'title', 'takeaway', 'source_version']
 const REQUIRED_SECTIONS = ['learn', 'do', 'friend', 'next', 'takeaway']
+const PLAN_HEADINGS = ['Un Visător și Prietenul lui', 'Pereche de egali', 'Prieten al Visului și grup']
+const PLAN_PARAGRAPHS = ['Cuvinte din curs', 'Înainte de întâlnire', 'Lecții din practică']
 const REQUIRED_VARIANTS = ['solo', 'pair', 'group']
 
 // CR-01 / CR-07 rule 2: words the learner must never meet (sources page may explain origins).
@@ -78,6 +80,25 @@ for (const rel of srcFiles) {
     const doSec = /## Fă \{#do\}([\s\S]*?)(^## )/m.exec(text)?.[1] ?? ''
     if (!/exemplu/i.test(doSec)) err(`${SOURCE}/${rel}: secțiunea Fă nu are niciun „de exemplu” (CR-07 regula 6)`)
   } else if (!('source_version' in meta)) err(`${SOURCE}/${rel}: missing source_version`)
+  if (rel.startsWith('friend/')) {
+    // the Friend page finds each configuration's table by its heading prefix (COURSE-RULES.md §5)
+    const heads = [...text.matchAll(/^## (.+)$/gm)].map((m) => m[1])
+    for (const h of PLAN_HEADINGS) if (!heads.some((x) => x.startsWith(h))) err(`${SOURCE}/${rel}: lipsește tabelul „${h}” (titlu ## care începe cu acest text)`)
+    for (const need of PLAN_PARAGRAPHS) if (!text.includes(need)) err(`${SOURCE}/${rel}: lipsește paragraful „${need}” (COURSE-RULES §5)`)
+    // every table's minutes add up to the total in its heading
+    let cur = null
+    const tables = []
+    for (const line of text.split(/\r?\n/)) {
+      const h = /^## (Un Visător|Pereche|Prieten al Visului și grup).*?\((\d+)(?: de)? (minute|ore)/.exec(line)
+      if (line.startsWith('## ')) { cur = h ? { name: h[1], total: h[3] === 'ore' ? Number(h[2]) * 60 : Number(h[2]), mins: [] } : null; if (cur) tables.push(cur); continue }
+      const row = /^\| (\d+)' \|/.exec(line)
+      if (cur && row) cur.mins.push(Number(row[1]))
+    }
+    for (const tb of tables) {
+      const sum = tb.mins.reduce((a, b) => a + b, 0)
+      if (tb.mins.length && sum !== tb.total) err(`${SOURCE}/${rel}: tabelul „${tb.name}” însumează ${sum} minute, titlul spune ${tb.total}`)
+    }
+  }
 
   if (!FORBIDDEN_EXEMPT.includes(rel)) {
     for (const [re, why] of FORBIDDEN) { const m = re.exec(text); if (m) err(`${SOURCE}/${rel}: „${m[0]}” – ${why} (CR-07 regula 2)`) }
