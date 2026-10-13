@@ -1,9 +1,11 @@
-# Build on push to main, sync dist/ to the S3 site, invalidate CloudFront (D9).
-# Needs three repository secrets/variables:
+# Build on push to main: tests and the full build (content check, lint, format, types) always
+# run. Deploying to the S3 site and invalidating CloudFront (D9) is optional: it runs only
+# when these repository secrets are set, and the run says so when they are not:
 #   AWS_ROLE_ARN            IAM role trusted by GitHub OIDC (no long-lived keys)
 #   S3_BUCKET               bucket that backs the site
-#   CLOUDFRONT_DISTRIBUTION distribution id
-# and one variable S3_PREFIX (e.g. "dream" for blog.floriniancu.ro/dream, or "" for a subdomain bucket).
+#   CLOUDFRONT_DISTRIBUTION distribution id (optional: without it the cache is not invalidated)
+# and the variables S3_PREFIX (e.g. "dream" for blog.floriniancu.ro/dream, or "" for a
+# subdomain bucket) and AWS_REGION (default eu-central-1).
 name: deploy
 on:
   push:
@@ -24,16 +26,34 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+      # secrets cannot be read in `if:`, so one step decides and the deploy steps read its output
+      - name: Is S3 deployment configured?
+        id: s3
+        env:
+          AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          CLOUDFRONT_DISTRIBUTION: ${{ secrets.CLOUDFRONT_DISTRIBUTION }}
+        run: |
+          if [ -n "$AWS_ROLE_ARN" ] && [ -n "$S3_BUCKET" ]; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=S3 deployment skipped::Set the AWS_ROLE_ARN and S3_BUCKET secrets to deploy the build to S3."
+          fi
+          if [ -n "$CLOUDFRONT_DISTRIBUTION" ]; then echo "invalidate=true" >> "$GITHUB_OUTPUT"; fi
       - uses: aws-actions/configure-aws-credentials@v4
+        if: steps.s3.outputs.deploy == 'true'
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION || 'eu-central-1' }}
       - name: Sync to S3
+        if: steps.s3.outputs.deploy == 'true'
         run: |
           PREFIX="${{ vars.S3_PREFIX }}"
           DEST="s3://${{ secrets.S3_BUCKET }}/${PREFIX:+$PREFIX/}"
           aws s3 sync dist/ "$DEST" --delete --cache-control "public,max-age=300"
       - name: Invalidate CloudFront
+        if: steps.s3.outputs.deploy == 'true' && steps.s3.outputs.invalidate == 'true'
         run: |
           PREFIX="${{ vars.S3_PREFIX }}"
           aws cloudfront create-invalidation --distribution-id "${{ secrets.CLOUDFRONT_DISTRIBUTION }}" --paths "/${PREFIX:+$PREFIX/}*"

@@ -93,8 +93,10 @@ without touching the live site: `npx vite build --outDir <folder> --emptyOutDir`
 
 ## Deploy
 
-`.github/workflows/deploy.yml` builds on push to `main` and syncs `dist/` to the S3 +
-CloudFront site through an OIDC-assumed role. Set the secrets named in the workflow.
+`.github/workflows/deploy.yml` runs the tests and the full build on every push to `main`.
+Deploying to the S3 + CloudFront site (through an OIDC-assumed role) is optional: it runs only
+when the `AWS_ROLE_ARN` and `S3_BUCKET` secrets are set (plus `CLOUDFRONT_DISTRIBUTION` to
+invalidate the cache); without them the run passes and notes that the deployment was skipped.
 `vite.config.ts` uses `base: './'` so the build works at any prefix or subdomain.
 
 ## Privacy
