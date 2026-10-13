@@ -4,3 +4,4 @@ e2e/shots
 content
 *.md
 package-lock.json
+site

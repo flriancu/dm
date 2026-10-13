@@ -4,3 +4,5 @@ dist
 .DS_Store
 *.tsbuildinfo
 e2e/shots
+site
+.site-files.json
