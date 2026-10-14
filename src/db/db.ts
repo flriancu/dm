@@ -325,6 +325,7 @@ export interface Settings {
   onboarded: boolean
   saboteurs: Saboteur[] // top three from the official test (FR-30)
   strengths: string[] // top five VIA strengths (FR-36)
+  calendarId?: string // this device's part of every calendar event id, so two people's events never replace each other
 }
 
 export const DEFAULT_SETTINGS: Settings = {

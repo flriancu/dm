@@ -46,11 +46,25 @@ export function shareableFile(name: string, text: string, type: string, accepts:
   return accepts(plain) ? plain : null
 }
 
-export type ShareResult = 'shared' | 'cancelled' | 'unsupported'
+/**
+ * shared · cancelled (the person closed the sheet) · busy (a sheet is already open: a second tap
+ * does nothing) · unsupported (no sheet, the type is refused, or the sheet failed: the caller
+ * downloads the file instead, so the person always gets it).
+ */
+export type ShareResult = 'shared' | 'cancelled' | 'busy' | 'unsupported'
+
+/**
+ * The open sheet: when it was asked for, and which call asked. A sheet that never answers
+ * counts as gone after a minute; if it is in fact still open, the browser refuses the next
+ * one (InvalidStateError), which is "busy" as well, never a reason to download.
+ */
+let sheet = { since: 0, call: 0 }
+const SHEET_TIMEOUT_MS = 60_000
 
 export async function shareText(name: string, text: string, type: string, title: string): Promise<ShareResult> {
   const n = nav()
   if (!n?.share || !n.canShare) return 'unsupported'
+  if (Date.now() - sheet.since < SHEET_TIMEOUT_MS) return 'busy'
   const file = shareableFile(name, text, type, (f) => {
     try {
       return n.canShare!({ files: [f] })
@@ -59,11 +73,15 @@ export async function shareText(name: string, text: string, type: string, title:
     }
   })
   if (!file) return 'unsupported'
+  const call = sheet.call + 1
+  sheet = { since: Date.now(), call }
   try {
     await n.share({ files: [file], title })
     return 'shared'
   } catch (e) {
-    if (e instanceof DOMException && e.name === 'AbortError') return 'cancelled'
-    throw e
+    const why = e instanceof DOMException ? e.name : ''
+    return why === 'AbortError' ? 'cancelled' : why === 'InvalidStateError' ? 'busy' : 'unsupported'
+  } finally {
+    if (sheet.call === call) sheet = { since: 0, call } // only this call's sheet: a later one may still be open
   }
 }

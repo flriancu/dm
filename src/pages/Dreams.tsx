@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Stepper from '../components/Stepper'
 import AutoText from '../components/AutoText'
+import { fields } from '../db/fields'
 import { useT } from '../i18n'
 import { useSettings } from '../state/settings'
 import {
@@ -12,7 +13,6 @@ import {
   chooseDream,
   releaseDream,
   markAchieved,
-  setPaperChosen,
   addCriterion,
   removeCriterion,
 } from '../db/dreams'
@@ -77,7 +77,7 @@ function Dreams() {
               id="paper-chosen"
               placeholder={t('dreams.paper.chosen.placeholder')}
               value={chosenRow?.text ?? ''}
-              onSave={setPaperChosen}
+              field={fields.paperDream()}
             />
             {chosenRow && (
               <p className="small" style={{ margin: '6px 0 0' }}>

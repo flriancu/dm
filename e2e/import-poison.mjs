@@ -82,10 +82,14 @@ async function importFile(page, content, { accept = true, wait = true } = {}) {
 async function render(page, route) {
   const before = page.errors.length
   await fresh(page, route)
-  const rootText = () => document.getElementById('root')?.innerText.trim().length > 0
+  // the app rendered: the static "loading" placeholder is gone and something is shown
+  const rootText = () =>
+    !document.getElementById('boot') && document.getElementById('root')?.innerText.trim().length > 0
   await page.waitForFunction(rootText, null, { timeout: 8000 }).catch(() => {})
   await page.waitForTimeout(700)
-  const text = await page.evaluate(() => document.getElementById('root')?.innerText.trim() ?? '')
+  const text = await page.evaluate(() =>
+    document.getElementById('boot') ? '' : (document.getElementById('root')?.innerText.trim() ?? ''),
+  )
   const errs = page.errors.slice(before)
   if (text.length && !CARD.test(text) && !errs.length) return null
   return `${route}: ${!text.length ? 'blank' : CARD.test(text) ? 'error card' : 'error'} ${errs[0] ?? ''}`.trim()
@@ -162,7 +166,7 @@ const POISON = [
   check(chosen === '1,0,0', 'chosen: true is read as chosen; one chosen dream at most, never a released one')
   const tasks = [
     { id: 1, text: 'GHOST-TASK', quadrant: 'zzz', moved: 1 },
-    { id: 2, text: 'b', moved: 1 },
+    { id: 2, text: 'b', quadrant: 'plan', moved: 1 },
   ]
   await importFile(page, backup({ weekTasks: tasks }))
   const moved = (await dump(page, ['weekTasks'])).weekTasks.filter((w) => w.moved === 1).length

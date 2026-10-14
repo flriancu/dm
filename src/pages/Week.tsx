@@ -3,7 +3,8 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useT } from '../i18n'
 import AutoText from '../components/AutoText'
-import { useWeekTasks, addWeekTask, putInQuadrant, moveToCalendar, setWhen, deleteWeekTask } from '../db/week'
+import { fields } from '../db/fields'
+import { useWeekTasks, addWeekTask, putInQuadrant, moveToCalendar, deleteWeekTask } from '../db/week'
 import { submitDraft } from '../state/useAction'
 import { QUADRANTS, TEXT_SHORT, type Quadrant, type WeekTask } from '../db/db'
 
@@ -172,7 +173,7 @@ function Week() {
                     id="when"
                     placeholder={t('week.when.placeholder')}
                     value={task.when ?? ''}
-                    onSave={(v) => setWhen(task, v)}
+                    field={fields.taskWhen(task.id!)}
                   />
                 </div>
               ) : null}

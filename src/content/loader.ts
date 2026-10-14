@@ -7,25 +7,36 @@ import type { ContentLocale } from '../i18n'
  * Every file is lazy-loaded on demand (per-locale, per-module bundles).
  * A new content language is a new folder with the same file names (FR-03).
  */
-const files = import.meta.glob('/content/*/**/*.md', { query: '?raw', import: 'default' }) as Record<string, () => Promise<string>>
+const files = import.meta.glob('/content/*/**/*.md', { query: '?raw', import: 'default' }) as Record<
+  string,
+  () => Promise<string>
+>
 
 export interface ModuleMeta {
-  id: string            // "00", "01", ...
+  id: string // "00", "01", ...
   title: string
   subtitle?: string
-  letter?: string       // COPIL letter(s)
+  letter?: string // COPIL letter(s)
   order: number
   takeaway: string
   sources?: string[]
   source_version: number
   reconstructed?: boolean
-  tools?: string[]      // app pages the "Fă" section links to; see content/tools.ts
+  tools?: string[] // app pages the "Fă" section links to; see content/tools.ts
 }
 
-export interface ModuleDoc { meta: ModuleMeta; sections: Section[]; raw: string }
+export interface ModuleDoc {
+  meta: ModuleMeta
+  sections: Section[]
+  raw: string
+}
 
 /** A meeting plan: the text before the first heading, then its `##` sections (three configuration tables, questions, lessons). */
-export interface PlanDoc { meta: Record<string, unknown>; preamble: string; sections: Section[] }
+export interface PlanDoc {
+  meta: Record<string, unknown>
+  preamble: string
+  sections: Section[]
+}
 
 marked.setOptions({ gfm: true, breaks: false })
 
@@ -37,7 +48,9 @@ export function md(s: string): string {
 
 function pathsFor(locale: ContentLocale, kind: string): string[] {
   const prefix = `/content/${locale}/${kind}/`
-  return Object.keys(files).filter((p) => p.startsWith(prefix)).sort()
+  return Object.keys(files)
+    .filter((p) => p.startsWith(prefix))
+    .sort()
 }
 
 /** Module ids are two-digit strings ("01"); the front matter parser would read 01 as 1. */
@@ -65,7 +78,11 @@ export async function loadModule(locale: ContentLocale, id: string): Promise<Mod
 }
 
 /** Any other markdown document, e.g. friend/01.md, sheets/cover.md, pages/sources.md */
-export async function loadDoc(locale: ContentLocale, kind: string, name: string): Promise<{ meta: Record<string, unknown>; html: string } | null> {
+export async function loadDoc(
+  locale: ContentLocale,
+  kind: string,
+  name: string,
+): Promise<{ meta: Record<string, unknown>; html: string } | null> {
   const p = `/content/${locale}/${kind}/${name}.md`
   const loader = files[p]
   if (!loader) return null

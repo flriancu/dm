@@ -1,15 +1,14 @@
 import { Link } from 'react-router-dom'
 import { useT } from '../../i18n'
 import AutoText from '../../components/AutoText'
+import { fields } from '../../db/fields'
 import SectionHead from '../../components/SectionHead'
-import { saveDreamWork } from '../../db/dreams'
 import { sheetPath } from '../../lib/paths'
 import type { Dream, DreamWork } from '../../db/db'
 
 /** Module 4: the fear behind the dream and what "good enough" looks like (FR-35). */
 export default function Fear({ dream, work }: { dream: Dream; work?: DreamWork }) {
   const { t } = useT()
-  const setFear = (k: 'fear' | 'goodEnough', v: string) => saveDreamWork(dream.id!, { fear: { [k]: v } })
   return (
     <>
       <SectionHead id="fear" label={t('mydream.section.fear')} title={t('fear.title')} />
@@ -23,7 +22,7 @@ export default function Fear({ dream, work }: { dream: Dream; work?: DreamWork }
             id="fear-fear"
             placeholder={t('fear.fear.placeholder')}
             value={work?.fear?.fear ?? ''}
-            onSave={(v) => setFear('fear', v)}
+            field={fields.dreamWork(dream.id!, 'fear', 'fear')}
             multiline
           />
         </div>
@@ -35,7 +34,7 @@ export default function Fear({ dream, work }: { dream: Dream; work?: DreamWork }
             id="fear-good"
             placeholder={t('fear.goodEnough.placeholder')}
             value={work?.fear?.goodEnough ?? ''}
-            onSave={(v) => setFear('goodEnough', v)}
+            field={fields.dreamWork(dream.id!, 'fear', 'goodEnough')}
             multiline
           />
         </div>

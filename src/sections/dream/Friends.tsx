@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useT } from '../../i18n'
 import AutoText from '../../components/AutoText'
+import { fields } from '../../db/fields'
 import SectionHead from '../../components/SectionHead'
 import { setFriend } from '../../db/dreams'
 import { sheetPath } from '../../lib/paths'
@@ -23,7 +24,7 @@ export default function Friends({ dream, work }: { dream: Dream; work?: DreamWor
               id={`friend-name-${i}`}
               placeholder={t('friends.name.placeholder')}
               value={f.name ?? ''}
-              onSave={(v) => set(i, { name: v })}
+              field={fields.friend(dream.id!, i, 'name')}
             />
           </div>
           <div className="field">
@@ -49,7 +50,7 @@ export default function Friends({ dream, work }: { dream: Dream; work?: DreamWor
                 id={`friend-ask-${i}`}
                 placeholder={t('friends.ask.placeholder')}
                 value={f.ask ?? ''}
-                onSave={(v) => set(i, { ask: v })}
+                field={fields.friend(dream.id!, i, 'ask')}
                 multiline
               />
             </div>
@@ -61,7 +62,7 @@ export default function Friends({ dream, work }: { dream: Dream; work?: DreamWor
                 id={`friend-day-${i}`}
                 placeholder={t('friends.day.placeholder')}
                 value={f.day ?? ''}
-                onSave={(v) => set(i, { day: v })}
+                field={fields.friend(dream.id!, i, 'day')}
               />
             </div>
           )}

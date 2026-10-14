@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { LocaleProvider, UI_LOCALES, useT, type UiLocale } from '../i18n'
 import { exportAll, downloadJson } from '../db/exportImport'
 import { wipeAll, StorageUnavailableError, OutdatedAppError } from '../db/lifecycle'
@@ -31,9 +32,18 @@ export default function CrashScreen({ error }: { error: unknown }) {
 }
 
 function Crash({ kind }: { kind: 'app' | 'storage' | 'outdated' }) {
-  const storage = kind === 'storage'
+  // a copy and a wipe need the database: not offered without storage, nor to code older than the data
+  const canUseData = kind === 'app'
   const { t } = useT()
-  const save = async () => downloadJson(`cartea-visurilor-${today()}.json`, await exportAll())
+  const [saveFailed, setSaveFailed] = useState(false)
+  const save = async () => {
+    try {
+      downloadJson(`cartea-visurilor-${today()}.json`, await exportAll())
+      setSaveFailed(false)
+    } catch {
+      setSaveFailed(true)
+    }
+  }
   const wipe = async () => {
     if (confirm(t('settings.danger.confirm'))) await wipeAll(() => alert(t('settings.danger.blocked')))
   }
@@ -45,13 +55,14 @@ function Crash({ kind }: { kind: 'app' | 'storage' | 'outdated' }) {
         <button className="btn primary" onClick={() => location.reload()}>
           {t('crash.reload')}
         </button>
-        {!storage && (
+        {canUseData && (
           <button className="btn" onClick={save}>
             {t('settings.export')}
           </button>
         )}
       </p>
-      {!storage && (
+      {saveFailed && <p className="notice small">{t('crash.saveFailed')}</p>}
+      {canUseData && (
         <>
           <p className="small muted">{t('crash.wipe.help')}</p>
           <button className="btn ghost small" onClick={wipe}>

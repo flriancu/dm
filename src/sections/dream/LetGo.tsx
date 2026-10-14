@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom'
 import { useT } from '../../i18n'
 import AutoText from '../../components/AutoText'
+import { fields } from '../../db/fields'
 import SectionHead from '../../components/SectionHead'
-import { saveDreamWork, setLetgoSign, decideLetgo } from '../../db/dreams'
+import { setLetgoSign, decideLetgo } from '../../db/dreams'
 import { useAction } from '../../state/useAction'
 import { sheetPath } from '../../lib/paths'
 import { LETGO_SIGNS, type Dream, type DreamWork } from '../../db/db'
@@ -39,7 +40,7 @@ export default function LetGo({ dream, work }: { dream: Dream; work?: DreamWork 
               placeholder={t(`letgo.${k}.placeholder`)}
               style={{ minHeight: 64 }}
               value={work?.letgo?.[k] ?? ''}
-              onSave={(v) => saveDreamWork(dream.id!, { letgo: { [k]: v } })}
+              field={fields.dreamWork(dream.id!, 'letgo', k)}
               multiline
             />
           </div>

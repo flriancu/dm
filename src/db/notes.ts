@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { db, today, type ModuleNote, type Plan, type FriendNote } from './db'
-import { mutateSettings, readSettings } from './settings'
+import { db, today, type Config, type ModuleNote, type Plan, type FriendNote, type Role } from './db'
+import { mutateSettings, readSettings, writeSettings } from './settings'
 import { useLiveFor } from './live'
 import { leaderAfterMeeting, nextMeeting } from '../lib/course'
 import { showsFriendSwitch } from '../state/roles'
@@ -13,10 +13,11 @@ import { showsFriendSwitch } from '../state/roles'
 // ---- module notes (one row per module: takeaways, one word, meeting held)
 export const useModuleNotes = () => useLiveQuery(() => db.moduleNotes.toArray(), [])
 /** One module's note: undefined while loading, null when none was written yet. */
-export const useModuleNote = (moduleId: string) =>
-  useLiveFor(moduleId, async (k) => (await db.moduleNotes.get(k)) ?? null)
+export const useModuleNote = (moduleId: string) => useLiveFor(moduleId, getModuleNote)
 export const completedModuleIds = (notes: ModuleNote[]) =>
   new Set(notes.filter((n) => n.completedOn).map((n) => n.moduleId))
+
+export const getModuleNote = async (moduleId: string) => (await db.moduleNotes.get(moduleId)) ?? null
 
 export async function patchModuleNote(moduleId: string, patch: Partial<ModuleNote>) {
   return db.transaction('rw', db.moduleNotes, async () => {
@@ -46,7 +47,23 @@ export const unmarkMeetingHeld = async (moduleId: string) =>
     const cur = await db.moduleNotes.get(moduleId)
     if (!cur?.completedOn) return
     await db.moduleNotes.put({ ...cur, completedOn: undefined, passedLead: false })
-    if (cur.passedLead) await mutateSettings((s) => ({ friendToday: leaderAfterMeeting(s.friendToday) }))
+    // the lead comes back only to the pair it was passed in (a change of role or configuration clears the flags)
+    if (cur.passedLead && showsFriendSwitch(await readSettings()))
+      await mutateSettings((s) => ({ friendToday: leaderAfterMeeting(s.friendToday) }))
+  })
+
+/**
+ * A new role or configuration: the turn to lead and the record of which meetings passed it
+ * belong to the old arrangement, so both are cleared in the same transaction.
+ */
+export const changeRoleConfig = async (role: Role, config: Config) =>
+  db.transaction('rw', db.settings, db.moduleNotes, async () => {
+    const cur = await readSettings()
+    if (cur.role === role && cur.config === config) return
+    await writeSettings({ role, config, friendToday: false })
+    await db.moduleNotes.toCollection().modify((n) => {
+      n.passedLead = false
+    })
   })
 
 // ---- if-then plans

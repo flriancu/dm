@@ -100,7 +100,9 @@ async function checkIcs(page, button, uid, date) {
   check(folded, `${uid}.ics: folded at 75 octets`)
   check(text.endsWith('\r\n') && !/[^\r]\n/.test(text), `${uid}.ics: CRLF line ends, CRLF at the end`)
   check(Buffer.from(text, 'utf8').equals(raw), `${uid}.ics: valid UTF-8 (no character split by a fold)`)
-  check(unfolded.includes(`UID:${uid}@cartea-visurilor`) && seq, `${uid}.ics: stable UID and a SEQUENCE`)
+  // the purpose plus this device's own id: stable for this person, never mixed with another's
+  const uidOk = new RegExp(`UID:${uid}-[A-Za-z0-9_-]{8,}@cartea-visurilor`).test(unfolded)
+  check(uidOk && seq, `${uid}.ics: stable UID and a SEQUENCE`)
   check(unfolded.includes(`DTSTART;VALUE=DATE:${date.replace(/-/g, '')}`), `${uid}.ics: DTSTART is ${date}`)
 }
 

@@ -9,7 +9,8 @@ export const addWeekTask = async (text: string) => db.weekTasks.add({ text, crea
 /** Only a task in "plan" can be the one moved to the calendar: moving it out of "plan" unmarks it. */
 export const putInQuadrant = async (task: WeekTask, quadrant: Quadrant) =>
   db.weekTasks.update(task.id!, quadrant === 'plan' ? { quadrant } : { quadrant, moved: 0 })
-export const setWhen = async (task: WeekTask, when: string) => db.weekTasks.update(task.id!, { when })
+export const getWeekTask = async (id: number) => (await db.weekTasks.get(id)) ?? null
+export const setWhen = async (taskId: number, when: string) => db.weekTasks.update(taskId, { when })
 export const deleteWeekTask = async (task: WeekTask) => db.weekTasks.delete(task.id!)
 
 /** The one task moved to "plan" this week: unmarks the previous one in the same transaction (unless this task is gone). */

@@ -69,8 +69,3 @@ export function calendarIcs(events: readonly CalendarEvent[]): string {
 export function dateIcs(date: string, uid: string, title: string, body: string): string {
   return calendarIcs([{ date, uid, title, body }])
 }
-
-export const letterIcs = (date: string, title: string, body: string) => dateIcs(date, 'letter', title, body)
-
-/** Offers a text file for download; the caller passes the name and content. */
-export { downloadText } from './files'

@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
 import { useT } from '../../i18n'
 import AutoText from '../../components/AutoText'
+import { fields } from '../../db/fields'
 import SectionHead from '../../components/SectionHead'
-import { saveVision } from '../../db/vision'
 import { VISION_SECTIONS, type VisionDoc } from '../../db/db'
 
 /** Modules 6–7: the nine-part vision worksheet and the check on the vision statement (FR-42). */
@@ -28,7 +28,7 @@ export default function Worksheet({ v }: { v: VisionDoc }) {
               id={`vs-${s}`}
               placeholder={t(`sheet.${s}.placeholder`)}
               value={v.worksheet[s] ?? ''}
-              onSave={(text) => saveVision({ worksheet: { [s]: text } })}
+              field={fields.vision('worksheet', s)}
               multiline
             />
           </div>

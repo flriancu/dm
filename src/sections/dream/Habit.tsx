@@ -1,16 +1,16 @@
 import { Link } from 'react-router-dom'
 import { useT } from '../../i18n'
 import AutoText from '../../components/AutoText'
+import { fields } from '../../db/fields'
 import SectionHead from '../../components/SectionHead'
-import { saveDreamWork, setHabitWeek } from '../../db/dreams'
+import { setHabitWeek } from '../../db/dreams'
 import { useToday } from '../../state/useToday'
 import { sheetPath } from '../../lib/paths'
-import { HABIT_PARTS, weekStart, type HabitPart, type Dream, type DreamWork } from '../../db/db'
+import { HABIT_PARTS, weekStart, type Dream, type DreamWork } from '../../db/db'
 
 /** Module 4 (P): the habit recipe (anchor, behaviour, celebration) and its weekly log (FR-22, FR-45). */
 export default function Habit({ dream, work }: { dream: Dream; work?: DreamWork }) {
   const { t, fmtDate } = useT()
-  const setHabit = (part: HabitPart, v: string) => saveDreamWork(dream.id!, { habit: { [part]: v } })
 
   // weekly log: this week plus the weeks already logged, newest first; "this week" moves on at midnight
   const thisWeek = weekStart(useToday())
@@ -39,7 +39,7 @@ export default function Habit({ dream, work }: { dream: Dream; work?: DreamWork 
               id={`habit-${p}`}
               placeholder={t(`habit.${p}.placeholder`)}
               value={work?.habit?.[p] ?? ''}
-              onSave={(v) => setHabit(p, v)}
+              field={fields.dreamWork(dream.id!, 'habit', p)}
             />
           </div>
         ))}
@@ -73,7 +73,7 @@ export default function Habit({ dream, work }: { dream: Dream; work?: DreamWork 
                 aria-label={t('habit.note.label', { date: fmtDate(w) })}
                 placeholder={t('habit.note.placeholder')}
                 value={row?.note ?? ''}
-                onSave={(v) => setHabitWeek(dream.id!, w, { note: v })}
+                field={fields.habitNote(dream.id!, w)}
               />
             </div>
           )

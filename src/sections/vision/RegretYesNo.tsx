@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
 import { useT } from '../../i18n'
 import AutoText from '../../components/AutoText'
+import { fields } from '../../db/fields'
 import SectionHead from '../../components/SectionHead'
-import { saveVision } from '../../db/vision'
 import { REGRET_AREAS, type RegretArea, type VisionDoc } from '../../db/db'
 
 /** Module 7: the regret exercise over four areas and the Yes/No list (FR-44). */
@@ -23,7 +23,7 @@ export default function RegretYesNo({ v }: { v: VisionDoc }) {
               placeholder={t(`regret.${a}.placeholder`)}
               style={{ minHeight: 72 }}
               value={v.regret?.[a] ?? ''}
-              onSave={(text) => saveVision({ regret: { [a]: text } })}
+              field={fields.vision('regret', a)}
               multiline
             />
           </div>
@@ -42,7 +42,7 @@ export default function RegretYesNo({ v }: { v: VisionDoc }) {
               placeholder={t(`yesno.${k}.placeholder`)}
               style={{ minHeight: 72 }}
               value={v.yesno?.[k] ?? ''}
-              onSave={(text) => saveVision({ yesno: { [k]: text } })}
+              field={fields.vision('yesno', k)}
               multiline
             />
           </div>

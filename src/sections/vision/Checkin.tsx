@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useT } from '../../i18n'
 import SectionHead from '../../components/SectionHead'
-import { dateIcs, downloadText as download } from '../../lib/ics'
+import { dateIcs } from '../../lib/ics'
+import { downloadText as download } from '../../lib/files'
 import { setCheckinRhythm, logCheckin } from '../../db/vision'
+import { calendarUid } from '../../db/settings'
 import { useAction } from '../../state/useAction'
 import { useToday } from '../../state/useToday'
 import { CHECKIN_STEPS, TEXT_LONG, type VisionDoc } from '../../db/db'
@@ -22,6 +24,12 @@ export default function Checkin({ v }: { v: VisionDoc }) {
     setCheckNote((cur) => (cur === note ? '' : cur))
   })
   const due = !!C.next && C.next <= now
+  const [checkinFile, makingFile] = useAction(async () =>
+    download(
+      'verificarea-viziunii.ics',
+      dateIcs(C.next!, await calendarUid('checkin'), t('checkin.ics.title'), t('checkin.ics.body')),
+    ),
+  )
   return (
     <>
       <SectionHead id="checkin" label={t('vision.section.checkin')} title={t('checkin.title')} />
@@ -49,15 +57,7 @@ export default function Checkin({ v }: { v: VisionDoc }) {
             </p>
             {C.next >= now && (
               <>
-                <button
-                  className="btn"
-                  onClick={() =>
-                    download(
-                      'verificarea-viziunii.ics',
-                      dateIcs(C.next!, 'checkin', t('checkin.ics.title'), t('checkin.ics.body')),
-                    )
-                  }
-                >
+                <button className="btn" onClick={() => checkinFile()} disabled={makingFile}>
                   {t('letter.ics')}
                 </button>
                 <p className="small muted" style={{ margin: 0 }}>

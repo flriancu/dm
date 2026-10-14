@@ -17,7 +17,8 @@ import { letterState } from './course'
 /**
  * "My book": everything the learner wrote, as one Markdown document a person can read
  * without the app (opens in any notes app or text editor). The labels are the app's own,
- * in the interface language. A sealed letter stays sealed: only its date is written.
+ * in the interface language. A sealed letter stays sealed: only its date is written. The
+ * Dream Friend's notes are not part of it (FR-61).
  */
 export interface BookInput {
   data: Partial<BackupTables>
@@ -27,21 +28,68 @@ export interface BookInput {
   today: string
 }
 
-/** A user line that would start a heading, list, quote or rule in Markdown gets a backslash. */
-export function escapeLine(line: string): string {
-  return /^\s*(#|>|[-*+]\s|\d+[.)]\s|[-*_]{3,}\s*$|```)/.test(line) ? line.replace(/^(\s*)/, '$1\\') : line
+/** Characters that can start Markdown inside a line: code, emphasis, links, HTML, entities, tables, strike-through. */
+const INLINE_MARKUP = /[\\`*_[\]<>&|~]/g
+/**
+ * Web addresses. A viewer that links a bare address (GFM) takes it up to the next space or
+ * `<`, backslashes included: escaping inside it would show in the link and break it, and an
+ * escaped `\<` right after it would turn back into HTML. So an address with a scheme is
+ * written as an autolink, `<https://…>`, which every viewer shows exactly as typed, links,
+ * and reads no markup in; punctuation that ends a sentence stays outside it. A bare `www.`
+ * gets its dot escaped instead: no viewer starts a link there, and it reads the same.
+ */
+const WEB_ADDRESS = /(?:https?|ftp):\/\/[^\s<>]*/gi
+const BARE_WWW = /www\./gi
+const SENTENCE_END = /[.,:;!?'"*_~]+$/
+
+/** The address as an autolink, and what follows it in the sentence. */
+function autolink(address: string): [string, string] {
+  let end = address.length - (address.match(SENTENCE_END)?.[0].length ?? 0)
+  // a closing parenthesis belongs to the address only when it opened one: "(see https://x.ro/a)"
+  while (address[end - 1] === ')' && address.slice(0, end).split(')').length > address.slice(0, end).split('(').length)
+    end--
+  return [`<${address.slice(0, end)}>`, address.slice(end)]
 }
 
-/** User text with its line breaks kept (Markdown hard breaks), each line escaped. */
+const escapeText = (s: string) => s.replace(INLINE_MARKUP, '\\$&').replace(BARE_WWW, (w) => `${w.slice(0, 3)}\\.`)
+
+function escapeInline(s: string): string {
+  let out = ''
+  let at = 0
+  for (const m of s.matchAll(WEB_ADDRESS)) {
+    const [link, after] = autolink(m[0])
+    out += escapeText(s.slice(at, m.index)) + link + escapeText(after)
+    at = m.index + m[0].length
+  }
+  return out + escapeText(s.slice(at))
+}
+
+/**
+ * One line of user text made inert: it reads back exactly as written in any Markdown viewer
+ * (it never becomes a heading, list, quote, rule, setext underline, table, code, link, HTML,
+ * an entity or emphasis) and stays readable as plain text. CommonMark lets any ASCII
+ * punctuation be escaped with a backslash, so every character that can start markup inline is
+ * escaped, and so is a block marker at the start (`1.` becomes `1\.`, not `\1.`). Leading
+ * indentation is dropped: four spaces would start a code block.
+ */
+export function escapeLine(line: string): string {
+  return escapeInline(line.trim())
+    .replace(/^(\d+)([.)])/, '$1\\$2')
+    .replace(/^[#=+-]/, '\\$&')
+}
+
+/**
+ * User text as Markdown: each line escaped, line breaks kept as hard breaks (continued at
+ * `indent` inside a list item). Blank lines inside a field are left out: one would end the
+ * list item or paragraph the text belongs to.
+ */
 export function text(s: string | undefined, indent = ''): string {
   if (!s) return ''
-  return s
-    .trim()
-    .replace(/\r\n?/g, '\n')
-    .split('\n')
-    .map((l) => escapeLine(l.trimEnd()))
-    .join(`  \n${indent}`)
+  return s.replace(/\r\n?/g, '\n').split('\n').map(escapeLine).filter(Boolean).join(`  \n${indent}`)
 }
+
+/** User text on one line (a heading): line breaks become spaces. */
+const inline = (s: string) => text(s.replace(/\s*[\r\n]+\s*/g, ' '))
 
 const has = (s: string | undefined) => !!s && s.trim() !== ''
 
@@ -80,12 +128,20 @@ export function bookMarkdown({ data, settings, t, fmtDate, today }: BookInput): 
     out.push('', `**${t('dreams.criteria')}:** ${settings.criteria.map((c) => text(c)).join('; ')}`)
   }
 
-  // ---- the chosen dream and its worksheets (modules 2–4, letting go)
-  const chosen = dreams.find((d) => d.chosen)
-  const work = chosen ? (data.dreamWork ?? []).find((w) => w.dreamId === chosen.id) : undefined
-  if (chosen) {
-    h(2, t('home.chosen'))
-    para(chosen.text)
+  // ---- the worksheets (modules 2–4, letting go): the chosen dream first, then every dream
+  // worked on before (released or achieved), so nothing written disappears from the book
+  const works = new Map((data.dreamWork ?? []).map((w) => [w.dreamId, w]))
+  const worked = dreams
+    .filter((d) => d.chosen || works.has(d.id!))
+    .sort((a, b) => (b.chosen ?? 0) - (a.chosen ?? 0) || (a.id ?? 0) - (b.id ?? 0))
+  for (const d of worked) {
+    const work = works.get(d.id!)
+    const before = out.length
+    if (d.chosen) {
+      h(2, t('home.chosen'))
+      para(d.text)
+    } else h(2, t('book.md.worksheetsOf', { dream: inline(d.text) }))
+    const headed = out.length
     if (work) {
       if (CLARIFY_STEPS.some((s) => has(work.clarify?.[s])) || work.routes?.some(has)) {
         h(3, t('mydream.section.clarify'))
@@ -130,6 +186,7 @@ export function bookMarkdown({ data, settings, t, fmtDate, today }: BookInput): 
         if (lg.decision) out.push(`- **${t(`letgo.${lg.decision}`)}**${lg.decided ? `, ${fmtDate(lg.decided)}` : ''}`)
       }
     }
+    if (!d.chosen && out.length === headed) out.length = before // an earlier dream with nothing written: no heading
   }
 
   // ---- the week (module 3)
@@ -207,12 +264,14 @@ export function bookMarkdown({ data, settings, t, fmtDate, today }: BookInput): 
     const regret = REGRET_AREAS.filter((a) => has(v.regret?.[a]))
     const yesno = (['yes', 'no', 'changes', 'hardest'] as const).filter((k) => has(v.yesno?.[k]))
     const retro = (['tool', 'habit', 'aha', 'word'] as const).filter((k) => has(v.retro?.[k]))
+    // the letters read (a letter becomes a past one only once read; anything else, from a backup, stays out)
+    const past = (v.pastLetters ?? []).filter((p) => letterState(p, today) === 'read' && (has(p.text) || has(p.reply)))
     const anything =
       values.length ||
       v.valueActs.length ||
       has(L?.text) ||
       L?.sealed ||
-      v.pastLetters?.length ||
+      past.length ||
       sheet.length ||
       regret.length ||
       yesno.length ||
@@ -229,9 +288,13 @@ export function bookMarkdown({ data, settings, t, fmtDate, today }: BookInput): 
       for (const a of v.valueActs)
         out.push(`- ${fmtDate(a.date)}${has(a.value) ? `, ${text(a.value)}` : ''}: ${text(a.text, '  ')}`)
     }
-    if (state === 'sealed' || state === 'arrived') {
+    // a letter is written out only once read; before that only its date (sealed) or that it has come (arrived)
+    if (state === 'sealed') {
       h(3, t('letter.title'))
       out.push(t('book.md.sealed', { date: fmtDate(L!.deliverDate ?? today) }))
+    } else if (state === 'arrived') {
+      h(3, t('letter.title'))
+      out.push(t('book.md.arrived', { date: fmtDate(L!.deliverDate ?? today) }))
     } else if (has(L?.text) || has(L?.reply)) {
       h(3, t('letter.title'))
       para(L?.text)
@@ -240,10 +303,16 @@ export function bookMarkdown({ data, settings, t, fmtDate, today }: BookInput): 
         para(L?.reply)
       }
     }
-    for (const p of v.pastLetters ?? []) {
-      h(4, `${t('letter.title')}${p.deliverDate ? `, ${fmtDate(p.deliverDate)}` : ''}`)
-      para(p.text)
-      if (has(p.reply)) para(p.reply)
+    if (past.length) {
+      h(3, t('letter.past', { n: past.length }))
+      for (const p of past) {
+        h(4, p.deliverDate ? fmtDate(p.deliverDate) : t('letter.title'))
+        para(p.text)
+        if (has(p.reply)) {
+          out.push(`**${t('letter.reply')}**`, '')
+          para(p.reply)
+        }
+      }
     }
     if (sheet.length) {
       h(3, t('sheet.title'))
@@ -267,7 +336,7 @@ export function bookMarkdown({ data, settings, t, fmtDate, today }: BookInput): 
     }
   }
 
-  // ---- notes per module, and the Dream Friend's notes
+  // ---- notes per module (the Dream Friend's notes are a separate store and never part of the book, FR-61)
   const notes = [...(data.moduleNotes ?? [])]
     .filter((n) => has(n.takeaways) || has(n.oneWord))
     .sort((a, b) => a.moduleId.localeCompare(b.moduleId))
@@ -279,15 +348,6 @@ export function bookMarkdown({ data, settings, t, fmtDate, today }: BookInput): 
       field(t('module.feedback'), n.oneWord)
     }
   }
-  const fnotes = [...(data.friendNotes ?? [])].sort((a, b) =>
-    (a.moduleId + a.created).localeCompare(b.moduleId + b.created),
-  )
-  if (fnotes.length) {
-    h(2, t('friend.notes'))
-    for (const n of fnotes)
-      out.push(`- ${t('home.module')} ${Number(n.moduleId)}, ${fmtDate(n.created)}: ${text(n.text, '  ')}`)
-  }
-
   return (
     out
       .join('\n')

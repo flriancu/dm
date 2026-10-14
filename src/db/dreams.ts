@@ -21,9 +21,13 @@ import { mutateSettings } from './settings'
 // ---- reads
 export const useDreams = () => useLiveQuery(() => db.dreams.toArray(), [])
 
+/** One-off reads, for code outside React (the unsaved-text replay). */
+export const getChosenDream = async () => (await db.dreams.where('chosen').equals(1).first()) ?? null
+export const getDreamWork = async (dreamId: number) => (await db.dreamWork.get(dreamId)) ?? null
+export const getDream = async (id: number) => (await db.dreams.get(id)) ?? null
+
 /** The dream the learner works on (chosen on the Dreams page): undefined while loading, null when there is none. */
-export const useChosenDream = () =>
-  useLiveQuery(async () => (await db.dreams.where('chosen').equals(1).first()) ?? null, [])
+export const useChosenDream = () => useLiveQuery(getChosenDream, [])
 
 /** One dream by id: undefined while loading, null when there is no such dream. */
 export const useDream = (id?: number | null) =>

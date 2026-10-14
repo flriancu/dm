@@ -392,20 +392,24 @@ async function humanDouble(page, loc) {
   check((await banner(page)) === 1, 'a full disk on the habit checkbox shows the banner')
   await quota(page, false)
   await page.goto(base + '#/module/01')
+  await page.locator('#mine').waitFor()
+  // a slow phone: at 6x CPU the save cannot finish before the page goes; the journal carries it to the next start
+  const cdp = await ctx.newCDPSession(page)
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 6 })
   await page.locator('#mine').click()
   await page.keyboard.type('chiar inainte de reincarcare')
-  // the page asks the browser to wait ("leave the page?"); a person needs far more than 100 ms to answer
   let asked = false
   page.once('dialog', (d) => {
-    asked = d.type() === 'beforeunload'
-    setTimeout(() => d.accept(), 100)
+    asked = true
+    d.accept()
   })
   await page.reload()
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 })
   await page.locator('#mine').waitFor()
   const kept = await notes01(page)
   check(
-    asked && kept === 'chiar inainte de reincarcare',
-    `text typed < 500 ms before a reload is kept (asked: ${asked})`,
+    !asked && kept === 'chiar inainte de reincarcare',
+    `text typed < 500 ms before a reload, at 6x CPU, is kept without asking (asked: ${asked}, kept: ${json(kept)})`,
   )
   await ctx.close()
   const c3 = await browser.newContext()

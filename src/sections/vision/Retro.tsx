@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
 import { useT } from '../../i18n'
 import AutoText from '../../components/AutoText'
+import { fields } from '../../db/fields'
 import SectionHead from '../../components/SectionHead'
-import { saveVision } from '../../db/vision'
 import { useModuleNotes } from '../../db/notes'
 import { TEXT_WORD, type VisionDoc } from '../../db/db'
 
@@ -45,7 +45,7 @@ export default function Retro({ v }: { v: VisionDoc }) {
                 maxLength={TEXT_WORD}
                 placeholder={t(`retro.${k}.placeholder`)}
                 value={v.retro?.[k] ?? ''}
-                onSave={(text) => saveVision({ retro: { [k]: text } })}
+                field={fields.vision('retro', k)}
               />
             ) : (
               <AutoText
@@ -53,7 +53,7 @@ export default function Retro({ v }: { v: VisionDoc }) {
                 placeholder={t(`retro.${k}.placeholder`)}
                 style={{ minHeight: 72 }}
                 value={v.retro?.[k] ?? ''}
-                onSave={(text) => saveVision({ retro: { [k]: text } })}
+                field={fields.vision('retro', k)}
                 multiline
               />
             )}

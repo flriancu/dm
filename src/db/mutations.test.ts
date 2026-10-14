@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { db, today, MAX_CRITERIA } from './db'
-import { readSettings, writeSettings } from './settings'
+import { db, today, MAX_CRITERIA, TEXT_LONG } from './db'
+import { calendarUid, readSettings, writeSettings } from './settings'
 import {
   addDream,
   chooseDream,
@@ -14,8 +14,8 @@ import {
   addCriterion,
   removeCriterion,
 } from './dreams'
-import { setValueItem, addValueAct, logCheckin, openLetter, startNewLetter, saveVision } from './vision'
-import { markMeetingHeld, unmarkMeetingHeld } from './notes'
+import { setValueItem, addValueAct, logCheckin, openLetter, startNewLetter, saveVision, getVision } from './vision'
+import { changeRoleConfig, markMeetingHeld, unmarkMeetingHeld } from './notes'
 import { moveToCalendar, putInQuadrant, addWeekTask } from './week'
 import { saveWheel } from './calm'
 
@@ -159,7 +159,7 @@ describe('meetings and the pair lead', () => {
     expect((await readSettings()).friendToday).toBe(true)
     await writeSettings({ role: 'dreamer', config: 'solo' })
     await markMeetingHeld('01', MEETINGS)
-    expect((await readSettings()).friendToday).toBe(true)
+    expect((await readSettings()).friendToday).toBe(false) // outside a peer pair there is no turn to lead
   })
   it('two tabs marking two meetings at once pass the lead once, for the one that was next', async () => {
     await pair()
@@ -192,5 +192,45 @@ describe('the week', () => {
     const moved = (await db.weekTasks.where('moved').equals(1).first())!
     await putInQuadrant(moved, 'drop')
     expect(await db.weekTasks.where('moved').equals(1).count()).toBe(0)
+  })
+})
+
+describe('the pair lead and a change of arrangement', () => {
+  it('a change of role or configuration clears the lead and the record of who passed it', async () => {
+    await writeSettings({ role: 'both', config: 'pair', friendToday: false })
+    await markMeetingHeld('01', ['01', '02'])
+    expect((await readSettings()).friendToday).toBe(true)
+    await changeRoleConfig('both', 'group')
+    expect((await readSettings()).friendToday).toBe(false)
+    await unmarkMeetingHeld('01') // the lead was passed in the old pair: nothing comes back
+    expect((await readSettings()).friendToday).toBe(false)
+    await changeRoleConfig('both', 'pair')
+    expect((await readSettings()).friendToday).toBe(false)
+  })
+  it('the lead only counts in a peer pair, whatever is stored', async () => {
+    await writeSettings({ role: 'dreamer', config: 'solo', friendToday: true })
+    expect((await readSettings()).friendToday).toBe(false)
+  })
+})
+
+describe('calendar ids', () => {
+  it('are the same on every export from this device, and different on another', async () => {
+    const a = await calendarUid('meeting-03')
+    expect(await calendarUid('meeting-03')).toBe(a)
+    expect(a).toMatch(/^meeting-03-[0-9a-f]{24}$/)
+    await writeSettings({ calendarId: undefined })
+    expect(await calendarUid('meeting-03')).not.toBe(a)
+  })
+})
+
+describe('check-in notes', () => {
+  it('a note merged on the same day never ends in half a character', async () => {
+    await saveVision({ checkin: { everyMonths: 3, next: today() } })
+    await logCheckin('a'.repeat(TEXT_LONG - 1))
+    await logCheckin(String.fromCodePoint(0x1f600))
+    const note = (await getVision())!.checkin!.log!.at(-1)!.note
+    const last = note.charCodeAt(note.length - 1)
+    expect(note.length).toBeLessThanOrEqual(TEXT_LONG)
+    expect(last >= 0xd800 && last <= 0xdbff).toBe(false) // no lone high surrogate at the cut
   })
 })

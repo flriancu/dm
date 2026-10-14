@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { TEXT_LONG, TEXT_SHORT } from '../db/db'
+import type { TextField } from '../db/fields'
+import { dropUnsaved, keepUnsaved } from '../db/journal'
 import { reportSaveError } from '../state/saveErrors'
-import { setPending } from '../state/pendingSaves'
 
 interface Props {
   id?: string
   value: string
-  onSave: (v: string) => unknown
+  /** where the text is saved (src/db/fields.ts) */
+  field: TextField
   placeholder?: string
   multiline?: boolean
   maxLength?: number
@@ -19,16 +21,18 @@ interface Props {
 /**
  * A text box that saves by itself: a short pause after typing, at least every `maxWait` ms
  * while typing goes on, on blur, when it unmounts (a tap on a nav link does not always blur
- * first), and when the page is hidden or closed. The save goes to the `onSave` of the moment
- * the edit started, so a change of dream or row under the box never redirects the text. Keeps
- * the typed text while a save is pending, so a late live-query update never wipes it; a save
- * the browser refuses keeps the text, marks the box and is retried on the next blur. While
- * text is not stored yet, leaving the page asks the browser to wait for it (pendingSaves).
+ * first), and when the page is hidden. The save goes to the field of the moment the edit
+ * started, so a change of dream or row under the box never redirects the text.
+ *
+ * Until it is stored, the text is also kept in the unsaved-text journal (synchronous, so a
+ * reload, a closed tab or a killed tab cannot lose it); the next start writes it, unless the
+ * field changed meanwhile. A late live-query update never wipes the text being typed; a save
+ * the browser refuses keeps the text, marks the box and is tried again on the next blur.
  */
 export default function AutoText({
   id,
   value,
-  onSave,
+  field,
   placeholder,
   multiline,
   maxLength = multiline ? TEXT_LONG : TEXT_SHORT,
@@ -41,65 +45,86 @@ export default function AutoText({
   const [failed, setFailed] = useState(false)
   const dirty = useRef(false)
   const since = useRef(0)
-  const target = useRef<Props['onSave'] | null>(null)
+  /** the edit under way: its field, the stored value it builds on, and the text in flight to the database */
+  const edit = useRef<{ field: TextField; base: string; sent?: string } | null>(null)
   const timer = useRef<number | undefined>(undefined)
   const typed = useRef(text)
-  const box = useRef(Symbol('AutoText'))
+  const known = useRef(value) // what the field holds in the database, as far as this box knows
   useEffect(() => {
     typed.current = text
   })
 
   // adopt outside changes only while the box is not being edited
   useEffect(() => {
+    known.current = value
     if (!dirty.current) setText(value)
   }, [value])
 
+  /** The journal entry of the edit under way, kept in step with what is typed, stored and in flight. */
+  const journal = (e: { field: TextField; base: string; sent?: string }) =>
+    keepUnsaved(e.field.key, { text: typed.current, base: e.base, sent: e.sent })
+
   const flush = useCallback(() => {
     window.clearTimeout(timer.current)
-    if (!dirty.current || !target.current) return
-    const save = target.current
+    const e = edit.current
+    if (!dirty.current || !e) return
     const v = typed.current
     dirty.current = false
-    target.current = null
-    const fail = (e: unknown) => {
-      if (!dirty.current) {
-        dirty.current = true // retried on the next blur, or with the next keystroke
-        target.current = save
-      }
-      setFailed(true)
-      reportSaveError(e)
-    }
+    e.sent = v
+    journal(e)
     const stored = () => {
+      known.current = v
+      const cur = edit.current
+      if (cur?.field.key !== e.field.key) {
+        dropUnsaved(e.field.key, v) // the box moved on (unmounted, another field): only this text was pending
+      } else {
+        cur.base = v // the field now holds v: whatever is typed next builds on it
+        if (cur.sent === v) cur.sent = undefined
+        if (dirty.current || cur.sent !== undefined) journal(cur)
+        else {
+          edit.current = null
+          dropUnsaved(e.field.key, v)
+        }
+      }
       setFailed(false)
-      if (!dirty.current) setPending(box.current, null)
+    }
+    const fail = (err: unknown) => {
+      // the journal still holds the text; the next blur or keystroke tries again
+      if (edit.current === e) dirty.current = true
+      setFailed(true)
+      reportSaveError(err)
     }
     try {
-      Promise.resolve(save(v)).then(stored, fail)
-    } catch (e) {
-      fail(e)
+      e.field.write(v).then(stored, fail)
+    } catch (err) {
+      fail(err)
     }
   }, [])
 
   useEffect(() => {
     const onHidden = () => document.visibilityState === 'hidden' && flush()
-    window.addEventListener('pagehide', flush)
     document.addEventListener('visibilitychange', onHidden)
     return () => {
-      window.removeEventListener('pagehide', flush)
       document.removeEventListener('visibilitychange', onHidden)
       flush()
+      edit.current = null // unmounted: whatever is not stored yet stays in the journal for the next start
     }
   }, [flush])
 
   const change = (v: string) => {
+    // the box now shows another field (a reused component): what was typed for the old one goes there first
+    if (edit.current && edit.current.field.key !== field.key) {
+      flush()
+      edit.current = null
+    }
     setText(v)
     typed.current = v
+    if (!edit.current) edit.current = { field, base: known.current }
     if (!dirty.current) {
       dirty.current = true
       since.current = Date.now()
-      target.current = onSave
-      setPending(box.current, flush)
     }
+    journal(edit.current)
     window.clearTimeout(timer.current)
     const wait = Math.min(delay, Math.max(0, maxWait - (Date.now() - since.current)))
     timer.current = window.setTimeout(flush, wait)

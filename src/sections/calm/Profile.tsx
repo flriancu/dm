@@ -3,9 +3,10 @@ import { Link } from 'react-router-dom'
 import { useT } from '../../i18n'
 import { SABOTEUR_LINKS, SAGE_POWERS_URL, SABOTEURS_OVERVIEW_URL } from '../../content/links'
 import AutoText from '../../components/AutoText'
+import { fields } from '../../db/fields'
 import SectionHead from '../../components/SectionHead'
 import { useSettings } from '../../state/settings'
-import { useStrengthUses, addStrengthUse, toggleSaboteur, setStrength } from '../../db/calm'
+import { useStrengthUses, addStrengthUse, toggleSaboteur } from '../../db/calm'
 import { submitDraft } from '../../state/useAction'
 import { MAX_SABOTEURS, PICKABLE_SABOTEURS, STRENGTH_SLOTS, TEXT_SHORT, type Saboteur } from '../../db/db'
 
@@ -92,7 +93,7 @@ export default function Profile() {
               id={`str-${i}`}
               placeholder={t(`profile.strength.placeholder.${i + 1}`)}
               value={s}
-              onSave={(v) => setStrength(i, v)}
+              field={fields.strength(i)}
             />
           </div>
         ))}

@@ -8,10 +8,11 @@ import { loadModule, md } from '../content/loader'
 import { useContent, useModules } from '../content/useContent'
 import { toolsFor } from '../content/tools'
 import { orderedConfigs } from '../content/plans'
-import { useModuleNote, patchModuleNote, markMeetingHeld, unmarkMeetingHeld, usePlansOf, addPlan } from '../db/notes'
+import { useModuleNote, markMeetingHeld, unmarkMeetingHeld, usePlansOf, addPlan } from '../db/notes'
 import { meetingIdsOf } from '../lib/course'
 import { TEXT_SHORT, TEXT_WORD } from '../db/db'
 import AutoText from '../components/AutoText'
+import { fields } from '../db/fields'
 import type { Section } from '../content/frontmatter'
 
 export default function ModulePage() {
@@ -41,8 +42,6 @@ export default function ModulePage() {
   const dreamer = showsDreamerParts(settings)
   const isZero = doc.meta.order === 0
   const lead = leadsMeetings(settings) // 'me' | 'other' | null: who leads the next meeting on this device
-
-  const saveNote = (patch: Record<string, string>) => patchModuleNote(id, patch)
 
   return (
     <article className="content" lang={contentLocale}>
@@ -146,7 +145,7 @@ export default function ModulePage() {
               multiline
               placeholder={t('module.takeaways.placeholder')}
               value={note?.takeaways ?? ''}
-              onSave={(v) => saveNote({ takeaways: v })}
+              field={fields.moduleNote(id, 'takeaways')}
             />
           </div>
         )}
@@ -158,7 +157,7 @@ export default function ModulePage() {
               maxLength={TEXT_WORD}
               placeholder={t('module.feedback.placeholder')}
               value={note?.oneWord ?? ''}
-              onSave={(v) => saveNote({ oneWord: v })}
+              field={fields.moduleNote(id, 'oneWord')}
             />
           </div>
         )}

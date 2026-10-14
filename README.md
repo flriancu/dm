@@ -45,11 +45,12 @@ src/db/schema.ts                    what a valid row of each table looks like; e
 src/db/{dreams,week,calm,vision,notes,settings}.ts  one data module per table group: read hooks + named mutations; pages never touch Dexie
 src/db/docs.ts                      transactional merge-save used by the document modules (lists are edited inside the transaction)
 src/db/exportImport.ts              backup: export, check (planImport), confirm, apply
-src/db/lifecycle.ts                 wipe/import/upgrade in another tab: stop writing, reload
+src/db/lifecycle.ts                 storage at start (none, or newer data), wipe/import/upgrade in another tab: stop writing, reload
+src/db/fields.ts                    every free-text field by address; replays the unsaved-text journal (src/db/journal.ts) of closed tabs at start
 src/state/settings.tsx              settings context; roles.ts/combos.ts the role/configuration predicates (who sees what, who leads)
 src/state/{useAction,saveErrors,useToday}.ts  one-off actions and draft submits, refused saves, the day that changes at midnight
-src/app/                            app shell: crash screen, page error card, reload after a new version
-src/content/loader.ts               content tree access; tools.ts = which app pages a module links to; plans.ts + plan-headings.json = the three configurations and their table headings (shared with the lint)
+src/app/                            app shell: crash screen, page error card, lazy pages (reload after a new version, retry once back online)
+src/content/loader.ts               content tree access; modules.ts = the module ids; tools.ts = which app pages a module links to; plans.ts + plan-headings.json = the three configurations and their table headings (shared with the lint)
 src/sections/{dream,vision,calm}/   one component per worksheet section (clarify, WOOP, habit, letter, wheel…)
 src/sheets/                         printable sheets, one file per area, listed once in registry.ts
 src/components/                     Shell (nav), AutoText (autosaving box), DateField (DayPicker in site colours), Stepper, SectionLinks, ErrorBoundary, RoleConfigPicker, DreamerOnly, WheelSvg
@@ -65,7 +66,8 @@ a role rule is one entry in a registry (`src/sheets/registry.ts`, `src/content/t
 `src/content/plans.ts`, `src/state/settings.tsx`);
 every multi-field document is saved through `saveDoc` so quick edits never overwrite
 each other, and a list inside it is changed by a function of the stored row, never rebuilt
-from what the page last showed; every free-text box is an `AutoText`; every date is picked
+from what the page last showed; every free-text box is an `AutoText` with a field address
+from `src/db/fields.ts` (its text survives a reload or a closed tab); every date is picked
 with `DateField`; a form that adds a row clears at once (`submitDraft`) and a one-off
 button is guarded (`useAction`); anything read from outside the app (a backup, an older
 version's rows) goes through `src/db/schema.ts` first; every mutation a data module exports
@@ -86,8 +88,9 @@ them). `pwsh scripts/intranet.ps1 start` serves `site/` at
 window, until `pwsh scripts/intranet.ps1 stop` (or logoff); `status` says whether it runs. A
 running server picks up a new publish without a restart. The server never reads `dist/`, so
 `npm run build` during development cannot take the live site down; requests are answered by
-a pool of workers, so one slow reader (a paused video) never holds up the others. It needs a
-one-time URL reservation for port 80 and an inbound firewall rule, both by an administrator;
+asynchronous writes that no thread waits on, so slow readers (paused videos, many of them) never hold up
+the others; transfers in flight are capped (beyond the cap a request gets 503 at once). It
+needs a one-time URL reservation for port 80 and an inbound firewall rule, both by an administrator;
 the commands (and how to undo them) are at the top of `serve-intranet.ps1`. To try a build
 without touching the live site: `npx vite build --outDir <folder> --emptyOutDir`, then
 `pwsh scripts/serve-intranet.ps1 -Prefix http://localhost:8099/dream_management/ -Root <folder>`.

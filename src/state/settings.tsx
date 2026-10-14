@@ -1,7 +1,6 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, type ReactNode } from 'react'
 import { DEFAULT_SETTINGS, type Settings } from '../db/db'
 import { useStoredSettings, writeSettings } from '../db/settings'
-import { openStorage } from '../db/lifecycle'
 
 interface Ctx {
   settings: Settings
@@ -11,11 +10,6 @@ interface Ctx {
 const SettingsCtx = createContext<Ctx>({ settings: DEFAULT_SETTINGS, loaded: false, update: async () => {} })
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
-  // a database that cannot open is thrown to the crash screen, which explains it
-  const [openError, setOpenError] = useState<unknown>(null)
-  useEffect(() => {
-    openStorage().catch(setOpenError)
-  }, [])
   const stored = useStoredSettings()
   const settings = stored ?? DEFAULT_SETTINGS
   const update = useCallback((patch: Partial<Settings>) => writeSettings(patch), [])
@@ -28,7 +22,6 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   }, [settings.theme, settings.uiLocale])
 
   const value = useMemo(() => ({ settings, loaded: stored !== undefined, update }), [settings, stored, update])
-  if (openError) throw openError
   return <SettingsCtx.Provider value={value}>{children}</SettingsCtx.Provider>
 }
 

@@ -349,7 +349,8 @@ for (const [name, viewport] of [
   ])
   const meetingsIcs = await readDl(cal)
   check((meetingsIcs.match(/BEGIN:VEVENT/g) ?? []).length === 7, `${name}: meetings file has the seven meetings`)
-  check(meetingsIcs.includes('UID:meeting-07@cartea-visurilor'), `${name}: meeting events carry stable ids`)
+  // the same purpose plus this device's own id: stable for this person, never mixed with another's
+  check(/UID:meeting-07-[\w-]{8,}@cartea-visurilor/.test(meetingsIcs), `${name}: meeting events carry stable ids`)
   await page.goto(base + '#/')
   check(
     await visible(page.getByRole('button', { name: 'Pune toate întâlnirile în calendar' })),

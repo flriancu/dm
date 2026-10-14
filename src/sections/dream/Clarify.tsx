@@ -1,15 +1,14 @@
 import { Link } from 'react-router-dom'
 import { useT } from '../../i18n'
 import AutoText from '../../components/AutoText'
+import { fields } from '../../db/fields'
 import SectionHead from '../../components/SectionHead'
-import { saveDreamWork, setRoute } from '../../db/dreams'
 import { sheetPath } from '../../lib/paths'
-import { CLARIFY_STEPS, ROUTE_SLOTS, type ClarifyStep, type Dream, type DreamWork } from '../../db/db'
+import { CLARIFY_STEPS, ROUTE_SLOTS, type Dream, type DreamWork } from '../../db/db'
 
 /** Module 2 (C): the five clarify steps and the three routes to the dream. */
 export default function Clarify({ dream, work }: { dream: Dream; work?: DreamWork }) {
   const { t } = useT()
-  const setStep = (step: ClarifyStep, v: string) => saveDreamWork(dream.id!, { clarify: { [step]: v } })
   const routes = Array.from({ length: ROUTE_SLOTS }, (_, i) => work?.routes?.[i] ?? '')
   const filled = CLARIFY_STEPS.filter((s) => (work?.clarify?.[s] ?? '').trim()).length
   return (
@@ -31,7 +30,7 @@ export default function Clarify({ dream, work }: { dream: Dream; work?: DreamWor
               id={`step-${s}`}
               placeholder={t(`clarify.${s}.placeholder`)}
               value={work?.clarify?.[s] ?? ''}
-              onSave={(v) => setStep(s, v)}
+              field={fields.dreamWork(dream.id!, 'clarify', s)}
               multiline
             />
           </div>
@@ -47,7 +46,7 @@ export default function Clarify({ dream, work }: { dream: Dream; work?: DreamWor
               id={`route-${i}`}
               placeholder={t(`mydream.route.placeholder.${i + 1}`)}
               value={r}
-              onSave={(v) => setRoute(dream.id!, i, v)}
+              field={fields.route(dream.id!, i)}
             />
           </div>
         ))}

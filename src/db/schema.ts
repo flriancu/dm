@@ -76,11 +76,11 @@ const short = text(TEXT_LONG)
 const long = text(TEXT_LONG)
 const word = text(TEXT_WORD)
 /**
- * Auto-increment keys: positive, and at most 2^52, half of the 2^53 where IndexedDB's key
- * generator stops, so the rows the app adds after an import keep valid keys and still pass
- * the check on the next import.
+ * Auto-increment keys: positive, and low enough below 2^53 (where IndexedDB's key generator
+ * stops) that the app can still add four billion rows after the largest imported key, so the
+ * keys it hands out keep passing this check on the next import.
  */
-export const MAX_ID = 2 ** 52
+export const MAX_ID = 2 ** 53 - 2 ** 32
 const id = int(1, MAX_ID)
 const moduleId: Validator<string> = (x) => (typeof x === 'string' && /^\d{2}$/.test(x) ? x : undefined)
 const dateOrToday = orElse(isoDate, today)
@@ -103,6 +103,7 @@ const SETTING_VALIDATORS: SettingValidators = {
   onboarded: bool,
   saboteurs: list(oneOf(PICKABLE_SABOTEURS), MAX_SABOTEURS, (s) => s),
   strengths: slots(short, STRENGTH_SLOTS, () => ''),
+  calendarId: (x) => (typeof x === 'string' && /^[\w-]{8,64}$/.test(x) ? x : undefined),
 }
 const isSettingKey = (k: unknown): k is keyof Settings => typeof k === 'string' && Object.hasOwn(SETTING_VALIDATORS, k)
 
@@ -114,6 +115,8 @@ export function settingsFrom(rows: readonly { key: unknown; value: unknown }[]):
     const v = SETTING_VALIDATORS[r.key](r.value)
     if (v !== undefined) s[r.key] = v
   }
+  // the turn to lead belongs to a peer pair; stored from an earlier pair or a backup, it means nothing elsewhere
+  if (!(s.role === 'both' && s.config === 'pair')) s.friendToday = false
   return s as unknown as Settings
 }
 
@@ -243,10 +246,16 @@ const valueRows: Validator<ValueItem[]> = (x) => {
   const rows = slots<ValueItem>(valueItem, VALUE_SLOTS, () => ({ text: '' }))(x) ?? []
   while (rows.length < VALUE_SLOTS) rows.push({ text: '' })
   let chosen = 0
+  // a flag is only changed when it breaks the rule, so a row that passes comes back exactly as it was
+  const plain = (r: ValueItem): ValueItem => {
+    const out = { ...r }
+    delete out.nonNegotiable
+    return out
+  }
   return rows.map((r) => {
-    if (!r.chosen) return { ...r, nonNegotiable: false }
+    if (!r.chosen) return r.nonNegotiable ? plain(r) : r
     chosen++
-    return chosen <= MAX_CHOSEN_VALUES ? r : { ...r, chosen: false, nonNegotiable: false }
+    return chosen <= MAX_CHOSEN_VALUES ? r : plain({ ...r, chosen: false })
   })
 }
 const vision = fields(
@@ -330,7 +339,8 @@ export function cleanTable<K extends TableName>(name: K, raw: unknown[]): { rows
 
 /**
  * Rules between rows that a single row cannot check: one chosen dream, and never a released
- * or achieved one; one task moved to the calendar; worksheets only for dreams that exist.
+ * or achieved one; one task moved to the calendar, and only from "plan"; worksheets only for
+ * dreams that exist.
  */
 export function enforceInvariants(t: Partial<BackupTables>): number {
   let fixed = 0
@@ -347,7 +357,7 @@ export function enforceInvariants(t: Partial<BackupTables>): number {
     let movedSeen = false
     t.weekTasks = t.weekTasks.map((w) => {
       if (w.moved !== 1) return w
-      if (!movedSeen) {
+      if (!movedSeen && w.quadrant === 'plan') {
         movedSeen = true
         return w
       }

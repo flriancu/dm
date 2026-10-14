@@ -84,7 +84,8 @@ describe('import checks every row', () => {
         ],
         weekTasks: [
           { id: 1, text: 't', quadrant: 'zzz', moved: 1 },
-          { id: 2, text: 'u', moved: 1 },
+          { id: 2, text: 'u', quadrant: 'plan', moved: 1 },
+          { id: 3, text: 'v', quadrant: 'now', moved: 1 }, // moved to the calendar only from "plan"
         ],
         wheels: [{ id: 1, values: [1, 2, 3], swls: [1, 1, 1, 1, 1] }],
         journal: [{ id: 1, date: 'x' }],
@@ -152,6 +153,20 @@ describe('import checks every row', () => {
     const again = await planImport(backup({ dreams: await d.dreams.toArray() }), d)
     expect(added).toBe(MAX_ID)
     expect(again.tables.dreams).toHaveLength(2)
+  })
+
+  it('gives back exactly the rows the app writes (value rows included)', async () => {
+    const values = [
+      { text: 'a' },
+      { text: 'b', chosen: true, nonNegotiable: true },
+      ...Array.from({ length: 8 }, () => ({ text: '' })),
+    ]
+    const plan = await planImport(
+      backup({ vision: [{ id: 'me', values, valueActs: [], worksheet: {}, updated: '2026-10-14' }] }),
+      d,
+    )
+    expect(plan.tables.vision?.[0].values).toEqual(values)
+    expect(plan.dropped).toBe(0)
   })
 
   it('replaces the tables in the file and leaves the others (FR-61: Friend notes apart)', async () => {

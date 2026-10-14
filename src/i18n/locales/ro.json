@@ -658,8 +658,8 @@
   "settings.import.confirm.dated": "Încarci copia salvată pe {date}? Visurile de pe acest dispozitiv ({now}) sunt înlocuite cu cele din fișier ({file}), împreună cu foile, notițele și setările din el. Nu se poate anula: dacă vrei să păstrezi ce e acum aici, salvează întâi o copie.",
   "settings.import.confirm.kept": "Ce lipsește din fișier rămâne cum e pe acest dispozitiv.",
   "settings.import.dropped": "{n} rânduri din fișier nu se potriveau cu aplicația și au fost lăsate deoparte sau corectate.",
-  "settings.import.err.notBackup": "Fișierul nu a putut fi citit. Alege un fișier .json salvat din această aplicație.",
-  "settings.import.err.tooLarge": "Fișierul e prea mare pentru o copie a acestei aplicații. Alege fișierul .json salvat de ea.",
+  "settings.import.err.notBackup": "Fișierul nu a putut fi citit. Alege copia salvată din această aplicație (un fișier .json, sau .json.txt dacă a fost trimisă prin „Trimite copia…”).",
+  "settings.import.err.tooLarge": "Fișierul e prea mare pentru o copie a acestei aplicații. Alege copia salvată de ea (.json sau .json.txt).",
   "settings.import.err.write": "Copia nu a putut fi încărcată: browserul a refuzat salvarea. Datele de pe acest dispozitiv au rămas cum erau.",
   "settings.danger.blocked": "Ștergerea așteaptă: aplicația e deschisă și în alt tab sau în altă fereastră. Închide-le, iar ștergerea se termină singură.",
   "crash.app": "Aplicația nu a putut afișa pagina. Datele tale sunt încă pe acest dispozitiv. Reîncarcă pagina; dacă problema rămâne, salvează o copie.",
@@ -690,5 +690,9 @@
   "book.md.paper": "Lista visurilor e pe hârtie, în caiet: {n} visuri.",
   "book.md.habitWeeks": "Săptămâni bifate: {n} din {m}.",
   "book.md.wheelOn": "Ultima fotografie, din {date}.",
-  "book.md.sealed": "Scrisoarea e sigilată până pe {date}; textul ei nu e în acest document."
+  "book.md.sealed": "Scrisoarea e sigilată până pe {date}; textul ei nu e în acest document.",
+  "crash.saveFailed": "Copia nu a putut fi salvată: browserul nu lasă aplicația să citească datele acum. Reîncarcă pagina și încearcă din nou.",
+  "book.md.file": "cartea-mea",
+  "book.md.worksheetsOf": "Foile visului „{dream}”",
+  "book.md.arrived": "Scrisoarea a sosit pe {date}; o citești în aplicație, pe pagina Viziunea. După ce o citești, apare și aici."
 }

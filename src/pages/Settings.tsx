@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useT, UI_LOCALES, LOCALE_META } from '../i18n'
 import { useSettings } from '../state/settings'
 import { useAction } from '../state/useAction'
+import { reportSaveError } from '../state/saveErrors'
 import { startDateKey } from '../state/roles'
 import { today, THEMES, type Role, type Config } from '../db/db'
 import {
@@ -18,6 +19,7 @@ import { bookMarkdown } from '../lib/book'
 import { canShareFiles, downloadText, shareText } from '../lib/files'
 import MeetingsCalendar from '../components/MeetingsCalendar'
 import { replaceData, wipeAll } from '../db/lifecycle'
+import { changeRoleConfig } from '../db/notes'
 import { comboIssue, configHelpKey } from '../state/combos'
 import RoleConfigPicker from '../components/RoleConfigPicker'
 import Stepper from '../components/Stepper'
@@ -33,21 +35,47 @@ export default function Settings() {
   const issue = comboIssue(settings.role, settings.config)
 
   const backupName = () => `cartea-visurilor-${today()}.json`
-  const bookName = () => `cartea-mea-${today()}.md`
-  const myBook = async () => bookMarkdown({ data: await exportAll(), settings, t, fmtDate, today: today() })
+  const bookName = () => `${t('book.md.file')}-${today()}.md`
+  // the book is the Dreamer's: the Friend's notes are a separate store and stay out of it (FR-61)
+  const myBook = async () =>
+    bookMarkdown({ data: await exportAll(undefined, false), settings, t, fmtDate, today: today() })
+  /** The share sheet when it works; a download when it is missing or fails; nothing on a second tap while it is open. */
+  const share = async (
+    make: () => Promise<{ text: string; download: () => void }>,
+    name: string,
+    type: string,
+    title: string,
+  ) => {
+    try {
+      const f = await make()
+      if ((await shareText(name, f.text, type, title)) === 'unsupported') f.download()
+    } catch (e) {
+      reportSaveError(e)
+    }
+  }
   const canShare = canShareFiles()
   const [doExport, exporting] = useAction(async () => downloadJson(backupName(), await exportAll()))
-  const [doShare, sharing] = useAction(async () => {
-    const data = await exportAll()
-    const r = await shareText(backupName(), backupText(data), 'application/json', t('settings.backup'))
-    if (r === 'unsupported') downloadJson(backupName(), data)
-  })
+  const doShare = () =>
+    share(
+      async () => {
+        const data = await exportAll()
+        return { text: backupText(data), download: () => downloadJson(backupName(), data) }
+      },
+      backupName(),
+      'application/json',
+      t('settings.backup'),
+    )
   const [doBook, booking] = useAction(async () => downloadText(bookName(), await myBook(), 'text/markdown'))
-  const [doShareBook, sharingBook] = useAction(async () => {
-    const text = await myBook()
-    const r = await shareText(bookName(), text, 'text/markdown', t('book.md.title'))
-    if (r === 'unsupported') downloadText(bookName(), text, 'text/markdown')
-  })
+  const doShareBook = () =>
+    share(
+      async () => {
+        const text = await myBook()
+        return { text, download: () => downloadText(bookName(), text, 'text/markdown') }
+      },
+      bookName(),
+      'text/markdown',
+      t('book.md.title'),
+    )
   const [doImport, importing] = useAction(async (f: File) => {
     setMsg('')
     try {
@@ -80,9 +108,7 @@ export default function Settings() {
   }
   const saveEdit = async () => {
     if (!draft.role || !draft.config) return
-    const changed = draft.role !== settings.role || draft.config !== settings.config
-    // the pair lead belongs to the pair: a new role or configuration starts without it
-    await update({ role: draft.role, config: draft.config, ...(changed ? { friendToday: false } : {}) })
+    await changeRoleConfig(draft.role, draft.config) // the pair lead belongs to the pair: a new arrangement starts without it
     setEditing(false)
   }
 
@@ -187,7 +213,7 @@ export default function Settings() {
               {t('settings.export')}
             </button>
             {canShare && (
-              <button className="btn ghost" onClick={() => doShare()} disabled={sharing}>
+              <button className="btn ghost" onClick={() => doShare()}>
                 {t('settings.share')}
               </button>
             )}
@@ -202,7 +228,7 @@ export default function Settings() {
               {t('settings.book')}
             </button>
             {canShare && (
-              <button className="btn ghost" onClick={() => doShareBook()} disabled={sharingBook}>
+              <button className="btn ghost" onClick={() => doShareBook()}>
                 {t('settings.book.share')}
               </button>
             )}

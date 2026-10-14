@@ -3,7 +3,10 @@
  * Values are strings, numbers, booleans or comma-separated lists in [brackets].
  * Kept dependency-free so the same parser runs in the build check script.
  */
-export interface Parsed<M = Record<string, unknown>> { meta: M; body: string }
+export interface Parsed<M = Record<string, unknown>> {
+  meta: M
+  body: string
+}
 
 export function parseFrontMatter<M = Record<string, unknown>>(src: string): Parsed<M> {
   const m = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/.exec(src)
@@ -23,12 +26,22 @@ function coerce(raw: string): unknown {
   if (raw === 'true') return true
   if (raw === 'false') return false
   if (/^-?\d+(\.\d+)?$/.test(raw)) return Number(raw)
-  if (raw.startsWith('[') && raw.endsWith(']')) return raw.slice(1, -1).split(',').map((s) => s.trim()).filter(Boolean)
+  if (raw.startsWith('[') && raw.endsWith(']'))
+    return raw
+      .slice(1, -1)
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
   return raw.replace(/^"(.*)"$/, '$1')
 }
 
 /** Split a markdown body into H2 sections, keyed by the heading's `{#id}` or its text. */
-export interface Section { id: string; title: string; body: string; sub: Section[] }
+export interface Section {
+  id: string
+  title: string
+  body: string
+  sub: Section[]
+}
 
 export function splitSections(body: string, level = 2): Section[] {
   const re = new RegExp(`^${'#'.repeat(level)}\\s+(.+?)\\s*$`, 'gm')
@@ -52,5 +65,10 @@ export function splitSections(body: string, level = 2): Section[] {
 }
 
 export function slug(s: string) {
-  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  return s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
 }

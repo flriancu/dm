@@ -5,7 +5,11 @@
  */
 import { sectionPath } from '../lib/paths'
 
-export interface Tool { id: string; to: string; labelKey: string }
+export interface Tool {
+  id: string
+  to: string
+  labelKey: string
+}
 
 export const TOOLS: Record<string, Tool> = {
   dreams: { id: 'dreams', to: '/dreams', labelKey: 'dreams.title' },

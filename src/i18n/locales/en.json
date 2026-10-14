@@ -658,8 +658,8 @@
   "settings.import.confirm.dated": "Load the backup saved on {date}? The dreams on this device ({now}) are replaced by the ones in the file ({file}), together with its sheets, notes and settings. This cannot be undone: if you want to keep what is here now, save a copy first.",
   "settings.import.confirm.kept": "Whatever the file does not contain stays as it is on this device.",
   "settings.import.dropped": "{n} rows of the file did not fit the app and were left out or corrected.",
-  "settings.import.err.notBackup": "The file could not be read. Choose a .json file saved from this app.",
-  "settings.import.err.tooLarge": "The file is too large to be a backup of this app. Choose the .json file it saved.",
+  "settings.import.err.notBackup": "The file could not be read. Choose the copy saved from this app (a .json file, or .json.txt if it was sent with “Send the copy…”).",
+  "settings.import.err.tooLarge": "The file is too large to be a copy of this app. Choose the copy it saved (.json or .json.txt).",
   "settings.import.err.write": "The backup could not be loaded: the browser refused to save. The data on this device is unchanged.",
   "settings.danger.blocked": "Deleting is waiting: the app is also open in another tab or window. Close them and the delete finishes by itself.",
   "crash.app": "The app could not show this page. Your data is still on this device. Reload the page; if the problem stays, save a copy.",
@@ -690,5 +690,9 @@
   "book.md.paper": "The dream list is on paper, in the notebook: {n} dreams.",
   "book.md.habitWeeks": "Weeks ticked: {n} of {m}.",
   "book.md.wheelOn": "Latest snapshot, from {date}.",
-  "book.md.sealed": "The letter is sealed until {date}; its text is not in this document."
+  "book.md.sealed": "The letter is sealed until {date}; its text is not in this document.",
+  "crash.saveFailed": "The copy could not be saved: the browser does not let the app read the data right now. Reload the page and try again.",
+  "book.md.file": "my-book",
+  "book.md.worksheetsOf": "Worksheets of the dream “{dream}”",
+  "book.md.arrived": "The letter arrived on {date}; you read it in the app, on the Vision page. Once read, it appears here too."
 }

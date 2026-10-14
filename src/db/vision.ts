@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { addMonths } from '../lib/dates'
-import { nextCheckinAfterRhythm } from '../lib/course'
+import { letterState, nextCheckinAfterRhythm } from '../lib/course'
 import {
   db,
   today,
@@ -14,6 +14,10 @@ import {
   type VisionDoc,
 } from './db'
 import { saveDoc, type DocPatch } from './docs'
+import { text } from '../lib/validate'
+
+/** A merged note kept within the paragraph limit, never splitting a character in two. */
+const cut = (s: string) => text(TEXT_LONG)(s) ?? ''
 
 /** The single vision document (modules 6–7): values, letter, worksheet, regret, yes/no, check-in, retrospective. */
 export function emptyVision(): VisionDoc {
@@ -34,7 +38,8 @@ const VISION_DOC = {
 }
 
 /** The stored document: undefined while loading, null before anything was written. */
-export const useVision = () => useLiveQuery(async () => (await db.vision.get('me')) ?? null, [])
+export const getVision = async () => (await db.vision.get('me')) ?? null
+export const useVision = () => useLiveQuery(getVision, [])
 
 /** Transactional merge: nested objects are merged one level deep, arrays replaced. */
 export const saveVision = async (patch: DocPatch<VisionDoc>) => saveDoc(VISION_DOC, patch)
@@ -64,11 +69,16 @@ export const sealLetter = async (deliverDate: string) =>
 export const openLetter = async () =>
   saveVision((v) => (v.letter?.opened ? {} : { letter: { opened: true, openedOn: today() } }))
 
-/** Keeps the letter already read in `pastLetters` (newest first) and starts an empty one. */
+/**
+ * Keeps the letter already read in `pastLetters` (newest first) and starts an empty one. Only a
+ * read letter moves: a letter sealed meanwhile in another tab stays sealed where it is.
+ */
 export const startNewLetter = async () =>
   // `letter: undefined` replaces the nested object; an empty object would be merged into the old letter
   saveVision((v) =>
-    v.letter ? { pastLetters: [v.letter, ...(v.pastLetters ?? [])].slice(0, MAX_PAST_LETTERS), letter: undefined } : {},
+    v.letter && letterState(v.letter, today()) === 'read'
+      ? { pastLetters: [v.letter, ...(v.pastLetters ?? [])].slice(0, MAX_PAST_LETTERS), letter: undefined }
+      : {},
   )
 
 // ---- the check-in (FR-45)
@@ -84,7 +94,7 @@ export const logCheckin = async (note: string) =>
     const now = today()
     const log = [...(c.log ?? [])]
     const last = log.at(-1)
-    const merged = last?.date === now ? [last.note, note.trim()].filter(Boolean).join('\n').slice(0, TEXT_LONG) : null
+    const merged = last?.date === now ? cut([last.note, note.trim()].filter(Boolean).join('\n')) : null
     if (merged !== null) log[log.length - 1] = { date: now, note: merged }
     else log.push({ date: now, note: note.trim() })
     return { checkin: { log: log.slice(-MAX_CHECKIN_LOG), lastDone: now, next: addMonths(now, c.everyMonths ?? 3) } }

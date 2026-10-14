@@ -2,12 +2,15 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useT } from '../../i18n'
 import AutoText from '../../components/AutoText'
+import { fields } from '../../db/fields'
 import DateField from '../../components/DateField'
 import SectionHead from '../../components/SectionHead'
 import { addMonths } from '../../lib/dates'
-import { letterIcs, downloadText as download } from '../../lib/ics'
+import { dateIcs } from '../../lib/ics'
+import { downloadText as download } from '../../lib/files'
+import { calendarUid } from '../../db/settings'
 import { letterState } from '../../lib/course'
-import { saveVision, sealLetter, openLetter, startNewLetter } from '../../db/vision'
+import { sealLetter, openLetter, startNewLetter } from '../../db/vision'
 import { useAction } from '../../state/useAction'
 import { useToday } from '../../state/useToday'
 import { LETTER_QUESTIONS, type Letter as LetterDoc, type VisionDoc } from '../../db/db'
@@ -24,6 +27,12 @@ export default function Letter({ v }: { v: VisionDoc }) {
   const [deliver, setDeliver] = useState(L.deliverDate ?? addMonths(now, 6))
   const [seal, sealing] = useAction(() => sealLetter(deliver))
   const [read, reading] = useAction(openLetter)
+  const [letterFile, makingFile] = useAction(async () =>
+    download(
+      'scrisoarea.ics',
+      dateIcs(L.deliverDate!, await calendarUid('letter'), t('letter.ics.title'), t('letter.ics.body')),
+    ),
+  )
   const [restart, restarting] = useAction(async () => {
     if (!confirm(t('letter.new.confirm'))) return
     await startNewLetter()
@@ -38,7 +47,7 @@ export default function Letter({ v }: { v: VisionDoc }) {
         style={{ minHeight: 120 }}
         placeholder={t('letter.reply.placeholder')}
         value={L.reply ?? ''}
-        onSave={(text) => saveVision({ letter: { reply: text } })}
+        field={fields.vision('letter', 'reply')}
         multiline
       />
     </div>
@@ -54,12 +63,7 @@ export default function Letter({ v }: { v: VisionDoc }) {
           </p>
           <p className="small muted">{t('letter.sealed.help')}</p>
           <div className="row">
-            <button
-              className="btn"
-              onClick={() =>
-                download('scrisoarea.ics', letterIcs(L.deliverDate!, t('letter.ics.title'), t('letter.ics.body')))
-              }
-            >
+            <button className="btn" onClick={() => letterFile()} disabled={makingFile}>
               {t('letter.ics')}
             </button>
             <button className="btn ghost" onClick={() => read()} disabled={reading}>
@@ -106,7 +110,7 @@ export default function Letter({ v }: { v: VisionDoc }) {
                 style={{ minHeight: 220 }}
                 placeholder={t('letter.text.placeholder')}
                 value={L.text ?? ''}
-                onSave={(text) => saveVision({ letter: { text } })}
+                field={fields.vision('letter', 'text')}
                 multiline
               />
             </div>

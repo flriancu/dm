@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useT } from '../../i18n'
 import AutoText from '../../components/AutoText'
+import { fields } from '../../db/fields'
 import SectionHead from '../../components/SectionHead'
 import { setValueItem, addValueAct } from '../../db/vision'
 import { submitDraft } from '../../state/useAction'
@@ -37,7 +38,7 @@ export default function Values({ v }: { v: VisionDoc }) {
               placeholder={t(`values.placeholder.${(i % 5) + 1}`)}
               style={{ flex: 1 }}
               value={x.text}
-              onSave={(text) => setValueItem(i, { text })}
+              field={fields.value(i)}
             />
             <button
               className={`chip ${x.chosen ? 'on' : ''}`}

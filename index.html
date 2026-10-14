@@ -6,9 +6,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
     <title>Cartea Visurilor</title>
+    <style>
+      #boot {
+        font:
+          1rem system-ui,
+          sans-serif;
+        padding: 1rem;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- shown until the app renders over it: while its code loads and its storage opens -->
+    <div id="root">
+      <p id="boot">Se încarcă… / Loading…</p>
+    </div>
+    <script>
+      // The app's code could not be fetched (offline, or the server away): say so instead of a blank
+      // page, and try again once the connection is back. Once the app runs, its own handling applies.
+      addEventListener(
+        'error',
+        function (e) {
+          var boot = document.getElementById('boot')
+          if (!boot || !e.target || e.target.tagName !== 'SCRIPT') return
+          boot.innerHTML =
+            'Cartea Visurilor nu s-a putut încărca. / The app could not load.<br />' +
+            '<button type="button" onclick="location.reload()">Reîncarcă / Reload</button>'
+          addEventListener('online', function () {
+            location.reload()
+          })
+        },
+        true,
+      )
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
