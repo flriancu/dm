@@ -1,0 +1,10 @@
+# Text files are stored and checked out with LF on every machine (Prettier and .editorconfig
+# require it; Git for Windows otherwise converts to CRLF on checkout and the build's format
+# check fails on a fresh clone).
+* text=auto eol=lf
+
+# Binary files: never converted.
+*.mp4 binary
+*.png binary
+*.ico binary
+*.woff2 binary
