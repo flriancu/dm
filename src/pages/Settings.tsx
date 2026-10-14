@@ -5,7 +5,18 @@ import { useSettings } from '../state/settings'
 import { useAction } from '../state/useAction'
 import { startDateKey } from '../state/roles'
 import { today, THEMES, type Role, type Config } from '../db/db'
-import { exportAll, downloadJson, readBackupFile, planImport, applyImport, ImportError } from '../db/exportImport'
+import {
+  exportAll,
+  backupText,
+  downloadJson,
+  readBackupFile,
+  planImport,
+  applyImport,
+  ImportError,
+} from '../db/exportImport'
+import { bookMarkdown } from '../lib/book'
+import { canShareFiles, downloadText, shareText } from '../lib/files'
+import MeetingsCalendar from '../components/MeetingsCalendar'
 import { replaceData, wipeAll } from '../db/lifecycle'
 import { comboIssue, configHelpKey } from '../state/combos'
 import RoleConfigPicker from '../components/RoleConfigPicker'
@@ -21,9 +32,22 @@ export default function Settings() {
   const [draft, setDraft] = useState<{ role?: Role; config?: Config }>({})
   const issue = comboIssue(settings.role, settings.config)
 
-  const [doExport, exporting] = useAction(async () =>
-    downloadJson(`cartea-visurilor-${today()}.json`, await exportAll()),
-  )
+  const backupName = () => `cartea-visurilor-${today()}.json`
+  const bookName = () => `cartea-mea-${today()}.md`
+  const myBook = async () => bookMarkdown({ data: await exportAll(), settings, t, fmtDate, today: today() })
+  const canShare = canShareFiles()
+  const [doExport, exporting] = useAction(async () => downloadJson(backupName(), await exportAll()))
+  const [doShare, sharing] = useAction(async () => {
+    const data = await exportAll()
+    const r = await shareText(backupName(), backupText(data), 'application/json', t('settings.backup'))
+    if (r === 'unsupported') downloadJson(backupName(), data)
+  })
+  const [doBook, booking] = useAction(async () => downloadText(bookName(), await myBook(), 'text/markdown'))
+  const [doShareBook, sharingBook] = useAction(async () => {
+    const text = await myBook()
+    const r = await shareText(bookName(), text, 'text/markdown', t('book.md.title'))
+    if (r === 'unsupported') downloadText(bookName(), text, 'text/markdown')
+  })
   const [doImport, importing] = useAction(async (f: File) => {
     setMsg('')
     try {
@@ -139,6 +163,7 @@ export default function Settings() {
           <Stepper id="cd" min={7} max={42} value={settings.cadenceDays} onChange={(v) => update({ cadenceDays: v })} />
           {settings.cadenceDays < 14 && <p className="small notice">{t('onboarding.cadence.help')}</p>}
         </div>
+        <MeetingsCalendar />
         {settings.role !== 'friend' && (
           <label className="row" style={{ minHeight: 44 }}>
             <input
@@ -157,12 +182,39 @@ export default function Settings() {
           {t('settings.privacy')}
         </p>
         <div>
-          <button className="btn" onClick={() => doExport()} disabled={exporting}>
-            {t('settings.export')}
-          </button>
+          <div className="row">
+            <button className="btn" onClick={() => doExport()} disabled={exporting}>
+              {t('settings.export')}
+            </button>
+            {canShare && (
+              <button className="btn ghost" onClick={() => doShare()} disabled={sharing}>
+                {t('settings.share')}
+              </button>
+            )}
+          </div>
           <p className="small muted" style={{ margin: '6px 0 0' }}>
             {t('settings.export.help')}
           </p>
+        </div>
+        <div>
+          <div className="row">
+            <button className="btn" onClick={() => doBook()} disabled={booking}>
+              {t('settings.book')}
+            </button>
+            {canShare && (
+              <button className="btn ghost" onClick={() => doShareBook()} disabled={sharingBook}>
+                {t('settings.book.share')}
+              </button>
+            )}
+          </div>
+          <p className="small muted" style={{ margin: '6px 0 0' }}>
+            {t('settings.book.help')}
+          </p>
+          {canShare && (
+            <p className="small muted" style={{ margin: '6px 0 0' }}>
+              {t('settings.share.help')}
+            </p>
+          )}
         </div>
         <div>
           <button className="btn" onClick={() => file.current?.click()} disabled={importing}>
@@ -174,7 +226,7 @@ export default function Settings() {
           <input
             ref={file}
             type="file"
-            accept="application/json,.json"
+            accept="application/json,.json,text/plain,.txt"
             className="visually-hidden"
             onChange={(e) => {
               const f = e.target.files?.[0]

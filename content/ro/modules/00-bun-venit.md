@@ -5,7 +5,7 @@ title: Bun venit
 subtitle: De la modul de supraviețuire înapoi la visat
 takeaway: Este vorba despre tine ca om întreg, nu doar despre ce faci la serviciu sau acasă.
 sources: [DM_Pilot_Intro_Apr2026.pdf, Kick-off slides 3 și 6]
-source_version: 5
+source_version: 6
 duration: "30 de minute, singur; într-o pereche sau în grup, 10 minute în plus pentru datele întâlnirilor"
 ---
 
@@ -21,7 +21,7 @@ Nu ai nevoie de un „vis mare”. Aici înveți cum să lucrezi cu un vis, oric
 
 **Când deschizi un modul.** Deschizi modulul următor cel târziu a doua zi după o întâlnire: în prima săptămână citești „Învață” și faci pașii din „Fă”; în a doua săptămână e întâlnirea. Pagina Acasă îți arată modulul 0 ca pas următor până apeși „Am citit modulul 0”; după aceea îți arată întâlnirea următoare și data ei.
 
-**Ce face aplicația și ce nu.** Hârtia este mediul principal: scrii de mână, în caiet. Aplicația ține evidența (câte visuri ai, visul ales, planurile tale), îți arată data întâlnirii următoare pe pagina Acasă și are toate foile de tipărit în meniul *Carte* („Foi de tipărit pentru Cartea Visurilor”), de la început, cu modulul din care este fiecare. Aplicația nu trimite notificări: pune data în calendarul telefonului cu butonul „Pune data în calendar”. Fiecare telefon ține un singur om: tu folosești aplicația pe telefonul tău, Prietenul Visului pe al lui, cu rolul Prietenul Visului; acolo, pe pagina Prietenul Visului, vede „Planul întâlnirii” pentru fiecare modul, cu pașii, minutele și întrebările. Tu, ca Visător, nu ai pagina aceea în meniu; într-o pereche o aveți amândoi, pentru că amândoi conduceți, pe rând.
+**Ce face aplicația și ce nu.** Hârtia este mediul principal: scrii de mână, în caiet. Aplicația ține evidența (câte visuri ai, visul ales, planurile tale), îți arată data întâlnirii următoare pe pagina Acasă și are toate foile de tipărit în meniul *Carte* („Foi de tipărit pentru Cartea Visurilor”), de la început, cu modulul din care este fiecare. Aplicația nu trimite notificări: pune întâlnirile în calendarul tău cu butonul „Pune toate întâlnirile în calendar” (în *Setări* și pe pagina Acasă), iar data scrisorii și a verificării viziunii cu butonul „Pune data în calendar”, la modulele 6 și 7. Fiecare telefon ține un singur om: tu folosești aplicația pe telefonul tău, Prietenul Visului pe al lui, cu rolul Prietenul Visului; acolo, pe pagina Prietenul Visului, vede „Planul întâlnirii” pentru fiecare modul, cu pașii, minutele și întrebările. Tu, ca Visător, nu ai pagina aceea în meniu; într-o pereche o aveți amândoi, pentru că amândoi conduceți, pe rând.
 
 **Metoda COPIL.** Cursul urmează metoda COPIL: cinci pași, câte unul pentru fiecare literă a cuvântului. Metoda a fost creată de Mirela Oprea, psihoterapeut din România (vezi pagina Surse).
 
@@ -35,7 +35,7 @@ Nu ai nevoie de un „vis mare”. Aici înveți cum să lucrezi cu un vis, oric
 
 1. Fă rost de o **Carte a Visurilor**: orice caiet și un pix. De exemplu, un caiet A5 cu coperți tari, pe care îl ții pe noptieră. În curs, *Cartea Visurilor* este caietul în care scrii de mână.
 2. Alege, în 5 minute, cum arată Cartea ta. Fie tipărești foile din meniul *Carte* („Foi de tipărit pentru Cartea Visurilor”) și le pui într-un dosar sau le lipești în caiet: lista celor 100 de visuri, foaia „Criteriile mele de importanță” (o completezi în modulul 2) și celelalte foi, toate acolo de pe acum. Fie folosești caietul gol și scrii totul liber, fără formulare. Amândouă merg la fel de bine; ce contează e să scrii de mână și să te întorci la ce ai scris.
-3. Scrie în *Setări*, în 2 minute, data primei întâlniri (întâlnirea pentru modulul 1) și câte zile sunt între două întâlniri (de obicei 14). De exemplu: „sâmbătă, 7 noiembrie” și „14”. În grup, data e cea pe care ți-a spus-o Prietenul Visului (cel care conduce grupul); dacă tu conduci grupul, e data pe care ai fixat-o cu grupul. Apoi pune data în calendarul telefonului cu butonul „Pune data în calendar”; aplicația îți arată data pe pagina Acasă. Dacă nu ai stabilit încă data, las-o goală și o scrii după ce vorbești cu Prietenul Visului.
+3. Scrie în *Setări*, în 2 minute, data primei întâlniri (întâlnirea pentru modulul 1) și câte zile sunt între două întâlniri (de obicei 14). De exemplu: „sâmbătă, 7 noiembrie” și „14”. În grup, data e cea pe care ți-a spus-o Prietenul Visului (cel care conduce grupul); dacă tu conduci grupul, e data pe care ai fixat-o cu grupul. Apoi apasă, tot în *Setări*, „Pune toate întâlnirile în calendar”: primești un singur fișier cu toate cele șapte întâlniri, pe care îl deschizi cu calendarul telefonului sau al calculatorului; aplicația îți arată data și pe pagina Acasă. Dacă mai târziu schimbi data sau zilele dintre întâlniri, apasă din nou butonul. Dacă nu ai stabilit încă data, lasă câmpul gol și scrie data după ce vorbești cu Prietenul Visului.
 4. Când ai terminat de citit pagina aceasta, apasă, jos, „Am citit modulul 0”: pagina Acasă trece la întâlnirea pentru modulul 1. La modulele 1–7, butonul de jos se numește „Întâlnirea a avut loc” și îl apeși la sfârșitul fiecărei întâlniri, nu când ai terminat pașii din „Fă”.
 
 ### Regulile de bază

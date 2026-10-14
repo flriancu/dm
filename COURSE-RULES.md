@@ -42,10 +42,15 @@ Content refers to app elements only by these names (the strings in `ro.json` mat
 | Printable sheets | meniul *Carte* („Foi de tipărit pentru Cartea Visurilor”) | |
 | Notebook | *Cartea Visurilor* = caietul în care scrii de mână | |
 | Pair switch | „La următoarea întâlnire eu conduc (Prietenul Visului)” | Acasă, only in a pair |
+| All meetings to calendar | „Pune toate întâlnirile în calendar” (one file, seven meetings) | Setări and Acasă, once a first-meeting date is set |
+| One date to calendar | „Pune data în calendar” | letter (module 6), vision check-in (module 7) |
+| Backup | „Salvează o copie”; on phones also „Trimite copia…” | Setări |
+| Readable book | „Salvează cartea mea ca text”; on phones also „Trimite cartea…” | Setări |
 
-The app has no notifications. Never write "aplicația îți amintește". Write "pune data în
-calendarul telefonului cu butonul „Pune data în calendar”; aplicația îți
-arată data pe pagina Acasă".
+The app has no notifications. Never write "aplicația îți amintește". For meetings write "pune
+întâlnirile în calendar cu butonul „Pune toate întâlnirile în calendar”"; for the letter and the
+check-in, "pune data în calendar cu butonul „Pune data în calendar”"; and "aplicația îți arată
+data pe pagina Acasă".
 
 Each device holds one person. The Dream Friend uses the app on their own phone with the
 role Prietenul Visului; say so in module 0 and in the role help.

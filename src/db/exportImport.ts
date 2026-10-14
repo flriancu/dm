@@ -1,3 +1,4 @@
+import { downloadText } from '../lib/files'
 import { db, type DreamDB } from './db'
 import { TABLE_NAMES, TABLE_SPECS, cleanTable, enforceInvariants, type BackupTables, type TableName } from './schema'
 
@@ -129,12 +130,9 @@ export async function importAll(raw: unknown, d: DreamDB = db): Promise<ImportPl
   return plan
 }
 
+/** The backup as text, exactly as it is saved to a file. */
+export const backupText = (data: unknown) => JSON.stringify(data, null, 2)
+
 export function downloadJson(name: string, data: unknown) {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = name
-  a.click()
-  setTimeout(() => URL.revokeObjectURL(url), 1000)
+  downloadText(name, backupText(data), 'application/json')
 }

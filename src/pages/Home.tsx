@@ -8,6 +8,7 @@ import { useChosenDream } from '../db/dreams'
 import { useModules } from '../content/useContent'
 import { useToday } from '../state/useToday'
 import { sectionPath } from '../lib/paths'
+import MeetingsCalendar from '../components/MeetingsCalendar'
 import { moduleDate, nextModule, letterDue } from '../lib/course'
 
 export default function Home() {
@@ -132,6 +133,7 @@ export default function Home() {
           )
         })}
       </ul>
+      <MeetingsCalendar />
     </>
   )
 }

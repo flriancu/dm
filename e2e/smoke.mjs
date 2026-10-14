@@ -323,6 +323,46 @@ for (const [name, viewport] of [
     page.getByRole('button', { name: 'Salvează o copie' }).click(),
   ])
   check(/cartea-visurilor-.*\.json/.test(dl.suggestedFilename()), `${name}: export downloads JSON`)
+  const readDl = async (d) => (await import('node:fs/promises')).readFile(await d.path(), 'utf8')
+
+  // My book: readable Markdown with the chosen dream, the sealed letter left out
+  const [bk] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: 'Salvează cartea mea ca text' }).click(),
+  ])
+  const md = await readDl(bk)
+  check(/^cartea-mea-.*\.md$/.test(bk.suggestedFilename()), `${name}: my book downloads as Markdown`)
+  check(md.startsWith('# Cartea mea') && md.includes('Să învăț să navighez'), `${name}: my book holds the dreams`)
+  check(!md.includes('beau cafeaua pe prispă'), `${name}: my book keeps the sealed letter sealed`)
+  check(md.includes('## Liniște') || md.includes('curiozitate'), `${name}: my book holds the calm page`)
+
+  // Meetings in one calendar file, once a first-meeting date exists
+  check(
+    !(await page.getByRole('button', { name: 'Pune toate întâlnirile în calendar' }).isVisible()),
+    `${name}: no meetings file without a start date`,
+  )
+  await page.locator('#sd').click()
+  await page.getByRole('dialog').getByRole('button', { name: 'Azi', exact: true }).click()
+  const [cal] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: 'Pune toate întâlnirile în calendar' }).click(),
+  ])
+  const meetingsIcs = await readDl(cal)
+  check((meetingsIcs.match(/BEGIN:VEVENT/g) ?? []).length === 7, `${name}: meetings file has the seven meetings`)
+  check(meetingsIcs.includes('UID:meeting-07@cartea-visurilor'), `${name}: meeting events carry stable ids`)
+  await page.goto(base + '#/')
+  check(
+    await visible(page.getByRole('button', { name: 'Pune toate întâlnirile în calendar' })),
+    `${name}: Home offers the meetings file`,
+  )
+  await page.goto(base + '#/settings')
+  const sharing = await page.evaluate(
+    () => typeof navigator.share === 'function' && typeof navigator.canShare === 'function',
+  )
+  check(
+    (await page.getByRole('button', { name: 'Trimite cartea…' }).isVisible()) === sharing,
+    `${name}: send buttons shown exactly when the share sheet exists (${sharing})`,
+  )
 
   // Print sheets render (acceptance 2, in part)
   await page.goto(base + '#/book/print/all')

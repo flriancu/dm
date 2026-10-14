@@ -28,6 +28,7 @@ node e2e/adversarial.mjs http://localhost:5173/  # malformed, rapid and role-swi
 node e2e/import-poison.mjs http://localhost:5173/ # backups written by hand, older or newer versions
 node e2e/flows.mjs http://localhost:5173/        # cross-module flows, roles, dates, time zones
 node e2e/races.mjs http://localhost:5173/        # two tabs, quick taps, reloads, storage failures
+node e2e/share.mjs http://localhost:5173/        # the Send buttons, with a share sheet that refuses .json and .md
 ```
 
 ## Layout

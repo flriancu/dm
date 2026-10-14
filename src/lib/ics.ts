@@ -32,40 +32,45 @@ export function foldLine(line: string): string {
   return out.join('\r\n ')
 }
 
+/** One all-day event: a local ISO date (yyyy-mm-dd), a stable id, a title and a description. */
+export interface CalendarEvent {
+  date: string
+  uid: string
+  title: string
+  body: string
+}
+
 /**
- * A minimal all-day event. `date` is a local ISO date (yyyy-mm-dd). The UID names the
- * purpose only, so a calendar that imports the file again after the date changed moves the
- * event instead of keeping two.
+ * A calendar file with all-day events. Each UID names the purpose only (for example
+ * "meeting-03"), so a calendar that imports the file again after the dates changed moves
+ * the events instead of keeping two of each.
  */
-export function dateIcs(date: string, uid: string, title: string, body: string): string {
+export function calendarIcs(events: readonly CalendarEvent[]): string {
   const stamp = new Date().toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z'
-  const d = date.replace(/-/g, '')
-  const lines = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//Cartea Visurilor//RO',
-    'BEGIN:VEVENT',
-    `UID:${uid}@cartea-visurilor`,
-    `DTSTAMP:${stamp}`,
-    `SEQUENCE:${Math.floor(Date.now() / 1000)}`,
-    `DTSTART;VALUE=DATE:${d}`,
-    `SUMMARY:${esc(title)}`,
-    `DESCRIPTION:${esc(body)}`,
-    'END:VEVENT',
-    'END:VCALENDAR',
-  ]
+  const seq = Math.floor(Date.now() / 1000)
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Cartea Visurilor//RO']
+  for (const e of events) {
+    lines.push(
+      'BEGIN:VEVENT',
+      `UID:${e.uid}@cartea-visurilor`,
+      `DTSTAMP:${stamp}`,
+      `SEQUENCE:${seq}`,
+      `DTSTART;VALUE=DATE:${e.date.replace(/-/g, '')}`,
+      `SUMMARY:${esc(e.title)}`,
+      `DESCRIPTION:${esc(e.body)}`,
+      'END:VEVENT',
+    )
+  }
+  lines.push('END:VCALENDAR')
   return lines.map(foldLine).join('\r\n') + '\r\n'
+}
+
+/** A calendar file with a single all-day event. */
+export function dateIcs(date: string, uid: string, title: string, body: string): string {
+  return calendarIcs([{ date, uid, title, body }])
 }
 
 export const letterIcs = (date: string, title: string, body: string) => dateIcs(date, 'letter', title, body)
 
 /** Offers a text file for download; the caller passes the name and content. */
-export function downloadText(name: string, text: string, type = 'text/calendar') {
-  const blob = new Blob([text], { type })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = name
-  a.click()
-  setTimeout(() => URL.revokeObjectURL(url), 1000)
-}
+export { downloadText } from './files'

@@ -1,4 +1,4 @@
-import { addDays, addMonths, parseLocal } from './dates'
+import { addDays, addMonths, localIso, parseLocal } from './dates'
 
 /** Course calendar and progress rules, free of React and of the database. */
 
@@ -76,4 +76,16 @@ export function letterDue(
   today: string,
 ): boolean {
   return letterState(letter, today) === 'arrived'
+}
+
+/** The dates of all meetings (module 1 onwards), for one calendar file; empty without a start date. */
+export function meetingDates<M extends ModuleRef & { title: string }>(
+  modules: readonly M[],
+  start: string | undefined,
+  cadence: number,
+): { module: M; date: string }[] {
+  return modules.flatMap((m) => {
+    const d = moduleDate(start, cadence, m.order)
+    return d ? [{ module: m, date: localIso(d) }] : []
+  })
 }
