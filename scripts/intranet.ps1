@@ -1,3 +1,4 @@
+#Requires -Version 7
 <#
   Publish, start, stop or check the intranet server on demand.
 
@@ -30,6 +31,46 @@ function Get-Server {
     Where-Object { $_.CommandLine -like "*$serve*" }
 }
 
+$ErrorActionPreference = 'Stop'   # any failure stops the publish and says so, instead of reporting success
+
+# The full path of a file in site/ named by the record, or $null when the name would leave site/
+# (a hand-edited or corrupted record must never make publish delete anything outside it).
+function Get-SitePath([string]$rel) {
+  if (-not $rel -or [IO.Path]::IsPathRooted($rel)) { return $null }
+  $path = [IO.Path]::GetFullPath((Join-Path $site $rel))
+  if (-not $path.StartsWith($site + '\', [StringComparison]::OrdinalIgnoreCase)) { return $null }
+  # only a name as publish writes it: 'assets\..\index.html' would also land inside site/, on another file
+  if ([IO.Path]::GetRelativePath($site, $path) -ne $rel) { return $null }
+  $path
+}
+
+# The record of when each file in site/ was last part of a publish. An unreadable record is
+# replaced by an empty one (every file then counts from this publish), entries that are not a
+# date or that point outside site/ are dropped; both with a warning.
+function Read-PublishRecord {
+  $seen = @{}
+  if (-not (Test-Path -LiteralPath $manifest)) { return $seen }
+  try {
+    $data = Get-Content -LiteralPath $manifest -Raw | ConvertFrom-Json -AsHashtable
+  } catch {
+    Write-Warning "$manifest could not be read; starting a new record."
+    return $seen
+  }
+  if ($data -isnot [System.Collections.IDictionary]) { Write-Warning "$manifest is not a record; starting a new one."; return $seen }
+  foreach ($k in $data.Keys) {
+    $v = $data[$k]
+    $when = [datetime]::MinValue
+    $isDate = if ($v -is [datetime]) { $when = $v; $true }   # ConvertFrom-Json already reads ISO dates
+    else { [datetime]::TryParse([string]$v, [ref]$when) }
+    if ($isDate -and (Get-SitePath $k)) {
+      $seen[$k] = $when
+    } else {
+      Write-Warning "Dropped record entry '$k'."
+    }
+  }
+  $seen
+}
+
 function Publish-Site {
   $staging = Join-Path ([IO.Path]::GetTempPath()) "dream-course-build-$PID"
   Push-Location $repo
@@ -51,22 +92,26 @@ function Publish-Site {
     Move-Item -LiteralPath $next (Join-Path $site 'index.html') -Force
     # old builds' files: kept for tabs still open on them, removed 30 days after they left the build
     $now = Get-Date
-    $seen = @{}
-    if (Test-Path -LiteralPath $manifest) {
-      (Get-Content -LiteralPath $manifest -Raw | ConvertFrom-Json).PSObject.Properties | ForEach-Object { $seen[$_.Name] = $_.Value }
+    $seen = Read-PublishRecord
+    $current = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)   # this build: never deleted
+    foreach ($f in $files) {
+      $rel = $f.FullName.Substring($staging.Length + 1)
+      [void]$current.Add($rel)
+      $seen[$rel] = $now
     }
-    foreach ($f in $files) { $seen[$f.FullName.Substring($staging.Length + 1)] = $now.ToString('o') }
-    foreach ($f in Get-ChildItem -LiteralPath $site -Recurse -File) {   # published before this record existed: count from now
+    foreach ($f in Get-ChildItem -LiteralPath $site -Recurse -File) {   # not in the record (yet): count from now
       $rel = $f.FullName.Substring($site.Length + 1)
-      if (-not $seen.ContainsKey($rel)) { $seen[$rel] = $now.ToString('o') }
+      if (-not $seen.ContainsKey($rel)) { $seen[$rel] = $now }
     }
     foreach ($rel in @($seen.Keys)) {
-      if ([datetime]$seen[$rel] -lt $now.AddDays(-30)) {
-        Remove-Item -LiteralPath (Join-Path $site $rel) -Force -ErrorAction SilentlyContinue
-        $seen.Remove($rel)
-      }
+      if ($seen[$rel] -ge $now.AddDays(-30) -or $current.Contains($rel)) { continue }
+      $path = Get-SitePath $rel
+      if ($path) { Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue }
+      $seen.Remove($rel)
     }
-    $seen | ConvertTo-Json | Set-Content -LiteralPath $manifest -Encoding utf8
+    $out = [ordered]@{}
+    foreach ($k in $seen.Keys | Sort-Object) { $out[$k] = $seen[$k].ToString('o') }
+    $out | ConvertTo-Json | Set-Content -LiteralPath $manifest -Encoding utf8
   } finally {
     Remove-Item -LiteralPath $staging -Recurse -Force -ErrorAction SilentlyContinue
   }
