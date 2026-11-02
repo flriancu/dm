@@ -4,8 +4,8 @@
 #   AWS_ROLE_ARN            IAM role trusted by GitHub OIDC (no long-lived keys)
 #   S3_BUCKET               bucket that backs the site
 #   CLOUDFRONT_DISTRIBUTION distribution id (optional: without it the cache is not invalidated)
-# and the variables S3_PREFIX (e.g. "dream" for blog.floriniancu.ro/dream, or "" for a
-# subdomain bucket) and AWS_REGION (default eu-central-1).
+# and the variables S3_PREFIX (unset for a bucket of its own, as for dream-management.fei.ro;
+# a folder name to serve from a sub-path) and AWS_REGION (default eu-central-1).
 name: deploy
 on:
   push:

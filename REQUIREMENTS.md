@@ -26,12 +26,12 @@ Vision), and a trusted human partner for the pair exercises and 1:1 sessions.
 | D6 | Data sharing | Nothing leaves the learner's device by default. A share action produces a summary the learner chooses to send before a 1:1. |
 | D7 | Licensing | Keep the CHILD/COPIL letters, the saboteur and Sage names, with explicit attribution. Link out to the official saboteurs test, the VIA survey and book pages. No book PDFs or long excerpts embedded. Private, non-commercial use among friends and family. |
 | D8 | Stack | Static single-page app, no application backend. |
-| D9 | Hosting and repo | Source repository on **GitHub**. Hosting on Florin's existing **S3 + CloudFront** site (floriniancu.ro), as a subpath or subdomain. A GitHub Actions workflow builds on push to main and syncs the build to S3, then invalidates CloudFront. No application backend. |
+| D9 | Hosting and repo | Source repository on **GitHub**. Hosting on **S3 + CloudFront** in Florin's AWS account, at https://dream-management.fei.ro. A GitHub Actions workflow builds on push to main and syncs the build to S3, then invalidates CloudFront. No application backend. |
 | D10 | Gaps in the source material | The 1:1 session content and the guest session on fear (session 4, no deck) are reconstructed from the method, Adina's notes and the referenced books. Florin corrects afterwards. |
 | D11 | Next step | This requirements document and the outline, reviewed before any code. |
 | D12 | Videos | The two short Chamine recordings from the pilot are not hosted. The course keeps only their text: the English subtitles and a Romanian translation, shown as transcripts (2026-11-02). |
 | D13 | Framework | React (Vite + React + TypeScript). |
-| D14 | Repository | Private GitHub repository. |
+| D14 | Repository | Public GitHub repository, github.com/flriancu/dm. It holds no third-party media (D12). |
 | D15 | Schedule | No fixed start date; the learner sets the start date and the two-week cadence runs from it. |
 | D16 | 1:1 content | No additional 1:1 material beyond the reconstructed scripts; 1:1s depend strongly on the person, so scripts stay short and question-based. |
 | D17 | Evidence review | An assessment of the materials against the scientific literature is part of the deliverable, see [ASSESSMENT.md](ASSESSMENT.md); every evidence claim there rests on a Crossref-verified peer-reviewed article (v0.2). |
@@ -313,11 +313,11 @@ Identifiers are stable; reference them from issues and commits.
 
 ## 9. Open questions for Florin
 
-- OQ-1 Which URL: a subpath of the blog (blog.floriniancu.ro/dream) or a new subdomain
-  (dream.floriniancu.ro)? The apex and www had no DNS records as of 2026-10.
+None open.
 
-Resolved: the recordings as text only (D12), React (D13), private repository
-(D14), no fixed start date (D15), no further 1:1 material (D16).
+Resolved: the address dream-management.fei.ro (OQ-1, D9), the recordings as text only
+(D12), React (D13), a public repository (D14), no fixed start date (D15), no further 1:1
+material (D16).
 
 ## 10. Out of scope for v1
 

@@ -84,8 +84,8 @@ file names to add a language. The build check lists what is missing or stale.
 `pwsh scripts/intranet.ps1 publish` runs the build checks and copies the build into `site/`
 (new files first, `index.html` last; the previous version's files stay for tabs still open on
 them). `pwsh scripts/intranet.ps1 start` serves `site/` at
-`http://<COMPUTERNAME>.<domain>/dream_management/` through Windows HTTP.sys, in a hidden
-window, until `pwsh scripts/intranet.ps1 stop` (or logoff); `status` says whether it runs. A
+`http://<COMPUTERNAME>.<domain>/dream_management/` (the workstation's name and its network's DNS
+domain) through Windows HTTP.sys, in a hidden window, until `pwsh scripts/intranet.ps1 stop` (or logoff); `status` says whether it runs. A
 running server picks up a new publish without a restart. The server never reads `dist/`, so
 `npm run build` during development cannot take the live site down; requests are answered by
 asynchronous writes that no thread waits on, so slow readers (paused videos, many of them) never hold up
@@ -97,8 +97,11 @@ without touching the live site: `npx vite build --outDir <folder> --emptyOutDir`
 
 ## Deploy
 
+The site is served at https://dream-management.fei.ro/ from a private S3 bucket behind
+CloudFront.
+
 `.github/workflows/deploy.yml` runs the tests and the full build on every push to `main`.
-Deploying to the S3 + CloudFront site (through an OIDC-assumed role) is optional: it runs only
+Deploying to S3 + CloudFront (through an OIDC-assumed role) is optional: it runs only
 when the `AWS_ROLE_ARN` and `S3_BUCKET` secrets are set (plus `CLOUDFRONT_DISTRIBUTION` to
 invalidate the cache); without them the run passes and notes that the deployment was skipped.
 `vite.config.ts` uses `base: './'` so the build works at any prefix or subdomain.
