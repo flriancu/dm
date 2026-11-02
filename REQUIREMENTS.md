@@ -29,7 +29,7 @@ Vision), and a trusted human partner for the pair exercises and 1:1 sessions.
 | D9 | Hosting and repo | Source repository on **GitHub**. Hosting on Florin's existing **S3 + CloudFront** site (floriniancu.ro), as a subpath or subdomain. A GitHub Actions workflow builds on push to main and syncs the build to S3, then invalidates CloudFront. No application backend. |
 | D10 | Gaps in the source material | The 1:1 session content and the guest session on fear (session 4, no deck) are reconstructed from the method, Adina's notes and the referenced books. Florin corrects afterwards. |
 | D11 | Next step | This requirements document and the outline, reviewed before any code. |
-| D12 | Videos | The two short Chamine recordings from the pilot may be hosted inside the course (2026-10-12). |
+| D12 | Videos | The two short Chamine recordings from the pilot are not hosted. The course keeps only their text: the English subtitles and a Romanian translation, shown as transcripts (2026-11-02). |
 | D13 | Framework | React (Vite + React + TypeScript). |
 | D14 | Repository | Private GitHub repository. |
 | D15 | Schedule | No fixed start date; the learner sets the start date and the two-week cadence runs from it. |
@@ -146,7 +146,7 @@ Identifiers are stable; reference them from issues and commits.
   five short games from the Sage Powers handout, rewritten; the Sage dialogue is
   presented as a two-chair exercise.
 - FR-33 PQ reps: a 10-second to 2-minute guided tactile exercise with a timer and the
-  two short Chamine videos hosted in the course (D12).
+  text of the two short Chamine recordings, in Romanian and English (D12).
 - FR-34 Wheel of Life: interactive 8-spoke wheel (the Co-Active Coaching areas), saved
   with a date so it can be redrawn at the vision check-ins and compared, with the
   five-item Satisfaction With Life Scale beside it, scored and dated.
@@ -316,7 +316,7 @@ Identifiers are stable; reference them from issues and commits.
 - OQ-1 Which URL: a subpath of the blog (blog.floriniancu.ro/dream) or a new subdomain
   (dream.floriniancu.ro)? The apex and www had no DNS records as of 2026-10.
 
-Resolved on 2026-10-12: videos may be hosted (D12), React (D13), private repository
+Resolved: the recordings as text only (D12), React (D13), private repository
 (D14), no fixed start date (D15), no further 1:1 material (D16).
 
 ## 10. Out of scope for v1

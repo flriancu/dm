@@ -224,10 +224,13 @@ for (const [name, viewport] of [
   await page.reload()
   await page.getByLabel('Punctul forte 1').waitFor()
   check((await page.getByLabel('Punctul forte 1').inputValue()) === 'curiozitate', `${name}: strength persisted`)
+  const summary = (text) => page.locator('details > summary').filter({ hasText: new RegExp(`^${text}$`) })
+  await summary('Textul original, în engleză').nth(1).waitFor()
   check(
-    (await page.locator('video track[srclang=ro]').count()) === 2 &&
-      (await page.locator('video track[srclang=en]').count()) === 2,
-    `${name}: both recordings carry Romanian and English subtitles`,
+    (await summary('Textul în română').count()) === 2 &&
+      (await summary('Textul original, în engleză').count()) === 2 &&
+      (await page.locator('video').count()) === 0,
+    `${name}: both recordings' text in Romanian and English, no video`,
   )
   check(
     (await page.locator('a[href*="support.positiveintelligence.com/article/108"]').count()) >= 1 &&

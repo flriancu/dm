@@ -4,11 +4,14 @@ import Transcript from '../../components/Transcript'
 import SectionHead from '../../components/SectionHead'
 import { useRepCount, addRep } from '../../db/calm'
 
-/** Module 5: the short attention exercise with its countdown and counter, plus the two videos (FR-33). */
+/** Module 5: the short attention exercise with its countdown and counter, plus the text of two recordings (FR-33). */
 const SENSES = ['touch', 'sound', 'breath', 'sight', 'weight'] as const
 
-/** The two Chamine recordings hosted with the course (D12): subtitles in both languages, transcript in Romanian. */
-const VIDEOS = ['chamine-1', 'chamine-2'] as const
+/** The two Chamine recordings (D12): only their text is in the course, from the subtitle files, in Romanian and English. */
+const RECORDINGS = [
+  { file: 'chamine-1', title: 'rep.videos.title.1' },
+  { file: 'chamine-2', title: 'rep.videos.title.2' },
+] as const
 
 export default function Rep() {
   const { t } = useT()
@@ -68,16 +71,13 @@ export default function Rep() {
       <h3>{t('rep.videos')}</h3>
       <p className="muted small">{t('rep.videos.help')}</p>
       <div className="card">
-        {VIDEOS.map((v) => (
-          <div key={v} className="field">
-            <video controls preload="metadata" style={{ width: '100%', borderRadius: 8 }} src={`./media/${v}.mp4`}>
-              <track kind="subtitles" srcLang="ro" label="Română" src={`./media/${v}.ro.vtt`} default />
-              <track kind="subtitles" srcLang="en" label="English" src={`./media/${v}.en.vtt`} />
-            </video>
-            <Transcript src={`./media/${v}.ro.vtt`} label={t('rep.videos.transcript')} />
+        {RECORDINGS.map((r) => (
+          <div key={r.file} className="field">
+            <h4 style={{ margin: 0 }}>{t(r.title)}</h4>
+            <Transcript src={`./media/${r.file}.ro.vtt`} label={t('rep.videos.transcript')} />
+            <Transcript src={`./media/${r.file}.en.vtt`} label={t('rep.videos.original')} />
           </div>
         ))}
-        <p className="small muted">{t('rep.videos.subtitles')}</p>
         <p className="small muted">{t('rep.videos.credit')}</p>
       </div>
     </>
