@@ -1,7 +1,7 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
-// base './' so the build can be served from any S3 prefix or subdomain (D9).
+// base './' so the build can be served from any sub-path or subdomain (D9).
 export default defineConfig({
   base: './',
   plugins: [react()],

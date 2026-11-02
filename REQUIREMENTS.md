@@ -26,7 +26,7 @@ Vision), and a trusted human partner for the pair exercises and 1:1 sessions.
 | D6 | Data sharing | Nothing leaves the learner's device by default. A share action produces a summary the learner chooses to send before a 1:1. |
 | D7 | Licensing | Keep the CHILD/COPIL letters, the saboteur and Sage names, with explicit attribution. Link out to the official saboteurs test, the VIA survey and book pages. No book PDFs or long excerpts embedded. Private, non-commercial use among friends and family. |
 | D8 | Stack | Static single-page app, no application backend. |
-| D9 | Hosting and repo | Source repository on **GitHub**. Hosting on **S3 + CloudFront** in Florin's AWS account, at https://dream-management.fei.ro. A GitHub Actions workflow builds on push to main and syncs the build to S3, then invalidates CloudFront. No application backend. |
+| D9 | Hosting and repo | Source repository on **GitHub**. Hosting on **GitHub Pages**, at https://dream-management.fei.ro. A GitHub Actions workflow builds on push to main and publishes the build to Pages. No application backend. |
 | D10 | Gaps in the source material | The 1:1 session content and the guest session on fear (session 4, no deck) are reconstructed from the method, Adina's notes and the referenced books. Florin corrects afterwards. |
 | D11 | Next step | This requirements document and the outline, reviewed before any code. |
 | D12 | Videos | The two short Chamine recordings from the pilot are not hosted. The course keeps only their text: the English subtitles and a Romanian translation, shown as transcripts (2026-11-02). |
@@ -280,13 +280,12 @@ Identifiers are stable; reference them from issues and commits.
   locale against `ro` and lists missing or stale files (stale = `ro` modified after the
   translation's front-matter `source_version`). Text direction and font fallback are
   defined per locale so a right-to-left or non-Latin language needs no layout change.
-- Routing: hash router so S3 needs no rewrite rules (a CloudFront function could add clean URLs later).
+- Routing: hash router so a static host needs no rewrite rules.
 - PWA: vite-plugin-pwa, precached app shell.
 - Printing: dedicated print routes with `@media print` styles.
 - Calendar invites: generated client-side as .ics files.
-- Repository: GitHub repository `dream-course`. GitHub Actions builds on push to main,
-  uploads `dist/` to the S3 bucket under the chosen prefix with an OIDC-assumed IAM
-  role (no long-lived keys in GitHub), and invalidates the CloudFront path.
+- Repository: GitHub repository `flriancu/dm`. GitHub Actions builds on push to main and
+  publishes `dist/` to GitHub Pages (no keys or secrets in GitHub).
 - Tests: Vitest for stores and export/import; Playwright smoke test for phone and
   laptop viewports and for print routes.
 
@@ -308,7 +307,7 @@ Identifiers are stable; reference them from issues and commits.
 5. The English toggle changes every interface string; content stays Romanian with the
    fallback notice visible. A dummy `content/xx/` folder with one translated module
    builds, lazy-loads, and the build check lists the untranslated remainder.
-6. The site is served from the S3 + CloudFront site, deployed by the GitHub workflow,
+6. The site is served from GitHub Pages at dream-management.fei.ro, deployed by the GitHub workflow,
    and passes the Playwright smoke test on push.
 
 ## 9. Open questions for Florin
