@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "lint": "oxlint --deny-warnings",
     "test": "vitest run",
+    "test:e2e": "node e2e/run.mjs",
     "check:content": "node scripts/check-content.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

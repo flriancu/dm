@@ -23,6 +23,7 @@ npm test           # vitest: pure logic, export/import round trip, i18n
 npm run lint       # oxlint, warnings are errors
 npm run format     # prettier (no semicolons, single quotes, 120 columns); format:check in the build
 npm run build      # content check + lint + format check + type check + vite build → dist/
+npm run test:e2e   # fresh build, preview server, every script below (CI runs this; about 5 minutes)
 node e2e/smoke.mjs http://localhost:5173/        # happy path per viewport (dev server running)
 node e2e/adversarial.mjs http://localhost:5173/  # malformed, rapid and role-switch input
 node e2e/import-poison.mjs http://localhost:5173/ # backups written by hand, older or newer versions
@@ -56,7 +57,7 @@ src/sheets/                         printable sheets, one file per area, listed 
 src/components/                     Shell (nav), AutoText (autosaving box), DateField (DayPicker in site colours), Stepper, SectionLinks, ErrorBoundary, RoleConfigPicker, DreamerOnly, WheelSvg
 src/pages/                          one file per route; a page only composes sections and components
 scripts/check-content.mjs           diffs every content locale against ro, validates ro
-e2e/*.mjs                           Playwright: happy path per viewport; malformed, rapid and role-switch input; imports; flows; races
+e2e/*.mjs                           Playwright: happy path per viewport; malformed, rapid and role-switch input; imports; flows; races; run.mjs runs them all
 ```
 
 Design rules: a page never holds business logic that a test would want (that lives in
@@ -97,14 +98,14 @@ without touching the live site: `npx vite build --outDir <folder> --emptyOutDir`
 
 ## Deploy
 
-The site is served at https://dream-management.fei.ro/ from a private S3 bucket behind
-CloudFront.
+The site is served at https://dream-management.fei.ro/ by GitHub Pages.
 
-`.github/workflows/deploy.yml` runs the tests and the full build on every push to `main`.
-Deploying to S3 + CloudFront (through an OIDC-assumed role) is optional: it runs only
-when the `AWS_ROLE_ARN` and `S3_BUCKET` secrets are set (plus `CLOUDFRONT_DISTRIBUTION` to
-invalidate the cache); without them the run passes and notes that the deployment was skipped.
-`vite.config.ts` uses `base: './'` so the build works at any prefix or subdomain.
+`.github/workflows/ci.yml` runs the unit tests, the full build and the browser checks on every
+push and pull request, and on `main` publishes `dist/` to Pages. Dependabot proposes one
+grouped update a month for npm and for the workflow's actions. The custom domain is set in the repository's Pages
+settings (source: GitHub Actions, HTTPS enforced), and DNS has a CNAME record from
+`dream-management.fei.ro` to `flriancu.github.io`. `vite.config.ts` uses `base: './'` so the
+build works at any prefix or subdomain.
 
 ## Privacy
 
